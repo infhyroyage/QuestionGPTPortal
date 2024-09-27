@@ -1,0 +1,42 @@
+name: Run Lint and Test before Merging Pull Request
+
+on:
+  pull_request:
+    branches:
+      - main
+
+env:
+  NODE_VERSION: "20.10.0"
+
+permissions:
+  checks: write
+  pull-requests: write
+  contents: write
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node ${{ env.NODE_VERSION }} Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Restore cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-question-gpt-portal-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
+          restore-keys: ${{ runner.os }}-question-gpt-portal-${{ hashFiles('**/package-lock.json') }}-
+
+      - name: Lint
+        uses: reviewdog/action-eslint@v1
+        with:
+          fail_on_error: true
+          filter_mode: file
+          level: warning
+          reporter: github-pr-review
