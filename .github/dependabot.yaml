@@ -8,8 +8,9 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "monthly"
-      time: "16:30"
+      interval: "weekly"
+      day: "monday"
+      time: "10:30"
       timezone: "Asia/Tokyo"
     assignees:
       - "infhyroyage"
@@ -28,8 +29,9 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "monthly"
-      time: "17:00"
+      interval: "weekly"
+      day: "monday"
+      time: "11:30"
       timezone: "Asia/Tokyo"
     assignees:
       - "infhyroyage"
