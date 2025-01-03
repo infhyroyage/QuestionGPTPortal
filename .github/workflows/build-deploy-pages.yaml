@@ -63,6 +63,10 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          VITE_API_URI: ${{ vars.API_URI }}
+          VITE_AZURE_AD_SP_MSAL_CLIENT_ID: ${{ vars.AZURE_AD_SP_MSAL_CLIENT_ID }}
+          VITE_AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
 
       # - name: Create Coverage Badges
       #   uses: jaywcjlove/coverage-badges-cli@v2.1.0
