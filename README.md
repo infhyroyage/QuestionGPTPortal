@@ -1,5 +1,7 @@
 # QuestionGPTPortal
 
+[![Build and Deploy GitHub Pages](https://github.com/infhyroyage/QuestionGPTPortal/actions/workflows/build-deploy-pages.yaml/badge.svg)](https://github.com/infhyroyage/QuestionGPTPortal/actions/workflows/build-deploy-pages.yaml)
+
 ## 概要
 
 [QuestionGPTTranslator](https://github.com/infhyroyage/QuestionGPTTranslator)を API サーバーとする Web アプリケーションを構成する。
