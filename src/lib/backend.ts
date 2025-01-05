@@ -44,8 +44,6 @@ async function callByAxios<T, D>(
         headers,
       });
       break;
-    default:
-      throw new Error(`Invalid method type: ${method}`);
   }
   if (res.status !== 200) {
     throw new Error(res.statusText);
@@ -71,6 +69,10 @@ export async function accessBackend<T, D = never>(
   data?: D
 ): Promise<T> {
   const apiUri: string | undefined = import.meta.env.VITE_API_URI;
+  if (!apiUri) {
+    throw new Error("Unset VITE_API_URI");
+  }
+
   const url: string = `${apiUri}/api${path}`;
 
   // localhost環境の場合は認証をスキップし、そのままバックエンドにアクセス
