@@ -15,7 +15,6 @@
     "hooks": "@/hooks",
     "lib": "@/lib",
     "pages": "@/pages",
-    "services": "@/services",
     "types": "@/types",
     "ui": "@/components/ui",
     "utils": "@/lib/utils"

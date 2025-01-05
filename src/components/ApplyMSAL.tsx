@@ -1,4 +1,4 @@
-import { config, loginScope } from "@/services/msal";
+import { config, loginScope } from "@/lib/msal";
 import { ApplyMSALProps } from "@/types/props";
 import { InteractionType, PublicClientApplication } from "@azure/msal-browser";
 import { MsalAuthenticationTemplate, MsalProvider } from "@azure/msal-react";

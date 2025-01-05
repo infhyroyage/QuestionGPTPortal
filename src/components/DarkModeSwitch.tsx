@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { toggleDarkModeAtom } from "@/services/atoms";
+import { toggleDarkModeAtom } from "@/lib/atoms";
 import { useAtom } from "jotai";
 import { Moon, Sun } from "lucide-react";
 

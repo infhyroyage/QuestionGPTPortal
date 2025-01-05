@@ -1,14 +1,14 @@
 import ApplyMSAL from "@/components/ApplyMSAL";
-import { toggleDarkModeAtom } from "@/services/atoms";
+import { toggleDarkModeAtom } from "@/lib/atoms";
 import { useAtom } from "jotai";
 import { useEffect } from "react";
 import { BrowserRouter, Route, Routes } from "react-router";
+import { basePath } from "./lib/github";
 import NotFoundPage from "./pages/NotFoundPage";
 import RootPage from "./pages/RootPage";
 import TestQuestionPage from "./pages/TestQuestion";
 import TestReadyPage from "./pages/TestReadyPage";
 import TestResultPage from "./pages/TestResultPage";
-import { basePath } from "./services/github";
 
 /**
  * アプリケーションのエントリーポイント

@@ -1,6 +1,6 @@
 import TopBar from "@/components/TopBar";
 import { Button } from "@/components/ui/button";
-import { basePath } from "@/services/github";
+import { basePath } from "@/lib/github";
 import { Frown } from "lucide-react";
 import { useNavigate } from "react-router";
 
