@@ -34,18 +34,14 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path={`${basePath}/`} element={<RootPage />} />
-          <Route
-            path={`${basePath}/tests/:testId/ready`}
-            element={<TestReadyPage />}
-          />
-          <Route
-            path={`${basePath}/tests/:testId/questions/:questionNumber`}
-            element={<TestQuestionPage />}
-          />
-          <Route
-            path={`${basePath}/tests/:testId/result`}
-            element={<TestResultPage />}
-          />
+          <Route path={`${basePath}/tests/:testId`}>
+            <Route path="ready" element={<TestReadyPage />} />
+            <Route
+              path="questions/:questionNumber"
+              element={<TestQuestionPage />}
+            />
+            <Route path="result" element={<TestResultPage />} />
+          </Route>
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>

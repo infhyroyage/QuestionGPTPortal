@@ -1,7 +1,11 @@
+import { useParams } from "react-router";
+
 /**
  * テスト準備ページのコンポーネント
  * @returns テスト準備ページのコンポーネント
  */
 export default function TestReadyPage() {
-  return <div>TestReadyPage</div>;
+  const { testId } = useParams();
+
+  return <div>TestReadyPage {testId}</div>;
 }
