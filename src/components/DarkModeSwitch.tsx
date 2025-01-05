@@ -11,6 +11,8 @@ export default function DarkModeSwitch() {
   const [isDarkMode, toggleDarkMode] = useAtom(toggleDarkModeAtom);
 
   return (
-    <Button onClick={toggleDarkMode}>{isDarkMode ? <Moon /> : <Sun />}</Button>
+    <Button onClick={toggleDarkMode} variant="outline" size="icon">
+      {isDarkMode ? <Moon /> : <Sun />}
+    </Button>
   );
 }
