@@ -8,6 +8,7 @@ import RootPage from "./pages/RootPage";
 import TestQuestionPage from "./pages/TestQuestion";
 import TestReadyPage from "./pages/TestReadyPage";
 import TestResultPage from "./pages/TestResultPage";
+import { basePath } from "./services/github";
 
 /**
  * アプリケーションのエントリーポイント
@@ -25,9 +26,6 @@ export default function App() {
       htmlElement.classList.remove("dark");
     }
   }, [isDarkMode]);
-
-  // localhost環境以外の場合は、GitHub Pagesでのパスに合わせる
-  const basePath: string = import.meta.env.DEV ? "" : "/QuestionGPTPortal";
 
   return (
     <ApplyMSAL>
