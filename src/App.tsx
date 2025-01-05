@@ -3,6 +3,7 @@ import { toggleDarkModeAtom } from "@/lib/atoms";
 import { useAtom } from "jotai";
 import { useEffect } from "react";
 import { BrowserRouter, Route, Routes } from "react-router";
+import { Toaster } from "./components/ui/toaster";
 import { basePath } from "./lib/github";
 import NotFoundPage from "./pages/NotFoundPage";
 import RootPage from "./pages/RootPage";
@@ -43,6 +44,7 @@ export default function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>
+      <Toaster />
     </ApplyMSAL>
   );
 }
