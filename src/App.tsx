@@ -3,7 +3,11 @@ import { toggleDarkModeAtom } from "@/services/atoms";
 import { useAtom } from "jotai";
 import { useEffect } from "react";
 import { BrowserRouter, Route, Routes } from "react-router";
+import NotFoundPage from "./pages/NotFoundPage";
 import RootPage from "./pages/RootPage";
+import TestQuestionPage from "./pages/TestQuestion";
+import TestReadyPage from "./pages/TestReadyPage";
+import TestResultPage from "./pages/TestResultPage";
 
 /**
  * アプリケーションのエントリーポイント
@@ -30,6 +34,19 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path={`${basePath}/`} element={<RootPage />} />
+          <Route
+            path={`${basePath}/tests/:testId/ready`}
+            element={<TestReadyPage />}
+          />
+          <Route
+            path={`${basePath}/tests/:testId/questions/:questionNumber`}
+            element={<TestQuestionPage />}
+          />
+          <Route
+            path={`${basePath}/tests/:testId/result`}
+            element={<TestResultPage />}
+          />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>
     </ApplyMSAL>
