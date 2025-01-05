@@ -1,11 +1,21 @@
 import { ReactNode } from "react";
 
 /**
- * MSALを適用するためのProps
+ * ApplyMSALのProps
  */
 export type ApplyMSALProps = {
   /**
    * 子コンポーネント
    */
   children: ReactNode;
+};
+
+/**
+ * TopBarのProps
+ */
+export type TopBarProps = {
+  /**
+   * タイトル
+   */
+  title: string;
 };

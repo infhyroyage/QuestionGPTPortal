@@ -6,7 +6,6 @@ import { MsalAuthenticationTemplate, MsalProvider } from "@azure/msal-react";
 
 /**
  * MSALを適用するコンポーネント
- * @param children 子コンポーネント
  * @returns MSALを適用した子コンポーネント(localhost環境の場合は適用せず、子コンポーネントをそのまま返す)
  */
 function ApplyMSAL({ children }: ApplyMSALProps) {

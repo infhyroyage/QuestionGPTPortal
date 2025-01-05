@@ -1,9 +1,9 @@
 import ApplyMSAL from "@/components/ApplyMSAL";
-import { Button } from "@/components/ui/button";
 import { toggleDarkModeAtom } from "@/services/atoms";
 import { useAtom } from "jotai";
 import { useEffect } from "react";
-import TopBar from "./components/TopBar";
+import { BrowserRouter, Route, Routes } from "react-router";
+import RootPage from "./pages/RootPage";
 
 /**
  * アプリケーションのエントリーポイント
@@ -22,13 +22,16 @@ export default function App() {
     }
   }, [isDarkMode]);
 
+  // localhost環境以外の場合は、GitHub Pagesでのパスに合わせる
+  const basePath: string = import.meta.env.DEV ? "" : "/QuestionGPTPortal";
+
   return (
     <ApplyMSAL>
-      <TopBar />
-      <div className="flex justify-center items-center h-screen flex-col gap-4">
-        <div>Hello World</div>
-        <Button>Click me</Button>
-      </div>
+      <BrowserRouter>
+        <Routes>
+          <Route path={`${basePath}/`} element={<RootPage />} />
+        </Routes>
+      </BrowserRouter>
     </ApplyMSAL>
   );
 }
