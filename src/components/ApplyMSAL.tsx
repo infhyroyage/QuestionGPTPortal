@@ -2,7 +2,7 @@ import { config, loginScope } from "@/services/msal";
 import { ApplyMSALProps } from "@/types/props";
 import { InteractionType, PublicClientApplication } from "@azure/msal-browser";
 import { MsalAuthenticationTemplate, MsalProvider } from "@azure/msal-react";
-// import LoadingCenter from "./LoadingCenter";
+import LoadingCenter from "./LoadingCenter";
 
 /**
  * MSALを適用するコンポーネント
@@ -19,7 +19,7 @@ function ApplyMSAL({ children }: ApplyMSALProps) {
       <MsalAuthenticationTemplate
         interactionType={InteractionType.Redirect}
         authenticationRequest={loginScope}
-        // loadingComponent={LoadingCenter}
+        loadingComponent={LoadingCenter}
       >
         <>{children}</>
       </MsalAuthenticationTemplate>
