@@ -1,6 +1,6 @@
 import LoadingCenter from "@/components/LoadingCenter";
 import TopBar from "@/components/TopBar";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/ui/use-toast";
 import { accessBackend } from "@/lib/backend";
 import { GetTests } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
