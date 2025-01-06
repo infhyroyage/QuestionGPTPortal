@@ -1,10 +1,16 @@
 import LoadingCenter from "@/components/LoadingCenter";
 import TopBar from "@/components/TopBar";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/ui/use-toast";
 import { accessBackend } from "@/lib/backend";
 import { GetTests } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
-import { TriangleAlert } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  ScrollText,
+  TriangleAlert,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 
 /**
@@ -13,6 +19,7 @@ import { useEffect, useState } from "react";
  */
 export default function RootPage() {
   const [getTests, setGetTests] = useState<GetTests | undefined>(undefined);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const { toast } = useToast();
 
@@ -52,16 +59,51 @@ export default function RootPage() {
   return (
     <>
       <TopBar title="Question GPT Portal" />
-      <div className="flex justify-center items-center h-screen flex-col gap-4">
+      <div className="pt-16">
         {!getTests ? (
           <LoadingCenter />
         ) : Object.keys(getTests).length === 0 ? (
-          <>
+          <div className="flex items-center justify-center h-screen flex-col gap-4">
             <TriangleAlert size={100} />
             <div>テストが見つかりませんでした</div>
-          </>
+          </div>
         ) : (
-          <div>TODO: テストが見つかりました</div>
+          <>
+            <Button
+              variant="ghost"
+              className="px-6 py-8 w-full justify-start space-x-4"
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              {isOpen ? (
+                <ChevronUp className="h-6 w-6" />
+              ) : (
+                <ChevronDown className="h-6 w-6" />
+              )}
+              <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
+                XXX
+              </h3>
+            </Button>
+            {isOpen && (
+              <div className="pl-16 space-y-2">
+                <div className="flex items-center justify-start space-x-4">
+                  <ScrollText className="h-5 w-5" />
+                  <Button variant="link">
+                    <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+                      YYY
+                    </h4>
+                  </Button>
+                </div>
+                <div className="flex items-center justify-start space-x-4">
+                  <ScrollText className="h-5 w-5" />
+                  <Button variant="link">
+                    <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+                      ZZZ
+                    </h4>
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </>
