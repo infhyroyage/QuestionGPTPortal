@@ -1,7 +1,8 @@
+import { GetTest } from "@/types/backend";
 import { atom } from "jotai";
 
 /**
- * ダークモードの場合はtrue、ライトモードの場合はfalse
+ * ダークモードの場合はtrue、ライトモードの場合はfalseのatom
  * toggleDarkModeAtomで隠蔽するためexportしない
  */
 const isDarkModeAtom = atom(true);
@@ -16,3 +17,8 @@ export const toggleDarkModeAtom = atom(
     set(isDarkModeAtom, !isDarkMode);
   }
 );
+
+/**
+ * テストデータのatom
+ */
+export const getTestAtom = atom<(GetTest & { testId: string }) | null>(null);

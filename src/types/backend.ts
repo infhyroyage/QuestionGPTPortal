@@ -10,10 +10,10 @@
 //   isMultiplied: boolean;
 // };
 
-// export type GetTest = {
-//   testName: string;
-//   length: number;
-// };
+export type GetTest = {
+  testName: string;
+  length: number;
+};
 
 export type Test = {
   id: string;
