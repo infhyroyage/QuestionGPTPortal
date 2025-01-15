@@ -1,6 +1,7 @@
 import { toast } from "@/hooks/ui/use-toast";
-import { getTestAtom } from "@/lib/atoms";
+import { testDetailsAtom } from "@/lib/atoms";
 import { accessBackend } from "@/lib/backend";
+import { TestDetails } from "@/types/atoms";
 import { GetTest } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom } from "jotai";
@@ -12,9 +13,7 @@ import { useParams } from "react-router";
  * @returns テスト準備ページのコンポーネント
  */
 export default function TestReadyPage() {
-  const [getTestRes, setGetTestRes] = useAtom<
-    (GetTest & { testId: string }) | null
-  >(getTestAtom);
+  const [testDetails, setTestDetails] = useAtom<TestDetails>(testDetailsAtom);
 
   const { testId } = useParams();
 
@@ -25,10 +24,7 @@ export default function TestReadyPage() {
 
   // tesiIdでの情報を習得していない場合のみ[GET] /tests/{testId}を実行
   useEffect(() => {
-    if (
-      testId &&
-      (getTestRes === null || (getTestRes && getTestRes.testId !== testId))
-    ) {
+    if (testId && !testDetails[testId]) {
       (async () => {
         try {
           const res: GetTest = await accessBackend<GetTest>(
@@ -37,7 +33,7 @@ export default function TestReadyPage() {
             instance,
             accountInfo
           );
-          setGetTestRes({ ...res, testId });
+          setTestDetails((prev) => ({ ...prev, [testId]: res }));
         } catch (e) {
           console.error(e);
           toast({
@@ -53,11 +49,7 @@ export default function TestReadyPage() {
         }
       })();
     }
-  }, [accountInfo, getTestRes, instance, setGetTestRes, testId]);
+  }, [accountInfo, testDetails, instance, setTestDetails, testId]);
 
-  return (
-    <div>
-      TestReadyPage {testId} {getTestRes && getTestRes.testName}
-    </div>
-  );
+  return <div>TestReadyPage {testId}</div>;
 }

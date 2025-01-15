@@ -1,4 +1,4 @@
-import { GetTest } from "@/types/backend";
+import { TestDetails } from "@/types/atoms";
 import { atom } from "jotai";
 
 /**
@@ -19,6 +19,6 @@ export const toggleDarkModeAtom = atom(
 );
 
 /**
- * テストデータのatom
+ * テスト詳細情報のatom
  */
-export const getTestAtom = atom<(GetTest & { testId: string }) | null>(null);
+export const testDetailsAtom = atom<TestDetails>({});
