@@ -10,15 +10,25 @@
 //   isMultiplied: boolean;
 // };
 
+/**
+ * [GET] /tests/{testId} のレスポンスボディの型
+ */
 export type GetTest = {
   testName: string;
   length: number;
 };
 
+/**
+ * [GET] /tests のレスポンスボディの各要素の型
+ */
 export type Test = {
   id: string;
   testName: string;
 };
+
+/**
+ * [GET] /tests のレスポンスボディの型
+ */
 export type GetTests = {
   [course: string]: Test[];
 };
