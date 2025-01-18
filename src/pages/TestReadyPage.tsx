@@ -4,6 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/ui/use-toast";
 import { testDetailsAtom } from "@/lib/atoms";
 import { accessBackend } from "@/lib/backend";
+import { basePath } from "@/lib/github";
 import { TestDetails } from "@/types/atoms";
 import { GetTest } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
@@ -77,7 +78,7 @@ export default function TestReadyPage() {
         )}
         <Button
           disabled={!testId || !testDetails[testId]}
-          onClick={() => navigate(`/tests/${testId}/start`)}
+          onClick={() => navigate(`${basePath}/tests/${testId}/start`)}
           size="lg"
         >
           {testId && testDetails[testId] ? (

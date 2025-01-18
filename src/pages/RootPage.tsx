@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/ui/use-toast";
 import { accessBackend } from "@/lib/backend";
+import { basePath } from "@/lib/github";
 import { GetTests, Test } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { ChevronDown, ScrollText, TriangleAlert } from "lucide-react";
@@ -102,7 +103,9 @@ export default function RootPage() {
                         <ScrollText className="h-5 w-5" />
                         <Button
                           variant="link"
-                          onClick={() => navigate(`/tests/${test.id}/ready`)}
+                          onClick={() =>
+                            navigate(`${basePath}/tests/${test.id}/ready`)
+                          }
                         >
                           <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
                             {test.testName}
