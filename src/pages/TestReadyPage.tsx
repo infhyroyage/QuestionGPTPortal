@@ -78,7 +78,7 @@ export default function TestReadyPage() {
         )}
         <Button
           disabled={!testId || !testDetails[testId]}
-          onClick={() => navigate(`${basePath}/tests/${testId}/start`)}
+          onClick={() => navigate(`${basePath}/tests/${testId}/questions/1`)}
           size="lg"
         >
           {testId && testDetails[testId] ? (
