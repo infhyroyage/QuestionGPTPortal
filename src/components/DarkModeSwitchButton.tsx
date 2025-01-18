@@ -7,7 +7,7 @@ import { Moon, Sun } from "lucide-react";
  * ダークモード切替えボタンのコンポーネント
  * @returns ダークモード切替えボタンのコンポーネント
  */
-export default function DarkModeSwitch() {
+export default function DarkModeSwitchButton() {
   const [isDarkMode, toggleDarkMode] = useAtom(toggleDarkModeAtom);
 
   return (

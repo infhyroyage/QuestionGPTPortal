@@ -1,5 +1,5 @@
 import { TopBarProps } from "@/types/props";
-import DarkModeSwitch from "./DarkModeSwitch";
+import DarkModeSwitchButton from "./DarkModeSwitchButton";
 
 /**
  * トップバーのコンポーネント
@@ -10,7 +10,7 @@ export default function TopBar({ title }: TopBarProps) {
     <div className="fixed top-0 left-0 right-0 h-16 p-3 bg-slate-100 dark:bg-slate-900">
       <div className="mx-3 flex items-center justify-between">
         <h1 className="text-lg font-bold">{title}</h1>
-        <DarkModeSwitch />
+        <DarkModeSwitchButton />
       </div>
     </div>
   );
