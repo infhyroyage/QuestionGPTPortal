@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/ui/use-toast";
 import { testDetailsAtom } from "@/lib/atoms";
 import { accessBackend } from "@/lib/backend";
@@ -54,7 +55,23 @@ export default function TestReadyPage() {
   }, [accountInfo, testDetails, instance, setTestDetails, testId]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex items-center justify-center min-h-screen flex-col space-y-8">
+      {/* TODO: Skeleton化 */}
+      {testId && testDetails[testId] ? (
+        <div className="flex flex-col items-center justify-center space-y-4">
+          <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
+            {testDetails[testId].courseName}
+          </h3>
+          <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+            {testDetails[testId].testName}
+          </h4>
+        </div>
+      ) : (
+        <div className="container mx-auto px-8 flex flex-col items-center justify-center space-y-4">
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-6 w-full" />
+        </div>
+      )}
       <Button
         disabled={!testId || !testDetails[testId]}
         onClick={() => navigate(`/tests/${testId}/start`)}

@@ -14,6 +14,7 @@
  * [GET] /tests/{testId} のレスポンスボディの型
  */
 export type GetTest = {
+  courseName: string;
   testName: string;
   length: number;
 };
