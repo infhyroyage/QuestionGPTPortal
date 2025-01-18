@@ -8,7 +8,7 @@ import LoadingCenter from "./LoadingCenter";
  * MSALを適用するコンポーネント
  * @returns MSALを適用した子コンポーネント(localhost環境の場合は適用せず、子コンポーネントをそのまま返す)
  */
-function ApplyMSAL({ children }: ApplyMSALProps) {
+export default function ApplyMSAL({ children }: ApplyMSALProps) {
   const msalInstance = new PublicClientApplication(config);
 
   // localhost環境の場合はMSALを使用しない
@@ -26,5 +26,3 @@ function ApplyMSAL({ children }: ApplyMSALProps) {
     </MsalProvider>
   );
 }
-
-export default ApplyMSAL;
