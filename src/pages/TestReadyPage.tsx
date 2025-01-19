@@ -2,11 +2,8 @@ import TopBar from "@/components/TopBar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/ui/use-toast";
-import { testDetailsAtom } from "@/lib/atoms";
-import { accessBackend } from "@/lib/backend";
+import { fetchTestDetailsAtom } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
-import { TestDetails } from "@/types/atoms";
-import { GetTest } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom } from "jotai";
 import { Loader2 } from "lucide-react";
@@ -18,7 +15,7 @@ import { useNavigate, useParams } from "react-router";
  * @returns テスト準備ページのコンポーネント
  */
 export default function TestReadyPage() {
-  const [testDetails, setTestDetails] = useAtom<TestDetails>(testDetailsAtom);
+  const [testDetails, fetchTestDetails] = useAtom(fetchTestDetailsAtom);
 
   const { testId } = useParams();
 
@@ -32,13 +29,7 @@ export default function TestReadyPage() {
     if (testId && !testDetails[testId]) {
       (async () => {
         try {
-          const res: GetTest = await accessBackend<GetTest>(
-            "GET",
-            `/tests/${testId}`,
-            instance,
-            accountInfo
-          );
-          setTestDetails((prev) => ({ ...prev, [testId]: res }));
+          await fetchTestDetails(testId, instance, accountInfo);
         } catch (e) {
           console.error(e);
           toast({
@@ -54,13 +45,12 @@ export default function TestReadyPage() {
         }
       })();
     }
-  }, [accountInfo, testDetails, instance, setTestDetails, testId]);
+  }, [accountInfo, fetchTestDetails, instance, testDetails, testId]);
 
   return (
     <>
       <TopBar title="Question GPT Portal" />
       <div className="pt-16 flex items-center justify-center min-h-screen flex-col space-y-8">
-        {/* TODO: Skeleton化 */}
         {testId && testDetails[testId] ? (
           <div className="flex flex-col items-center justify-center space-y-4">
             <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
