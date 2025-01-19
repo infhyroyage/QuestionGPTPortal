@@ -1,3 +1,6 @@
+import TopBar from "@/components/TopBar";
+import { fetchTestDetailsAtom } from "@/lib/atoms";
+import { useAtom } from "jotai";
 import { useParams } from "react-router";
 
 /**
@@ -5,11 +8,22 @@ import { useParams } from "react-router";
  * @returns テストページのコンポーネント
  */
 export default function TestQuestionPage() {
+  const [testDetails] = useAtom(fetchTestDetailsAtom);
+
   const { testId, questionNumber } = useParams();
 
   return (
-    <div>
-      TestQuestionPage {testId} {questionNumber}
-    </div>
+    <>
+      <TopBar
+        title={
+          testId
+            ? `[${testDetails[testId].courseName}] ${testDetails[testId].testName}`
+            : "Question GPT Portal"
+        }
+      />
+      <div className="pt-16">
+        TestQuestionPage {testId} {questionNumber}
+      </div>
+    </>
   );
 }
