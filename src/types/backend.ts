@@ -1,14 +1,20 @@
-// export type Sentence = {
-//   sentence: string;
-//   isIndicatedImg: boolean;
-//   isEscapedTranslation: boolean;
-// };
+export type Subject = {
+  sentence: string;
+  isIndicatedImg: boolean;
+  isEscapedTranslation: boolean;
+};
 
-// export type GetQuestion = {
-//   subjects: Sentence[];
-//   choices: Sentence[];
-//   isMultiplied: boolean;
-// };
+export type Choice = {
+  sentence: string;
+  img: string | null;
+  isEscapedTranslation: boolean;
+};
+
+export type GetQuestion = {
+  subjects: Subject[];
+  choices: Choice[];
+  isMultiplied: boolean;
+};
 
 /**
  * [GET] /tests/{testId} のレスポンスボディの型
