@@ -1,7 +1,7 @@
 import TopBar from "@/components/TopBar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/ui/use-toast";
+import { toast } from "@/hooks/ui/use-toast";
 import { accessBackend } from "@/lib/backend";
 import { basePath } from "@/lib/github";
 import { GetTests, Test } from "@/types/backend";
@@ -17,8 +17,6 @@ import { useNavigate } from "react-router";
 export default function RootPage() {
   const [getTests, setGetTests] = useState<GetTests | undefined>(undefined);
   const [opens, setOpens] = useState<boolean[]>([]);
-
-  const { toast } = useToast();
 
   const { instance, accounts } = useMsal();
   const accountInfo = useAccount(accounts[0] || {});
@@ -52,7 +50,7 @@ export default function RootPage() {
         });
       }
     })();
-  }, [accountInfo, instance, toast]);
+  }, [accountInfo, instance]);
 
   return (
     <>
