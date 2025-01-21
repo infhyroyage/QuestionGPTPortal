@@ -5,7 +5,7 @@ import { toast } from "@/hooks/ui/use-toast";
 import { fetchTestDetailsAtom } from "@/lib/atoms";
 import { accessBackend } from "@/lib/backend";
 import { basePath } from "@/lib/github";
-import { GetQuestion, Subject } from "@/types/backend";
+import { Choice, GetQuestion, Subject } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
@@ -86,16 +86,23 @@ export default function TestQuestionPage() {
           <div className="h-[40vh]" />
         </div>
         <div className="fixed bottom-0 h-[40vh] w-full px-4">
-          <ScrollArea className="h-full rounded-md border bg-zinc-100 dark:bg-zinc-900">
+          <ScrollArea className="h-full rounded-md border bg-slate-200 dark:bg-slate-800">
             <div className="space-y-4 m-4">
-              {[...Array(4)].map((_, idx) => (
-                <div
-                  key={idx}
-                  className="py-4 pl-4 space-x-4 border border-input bg-background rounded-lg text-lg font-semibold hover:bg-accent hover:text-accent-foreground"
-                >
-                  {`選択肢${idx + 1}`}
-                </div>
-              ))}
+              {question
+                ? question.choices.map((choice: Choice, idx: number) => (
+                    <p
+                      key={idx}
+                      className="py-4 pl-4 border border-input bg-background rounded-lg leading-7 hover:bg-accent hover:text-accent-foreground"
+                    >
+                      {choice.sentence}
+                    </p>
+                  ))
+                : Array.from({ length: 4 }).map((_, idx: number) => (
+                    <Skeleton
+                      key={idx}
+                      className="h-[62px] w-full rounded-lg"
+                    />
+                  ))}
             </div>
           </ScrollArea>
         </div>
