@@ -83,7 +83,7 @@ export default function RootPage() {
                   }}
                 >
                   <ChevronDown
-                    className={`h-6 w-6 transform transition-transform duration-200 ${
+                    className={`h-6 w-6 transform transition-transform ${
                       opens[i] ? "rotate-180" : "rotate-0"
                     }`}
                   />
