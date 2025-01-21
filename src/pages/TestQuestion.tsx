@@ -8,7 +8,7 @@ import { basePath } from "@/lib/github";
 import { Choice, GetQuestion, Subject } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom } from "jotai";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
 /**
@@ -18,6 +18,7 @@ import { useNavigate, useParams } from "react-router";
 export default function TestQuestionPage() {
   const [testDetails] = useAtom(fetchTestDetailsAtom);
   const [question, setQuestion] = useState<GetQuestion | undefined>(undefined);
+  const [selectedIdxes, setSelectedIdxes] = useState<number[]>([]);
 
   const { testId, questionNumber } = useParams();
 
@@ -61,6 +62,27 @@ export default function TestQuestionPage() {
     })();
   }, [accountInfo, instance, questionNumber, testId]);
 
+  const onClickSelector = useCallback(
+    (idx: number) => () => {
+      // TODO: 1つの問題に付き1回限りの回答とするため、回答済の場合はNOP
+      // if (isSubmitted) return;
+
+      let updated: number[];
+      if (question && question.isMultiplied) {
+        const updatedSelectedIdxes: number[] = selectedIdxes.includes(idx)
+          ? selectedIdxes.filter((selectedIdx: number) => selectedIdx !== idx)
+          : [...selectedIdxes, idx];
+        updated = updatedSelectedIdxes.sort((a, b) =>
+          a === b ? 0 : a < b ? -1 : 1
+        );
+      } else {
+        updated = [idx];
+      }
+      setSelectedIdxes(updated);
+    },
+    [question, selectedIdxes]
+  );
+
   return (
     testId &&
     testDetails[testId] && (
@@ -80,19 +102,28 @@ export default function TestQuestionPage() {
                 </p>
               ))
             ) : (
-              <Skeleton className="h-7 w-full" />
+              <>
+                <Skeleton className="h-7 w-full" />
+                <Skeleton className="h-7 w-full" />
+                <Skeleton className="h-[160px] w-[120px]" />
+              </>
             )}
           </div>
           <div className="h-[40vh]" />
         </div>
         <div className="fixed bottom-0 h-[40vh] w-full px-4">
-          <ScrollArea className="h-full rounded-md border bg-slate-200 dark:bg-slate-800">
+          <ScrollArea className="h-full rounded-md bg-slate-200 dark:bg-slate-800">
             <div className="space-y-4 m-4">
               {question
                 ? question.choices.map((choice: Choice, idx: number) => (
                     <p
                       key={idx}
-                      className="py-4 pl-4 border border-input bg-background rounded-lg leading-7 hover:bg-accent hover:text-accent-foreground"
+                      className={`py-4 pl-4 rounded-lg leading-7 transition-colors ${
+                        selectedIdxes.includes(idx)
+                          ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                          : "border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+                      }`}
+                      onClick={onClickSelector(idx)}
                     >
                       {choice.sentence}
                     </p>
