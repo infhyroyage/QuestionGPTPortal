@@ -2,10 +2,13 @@ import TopBar from "@/components/TopBar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/ui/use-toast";
-import { fetchTestDetailsAtom } from "@/lib/atoms";
-import { accessBackend } from "@/lib/backend";
+import {
+  fetchQuestionAtom,
+  fetchTestDetailsAtom,
+  fetchTranslationInitAtom,
+} from "@/lib/atoms";
 import { basePath } from "@/lib/github";
-import { Choice, GetQuestion, Subject } from "@/types/backend";
+import { Choice, Subject } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom } from "jotai";
 import { useCallback, useEffect, useState } from "react";
@@ -17,7 +20,10 @@ import { useNavigate, useParams } from "react-router";
  */
 export default function TestQuestionPage() {
   const [testDetails] = useAtom(fetchTestDetailsAtom);
-  const [question, setQuestion] = useState<GetQuestion | undefined>(undefined);
+  const [question, fetchQuestion] = useAtom(fetchQuestionAtom);
+  const [translationInit, fetchTranslationInit] = useAtom(
+    fetchTranslationInitAtom
+  );
   const [selectedIdxes, setSelectedIdxes] = useState<number[]>([]);
 
   const { testId, questionNumber } = useParams();
@@ -36,16 +42,32 @@ export default function TestQuestionPage() {
 
   // 初回レンダリング時のみ[GET] /tests/{testId}/questions/{questionNumber}を実行
   useEffect(() => {
+    if (testId && questionNumber) {
+      (async () => {
+        try {
+          await fetchQuestion(testId, questionNumber, instance, accountInfo);
+        } catch (e) {
+          console.error(e);
+          toast({
+            variant: "destructive",
+            title: "システムエラーが発生しました",
+            description: (
+              <>
+                <p>以下をシステム管理者にご連絡ください</p>
+                <p>{String(e)}</p>
+              </>
+            ),
+          });
+        }
+      })();
+    }
+  }, [accountInfo, fetchQuestion, instance, questionNumber, testId]);
+
+  // [GET] /tests/{testId}/questions/{questionNumber}実行直後のみ問題文・選択肢を翻訳
+  useEffect(() => {
     (async () => {
       try {
-        const res: GetQuestion = await accessBackend<GetQuestion>(
-          "GET",
-          `/tests/${testId}/questions/${questionNumber}`,
-          instance,
-          accountInfo
-        );
-
-        setQuestion(res);
+        await fetchTranslationInit(instance, accountInfo);
       } catch (e) {
         console.error(e);
         toast({
@@ -60,7 +82,7 @@ export default function TestQuestionPage() {
         });
       }
     })();
-  }, [accountInfo, instance, questionNumber, testId]);
+  }, [accountInfo, fetchTranslationInit, instance]);
 
   const onClickSelector = useCallback(
     (idx: number) => () => {
@@ -97,15 +119,27 @@ export default function TestQuestionPage() {
           <div className="space-y-4 mb-4">
             {question ? (
               question.subjects.map((subject: Subject, idx: number) => (
-                <p key={idx} className="leading-7">
-                  {subject.sentence}
-                </p>
+                <div key={idx} className="space-y-1">
+                  <p className="leading-7">{subject.sentence}</p>
+                  {translationInit ? (
+                    <p className="text-sm text-muted-foreground">
+                      {translationInit.subjects[idx]}
+                    </p>
+                  ) : (
+                    <Skeleton className="h-5 w-full" />
+                  )}
+                </div>
               ))
             ) : (
               <>
-                <Skeleton className="h-7 w-full" />
-                <Skeleton className="h-7 w-full" />
-                <Skeleton className="h-[160px] w-[120px]" />
+                <div className="space-y-1">
+                  <Skeleton className="h-7 w-full" />
+                  <Skeleton className="h-5 w-full" />
+                </div>
+                <div className="space-y-1">
+                  <Skeleton className="h-7 w-full" />
+                  <Skeleton className="h-5 w-full" />
+                </div>
               </>
             )}
           </div>
@@ -116,6 +150,7 @@ export default function TestQuestionPage() {
             <div className="space-y-4 m-4">
               {question
                 ? question.choices.map((choice: Choice, idx: number) => (
+                    // TODO: 選択肢の翻訳文を表示
                     <p
                       key={idx}
                       className={`py-4 pl-4 rounded-lg leading-7 transition-colors ${
