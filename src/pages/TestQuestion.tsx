@@ -3,18 +3,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/ui/use-toast";
 import { fetchTestDetailsAtom } from "@/lib/atoms";
 import { accessBackend } from "@/lib/backend";
+import { basePath } from "@/lib/github";
 import { GetQuestion, Subject } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 
 /**
  * テストページのコンポーネント
  * @returns テストページのコンポーネント
  */
 export default function TestQuestionPage() {
-  const [testDetails, fetchTestDetails] = useAtom(fetchTestDetailsAtom);
+  const [testDetails] = useAtom(fetchTestDetailsAtom);
   const [question, setQuestion] = useState<GetQuestion | undefined>(undefined);
 
   const { testId, questionNumber } = useParams();
@@ -22,28 +23,14 @@ export default function TestQuestionPage() {
   const { instance, accounts } = useMsal();
   const accountInfo = useAccount(accounts[0] || {});
 
-  // tesiIdでの情報を習得していない場合のみ[GET] /tests/{testId}を実行
+  const navigate = useNavigate();
+
+  // tesiIdでの情報を習得していない場合はテスト準備ページにリダイレクト
   useEffect(() => {
     if (testId && !testDetails[testId]) {
-      (async () => {
-        try {
-          await fetchTestDetails(testId, instance, accountInfo);
-        } catch (e) {
-          console.error(e);
-          toast({
-            variant: "destructive",
-            title: "システムエラーが発生しました",
-            description: (
-              <>
-                <p>以下をシステム管理者にご連絡ください</p>
-                <p>{String(e)}</p>
-              </>
-            ),
-          });
-        }
-      })();
+      navigate(`${basePath}/tests/${testId}/ready`);
     }
-  }, [accountInfo, fetchTestDetails, instance, testDetails, testId]);
+  }, [navigate, testDetails, testId]);
 
   // 初回レンダリング時のみ[GET] /tests/{testId}/questions/{questionNumber}を実行
   useEffect(() => {
