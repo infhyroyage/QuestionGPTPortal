@@ -145,28 +145,34 @@ export default function TestQuestionPage() {
           </div>
           <div className="h-[40vh]" />
         </div>
-        <div className="fixed bottom-0 h-[40vh] w-full px-4">
+        <div className="fixed bottom-0 h-[40vh] w-full">
           <ScrollArea className="h-full rounded-md bg-slate-200 dark:bg-slate-800">
             <div className="space-y-4 m-4">
               {question
                 ? question.choices.map((choice: Choice, idx: number) => (
-                    // TODO: 選択肢の翻訳文を表示
-                    <p
+                    <div
                       key={idx}
-                      className={`py-4 pl-4 rounded-lg leading-7 transition-colors ${
+                      className={`py-4 pl-4 space-y-1 rounded-lg transition-colors ${
                         selectedIdxes.includes(idx)
                           ? "bg-primary text-primary-foreground hover:bg-primary/90"
                           : "border border-input bg-background hover:bg-accent hover:text-accent-foreground"
                       }`}
                       onClick={onClickSelector(idx)}
                     >
-                      {choice.sentence}
-                    </p>
+                      <p className="leading-7">{choice.sentence}</p>
+                      {translationInit ? (
+                        <p className="text-sm text-muted-foreground">
+                          {translationInit.choices[idx]}
+                        </p>
+                      ) : (
+                        <Skeleton className="h-5 w-full" />
+                      )}
+                    </div>
                   ))
                 : Array.from({ length: 4 }).map((_, idx: number) => (
                     <Skeleton
                       key={idx}
-                      className="h-[62px] w-full rounded-lg"
+                      className="h-[86px] w-full rounded-lg"
                     />
                   ))}
             </div>
