@@ -40,12 +40,13 @@ export default function TestQuestionPage() {
     }
   }, [navigate, testDetails, testId]);
 
-  // 初回レンダリング時のみ[GET] /tests/{testId}/questions/{questionNumber}を実行
+  // ページ遷移時に、問題文・選択肢を取得・翻訳
   useEffect(() => {
-    if (testId && questionNumber) {
+    if (testId && questionNumber && !question) {
       (async () => {
         try {
           await fetchQuestion(testId, questionNumber, instance, accountInfo);
+          await fetchTranslationInit(instance, accountInfo);
         } catch (e) {
           console.error(e);
           toast({
@@ -61,28 +62,15 @@ export default function TestQuestionPage() {
         }
       })();
     }
-  }, [accountInfo, fetchQuestion, instance, questionNumber, testId]);
-
-  // [GET] /tests/{testId}/questions/{questionNumber}実行直後のみ問題文・選択肢を翻訳
-  useEffect(() => {
-    (async () => {
-      try {
-        await fetchTranslationInit(instance, accountInfo);
-      } catch (e) {
-        console.error(e);
-        toast({
-          variant: "destructive",
-          title: "システムエラーが発生しました",
-          description: (
-            <>
-              <p>以下をシステム管理者にご連絡ください</p>
-              <p>{String(e)}</p>
-            </>
-          ),
-        });
-      }
-    })();
-  }, [accountInfo, fetchTranslationInit, instance]);
+  }, [
+    accountInfo,
+    fetchQuestion,
+    fetchTranslationInit,
+    instance,
+    question,
+    questionNumber,
+    testId,
+  ]);
 
   const onClickSelector = useCallback(
     (idx: number) => () => {
