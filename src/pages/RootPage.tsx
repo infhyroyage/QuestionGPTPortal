@@ -23,7 +23,7 @@ export default function RootPage() {
 
   const navigate = useNavigate();
 
-  // 初回レンダリング時のみ[GET] /testsを実行
+  // 初回レンダリング時のみテスト一覧情報を取得
   useEffect(() => {
     (async () => {
       try {

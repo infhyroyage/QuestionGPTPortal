@@ -24,7 +24,7 @@ export default function TestReadyPage() {
 
   const navigate = useNavigate();
 
-  // tesiIdでの情報を習得していない場合のみ[GET] /tests/{testId}を実行
+  // テスト詳細情報を取得していない場合のみ取得
   useEffect(() => {
     if (testId && !testDetails[testId]) {
       (async () => {
