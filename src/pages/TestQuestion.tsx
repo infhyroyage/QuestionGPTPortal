@@ -1,3 +1,4 @@
+import SubmitButton from "@/components/SubmitButton";
 import TopBar from "@/components/TopBar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -165,6 +166,7 @@ export default function TestQuestionPage() {
             </div>
           </ScrollArea>
         </div>
+        <SubmitButton />
       </>
     )
   );

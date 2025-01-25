@@ -1,4 +1,9 @@
-import { QuestionSelector, TestDetails, TranslationInit } from "@/types/atoms";
+import {
+  QuestionSelector,
+  Selector,
+  TestDetails,
+  TranslationInit,
+} from "@/types/atoms";
 import {
   Choice,
   GetQuestion,
@@ -71,7 +76,7 @@ export const toggleSelectedChoiceAtom = atom(null, (get, set, idx: number) => {
   // 1つの回答のみが存在する場合はidx番目を選択・idx番目以外を未選択とする
   set(questionSelectorAtom, {
     ...questionSelector,
-    choices: questionSelector.choices.map((choice, i) => ({
+    choices: questionSelector.choices.map((choice: Selector, i: number) => ({
       ...choice,
       isSelected: questionSelector.isMultiplied
         ? i === idx
