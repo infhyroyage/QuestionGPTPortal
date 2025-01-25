@@ -1,4 +1,4 @@
-import { TestDetails, TranslationInit } from "@/types/atoms";
+import { QuestionSelector, TestDetails, TranslationInit } from "@/types/atoms";
 import {
   Choice,
   GetQuestion,
@@ -18,15 +18,15 @@ import { accessBackend } from "./backend";
 const isDarkModeAtom = atom<boolean>(true);
 
 /**
- * 問題文を管理するatom
+ * 問題文・選択肢を管理するatom
  */
-const questionAtom = atom<GetQuestion | undefined>(undefined);
+const questionSelectorAtom = atom<QuestionSelector>(undefined);
 
 /**
- * 問題文を取得するatom
+ * 問題文・選択肢を取得するatom
  */
-export const fetchQuestionAtom = atom(
-  (get) => get(questionAtom),
+export const fetchQuestionSelectorAtom = atom(
+  (get) => get(questionSelectorAtom),
   async (
     get,
     set,
@@ -36,8 +36,8 @@ export const fetchQuestionAtom = atom(
     accountInfo: AccountInfo | null
   ) => {
     // すでに問題文が存在する場合は何も取得・更新しない
-    const question = get(questionAtom);
-    if (question) {
+    const questionSelector = get(questionSelectorAtom);
+    if (questionSelector) {
       return;
     }
 
@@ -48,9 +48,39 @@ export const fetchQuestionAtom = atom(
       instance,
       accountInfo
     );
-    set(questionAtom, res);
+    set(questionSelectorAtom, {
+      subjects: res.subjects,
+      choices: res.choices.map((choice: Choice) => ({
+        ...choice,
+        isSelected: false,
+      })),
+      isMultiplied: res.isMultiplied,
+    });
   }
 );
+
+/**
+ * 選択肢の選択状態の切り替え(write only)を管理するatom
+ */
+export const toggleSelectedChoiceAtom = atom(null, (get, set, idx: number) => {
+  // まだ選択肢を取得していない場合は何もしない
+  const questionSelector = get(questionSelectorAtom);
+  if (!questionSelector) return;
+
+  // 複数個の回答が存在する場合はidx番目のみ選択状態を反転し、
+  // 1つの回答のみが存在する場合はidx番目を選択・idx番目以外を未選択とする
+  set(questionSelectorAtom, {
+    ...questionSelector,
+    choices: questionSelector.choices.map((choice, i) => ({
+      ...choice,
+      isSelected: questionSelector.isMultiplied
+        ? i === idx
+          ? !choice.isSelected
+          : choice.isSelected
+        : i === idx,
+    })),
+  });
+});
 
 /**
  * ダークモード化のフラグと、ダークモード切替え用のatom
@@ -120,7 +150,7 @@ export const fetchTranslationInitAtom = atom(
     }
 
     // 翻訳対象の問題文・選択肢がまだ存在しない場合は何も翻訳しない
-    const question = get(questionAtom);
+    const question = get(questionSelectorAtom);
     if (!question) {
       return;
     }
