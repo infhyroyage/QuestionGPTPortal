@@ -1,20 +1,18 @@
+import QuestionSubjects from "@/components/QuestionSubjects";
+import Selector from "@/components/Selector";
 import SubmitButton from "@/components/SubmitButton";
 import TopBar from "@/components/TopBar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/ui/use-toast";
 import {
   fetchQuestionSelectorAtom,
   fetchTestDetailsAtom,
   fetchTranslationInitAtom,
-  proceedSubmitAtom,
-  toggleSelectedChoiceAtom,
 } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
-import { Choice, Subject } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom } from "jotai";
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
 
 /**
@@ -22,15 +20,11 @@ import { useNavigate, useParams } from "react-router";
  * @returns テストページのコンポーネント
  */
 export default function TestQuestionPage() {
-  const [submit] = useAtom(proceedSubmitAtom);
   const [testDetails] = useAtom(fetchTestDetailsAtom);
   const [questionSelector, fetchQuestionSelector] = useAtom(
     fetchQuestionSelectorAtom
   );
-  const [, toggleSelectedChoice] = useAtom(toggleSelectedChoiceAtom);
-  const [translationInit, fetchTranslationInit] = useAtom(
-    fetchTranslationInitAtom
-  );
+  const [, fetchTranslationInit] = useAtom(fetchTranslationInitAtom);
 
   const { testId, questionNumber } = useParams();
 
@@ -83,18 +77,6 @@ export default function TestQuestionPage() {
     testId,
   ]);
 
-  // idx番目の選択肢押下時の処理
-  const onClickSelector = useCallback(
-    (idx: number) => () => {
-      // 回答・解説の生成開始後は選択状態を切り替えない
-      if (submit !== "NOT_ANSWERED") return;
-
-      // idx番目の選択肢の選択状態を切り替え
-      toggleSelectedChoice(idx);
-    },
-    [submit, toggleSelectedChoice]
-  );
-
   return (
     testId &&
     testDetails[testId] && (
@@ -106,68 +88,11 @@ export default function TestQuestionPage() {
           <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight my-6">
             {`${questionNumber}問目 (全${testDetails[testId].length}問)`}
           </h3>
-          <div className="space-y-4 mb-4">
-            {questionSelector ? (
-              questionSelector.subjects.map((subject: Subject, idx: number) => (
-                <div key={idx} className="space-y-1">
-                  <p className="leading-7">{subject.sentence}</p>
-                  {translationInit ? (
-                    <p className="text-sm text-muted-foreground">
-                      {translationInit.subjects[idx]}
-                    </p>
-                  ) : (
-                    <Skeleton className="h-5 w-full" />
-                  )}
-                </div>
-              ))
-            ) : (
-              <>
-                <div className="space-y-1">
-                  <Skeleton className="h-7 w-full" />
-                  <Skeleton className="h-5 w-full" />
-                </div>
-                <div className="space-y-1">
-                  <Skeleton className="h-7 w-full" />
-                  <Skeleton className="h-5 w-full" />
-                </div>
-              </>
-            )}
-          </div>
-          <div className="h-[40vh]" />
+          <QuestionSubjects />
         </div>
         <div className="fixed bottom-0 h-[40vh] w-full">
           <ScrollArea className="h-full rounded-md bg-slate-200 dark:bg-slate-800">
-            <div className="space-y-4 m-4">
-              {questionSelector
-                ? questionSelector.choices.map(
-                    (choice: Choice, idx: number) => (
-                      <div
-                        key={idx}
-                        className={`py-4 pl-4 space-y-1 rounded-lg transition-colors ${
-                          questionSelector.choices[idx].isSelected
-                            ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                            : "border border-input bg-background hover:bg-accent hover:text-accent-foreground"
-                        }`}
-                        onClick={onClickSelector(idx)}
-                      >
-                        <p className="leading-7">{choice.sentence}</p>
-                        {translationInit ? (
-                          <p className="text-sm text-muted-foreground">
-                            {translationInit.choices[idx]}
-                          </p>
-                        ) : (
-                          <Skeleton className="h-5 w-full" />
-                        )}
-                      </div>
-                    )
-                  )
-                : Array.from({ length: 4 }).map((_, idx: number) => (
-                    <Skeleton
-                      key={idx}
-                      className="h-[86px] w-full rounded-lg"
-                    />
-                  ))}
-            </div>
+            <Selector />
           </ScrollArea>
         </div>
         <SubmitButton />
