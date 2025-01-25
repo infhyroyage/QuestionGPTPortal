@@ -6,6 +6,15 @@ import { Choice, GetTest, Subject } from "./backend";
 export type Selector = Choice & { isSelected: boolean };
 
 /**
+ * 回答の生成状態の型
+ * * NOT_ANSWERED: 回答未生成
+ * * ANSWERING: 回答生成中
+ * * CORRECT: 回答生成済(正解)
+ * * INCORRECT: 回答生成済(不正解)
+ */
+export type Submit = "NOT_ANSWERED" | "ANSWERING" | "CORRECT" | "INCORRECT";
+
+/**
  * 問題文・選択肢の型
  */
 export type QuestionSelector =

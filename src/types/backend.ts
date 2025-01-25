@@ -1,15 +1,32 @@
+/**
+ * [GET] /tests/{testId}/questions/{questionNumber}/answer のレスポンスボディの型
+ */
+export type GetAnswer = {
+  correctIdxes: number[];
+  explanations: string[];
+};
+
+/**
+ * [GET] /tests/{testId}/questions/{questionNumber} のレスポンスボディの問題文の型
+ */
 export type Subject = {
   sentence: string;
   isIndicatedImg: boolean;
   isEscapedTranslation: boolean;
 };
 
+/**
+ * [GET] /tests/{testId}/questions/{questionNumber} のレスポンスボディの選択肢の型
+ */
 export type Choice = {
   sentence: string;
   img: string | null;
   isEscapedTranslation: boolean;
 };
 
+/**
+ * [GET] /tests/{testId}/questions/{questionNumber} のレスポンスボディの型
+ */
 export type GetQuestion = {
   subjects: Subject[];
   choices: Choice[];

@@ -7,6 +7,7 @@ import {
   fetchQuestionSelectorAtom,
   fetchTestDetailsAtom,
   fetchTranslationInitAtom,
+  proceedSubmitAtom,
   toggleSelectedChoiceAtom,
 } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
@@ -21,6 +22,7 @@ import { useNavigate, useParams } from "react-router";
  * @returns テストページのコンポーネント
  */
 export default function TestQuestionPage() {
+  const [submit] = useAtom(proceedSubmitAtom);
   const [testDetails] = useAtom(fetchTestDetailsAtom);
   const [questionSelector, fetchQuestionSelector] = useAtom(
     fetchQuestionSelectorAtom
@@ -29,6 +31,7 @@ export default function TestQuestionPage() {
   const [translationInit, fetchTranslationInit] = useAtom(
     fetchTranslationInitAtom
   );
+
   const { testId, questionNumber } = useParams();
 
   const { instance, accounts } = useMsal();
@@ -80,15 +83,16 @@ export default function TestQuestionPage() {
     testId,
   ]);
 
+  // idx番目の選択肢押下時の処理
   const onClickSelector = useCallback(
     (idx: number) => () => {
-      // TODO: 1つの問題に付き1回限りの回答とするため、回答済の場合はNOP
-      // if (isSubmitted) return;
+      // 回答・解説の生成開始後は選択状態を切り替えない
+      if (submit !== "NOT_ANSWERED") return;
 
       // idx番目の選択肢の選択状態を切り替え
       toggleSelectedChoice(idx);
     },
-    [toggleSelectedChoice]
+    [submit, toggleSelectedChoice]
   );
 
   return (

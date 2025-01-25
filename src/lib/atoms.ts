@@ -1,6 +1,7 @@
 import {
   QuestionSelector,
   Selector,
+  Submit,
   TestDetails,
   TranslationInit,
 } from "@/types/atoms";
@@ -15,6 +16,27 @@ import {
 import { AccountInfo, IPublicClientApplication } from "@azure/msal-browser";
 import { atom } from "jotai";
 import { accessBackend } from "./backend";
+
+/**
+ * 回答・解説の生成状態を管理するatom
+ */
+const submitAtom = atom<Submit>("NOT_ANSWERED");
+
+/**
+ * 回答・解説の生成状態を次の状態に更新するatom
+ */
+export const proceedSubmitAtom = atom(
+  (get) => get(submitAtom),
+  (get, set) => {
+    const submit: Submit = get(submitAtom);
+    if (submit === "NOT_ANSWERED") {
+      set(submitAtom, "ANSWERING");
+    } else if (submit === "ANSWERING") {
+      // TODO: 未実装(暫定的に正解とする)
+      set(submitAtom, "CORRECT");
+    }
+  }
+);
 
 /**
  * ダークモードの場合はtrue、ライトモードの場合はfalseのatom
