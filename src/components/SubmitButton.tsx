@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/ui/use-toast";
 import { fetchQuestionSelectorAtom, proceedSubmitAtom } from "@/lib/atoms";
 import { accessBackend } from "@/lib/backend";
-import { Selector } from "@/types/atoms";
 import { GetAnswer } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom } from "jotai";
@@ -23,14 +22,16 @@ export default function SubmitButton() {
   const { instance, accounts } = useMsal();
   const accountInfo = useAccount(accounts[0] || {});
 
-  // 選択肢を取得し、選択肢のいずれかが選択されている場合は回答・解説生成ボタンを活性状態とする
+  // 以下のいずれかの場合は、回答・解説生成ボタンを非活性とする
+  // * 選択肢を取得していない
+  // * 選択肢がいずれも選択していない
+  // * 回答・解説が生成中
   const isDisabledSubmitButton = useMemo<boolean>(
     () =>
-      !(
-        questionSelector &&
-        questionSelector.choices.some((choice: Selector) => choice.isSelected)
-      ),
-    [questionSelector]
+      !questionSelector ||
+      questionSelector.choices.every((choice) => !choice.isSelected) ||
+      submit === "ANSWERING",
+    [questionSelector, submit]
   );
 
   // 回答・解説生成ボタン押下時の処理
