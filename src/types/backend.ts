@@ -1,7 +1,24 @@
 /**
- * [GET] /tests/{testId}/questions/{questionNumber}/answer のレスポンスボディの型
+ * [GET] /tests/{testId}/answers/{questionNumber} のレスポンスボディの型
  */
 export type GetAnswer = {
+  correctIdxes: number[];
+  explanations: string[];
+};
+
+/**
+ * [POST] /tests/{testId}/answers/{questionNumber} のリクエストボディの型
+ */
+export type PostAnswerReq = {
+  courseName: string;
+  subjects: string[];
+  choices: string[];
+};
+
+/**
+ * [POST] /tests/{testId}/answers/{questionNumber} のレスポンスボディの型
+ */
+export type PostAnswerRes = {
   correctIdxes: number[];
   explanations: string[];
 };

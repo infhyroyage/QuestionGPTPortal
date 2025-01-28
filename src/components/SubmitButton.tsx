@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/ui/use-toast";
-import { fetchQuestionSelectorAtom, proceedSubmitAtom } from "@/lib/atoms";
-import { accessBackend } from "@/lib/backend";
-import { GetAnswer } from "@/types/backend";
+import {
+  fetchAnswerExplanationAtom,
+  fetchQuestionSelectorAtom,
+} from "@/lib/atoms";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom } from "jotai";
 import { Check, Loader2, SendHorizontal, X } from "lucide-react";
@@ -14,7 +15,9 @@ import { useParams } from "react-router";
  * @returns 回答・解説生成ボタンのコンポーネント
  */
 export default function SubmitButton() {
-  const [submit, proceedSubmit] = useAtom(proceedSubmitAtom);
+  const [answerExplanation, fetchAnswerExplanation] = useAtom(
+    fetchAnswerExplanationAtom
+  );
   const [questionSelector] = useAtom(fetchQuestionSelectorAtom);
 
   const { testId, questionNumber } = useParams();
@@ -26,33 +29,27 @@ export default function SubmitButton() {
   // * 選択肢を取得していない
   // * 選択肢がいずれも選択していない
   // * 回答・解説が生成中
+  // * 回答・解説が生成済み
   const isDisabledSubmitButton = useMemo<boolean>(
     () =>
       !questionSelector ||
       questionSelector.choices.every((choice) => !choice.isSelected) ||
-      submit === "ANSWERING",
-    [questionSelector, submit]
+      !!answerExplanation,
+    [answerExplanation, questionSelector]
   );
 
   // 回答・解説生成ボタン押下時の処理
   const onClickSubmit = useCallback(async () => {
     // 同じ問題に対し、回答・解説の生成は1回のみ
-    if (submit !== "NOT_ANSWERED") return;
-
-    proceedSubmit();
+    if (!testId || !questionNumber || !!answerExplanation) return;
 
     try {
-      // [GET] /tests/{testId}/questions/{questionNumber}/answerを実行
-      const res: GetAnswer = await accessBackend<GetAnswer>(
-        "GET",
-        `/tests/${testId}/questions/${questionNumber}/answer`,
+      await fetchAnswerExplanation(
+        testId,
+        questionNumber,
         instance,
         accountInfo
       );
-
-      console.log(res); // DEBUG
-
-      proceedSubmit();
     } catch (e) {
       console.error(e);
       toast({
@@ -66,29 +63,36 @@ export default function SubmitButton() {
         ),
       });
     }
-  }, [accountInfo, instance, proceedSubmit, questionNumber, submit, testId]);
+  }, [
+    accountInfo,
+    answerExplanation,
+    fetchAnswerExplanation,
+    instance,
+    questionNumber,
+    testId,
+  ]);
 
   return (
     <Button
       className={`fixed bottom-[calc(40vh+1rem)] right-4${
-        submit === "CORRECT"
+        !answerExplanation || answerExplanation.isSubmitting
+          ? ""
+          : answerExplanation.isCorrect
           ? " bg-green-500"
-          : submit === "INCORRECT"
-          ? " bg-red-500"
-          : ""
+          : " bg-red-500"
       }`}
       size="icon"
       disabled={isDisabledSubmitButton}
       onClick={onClickSubmit}
     >
-      {submit === "ANSWERING" ? (
-        <Loader2 className="animate-spin" />
-      ) : submit === "CORRECT" ? (
-        <Check />
-      ) : submit === "INCORRECT" ? (
-        <X />
-      ) : (
+      {!answerExplanation ? (
         <SendHorizontal />
+      ) : answerExplanation.isSubmitting ? (
+        <Loader2 className="animate-spin" />
+      ) : answerExplanation.isCorrect ? (
+        <Check />
+      ) : (
+        <X />
       )}
     </Button>
   );

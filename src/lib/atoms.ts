@@ -1,39 +1,131 @@
 import {
+  AnswerExplanation,
+  ChoiceAndSelect,
   QuestionSelector,
-  Selector,
-  Submit,
   TestDetails,
   TranslationInit,
 } from "@/types/atoms";
 import {
   Choice,
+  GetAnswer,
   GetQuestion,
   GetTest,
+  PostAnswerReq,
+  PostAnswerRes,
   PutEn2JaReq,
   PutEn2JaRes,
   Subject,
 } from "@/types/backend";
 import { AccountInfo, IPublicClientApplication } from "@azure/msal-browser";
+import { AxiosError } from "axios";
 import { atom } from "jotai";
 import { accessBackend } from "./backend";
 
 /**
- * 回答・解説の生成状態を管理するatom
+ * 正解・解説文を管理するatom
  */
-const submitAtom = atom<Submit>("NOT_ANSWERED");
+const answerExplanationAtom = atom<AnswerExplanation>(undefined);
 
 /**
- * 回答・解説の生成状態を次の状態に更新するatom
+ * 正解・解説文を取得するatom
  */
-export const proceedSubmitAtom = atom(
-  (get) => get(submitAtom),
-  (get, set) => {
-    const submit: Submit = get(submitAtom);
-    if (submit === "NOT_ANSWERED") {
-      set(submitAtom, "ANSWERING");
-    } else if (submit === "ANSWERING") {
-      // TODO: 未実装(暫定的に正解とする)
-      set(submitAtom, "CORRECT");
+export const fetchAnswerExplanationAtom = atom(
+  (get) => get(answerExplanationAtom),
+  async (
+    get,
+    set,
+    testId: string,
+    questionNumber: string,
+    instance: IPublicClientApplication,
+    accountInfo: AccountInfo | null
+  ) => {
+    // すでに正解・解説文が存在する場合は何も取得・更新しない
+    const answerExplanation = get(answerExplanationAtom);
+    if (answerExplanation) {
+      return;
+    }
+
+    // テスト詳細情報がまだ存在しない場合は何も取得・更新しない
+    const testDetails = get(testDetailsAtom);
+    if (!testDetails[testId]) {
+      return;
+    }
+
+    // 問題文・選択肢がまだ存在しない場合は何も取得・更新しない
+    const questionSelector = get(questionSelectorAtom);
+    if (!questionSelector) {
+      return;
+    }
+
+    // 選択肢がいずれも選択していない場合は何も取得・更新しない
+    const selectedFlags: boolean[] = questionSelector.choices.map(
+      (choice: ChoiceAndSelect) => choice.isSelected
+    );
+    if (selectedFlags.every((flag) => !flag)) {
+      return;
+    }
+
+    // 回答・解説生成中に更新
+    set(answerExplanationAtom, {
+      isSubmitting: true,
+    });
+
+    try {
+      // [GET] /tests/{testId}/answers/{questionNumber}にアクセスして取得した正解・解説文で更新
+      const getAnswerRes: GetAnswer = await accessBackend<GetAnswer>(
+        "GET",
+        `/tests/${testId}/answers/${questionNumber}`,
+        instance,
+        accountInfo
+      );
+      const correctFlags: boolean[] = Array(
+        questionSelector.choices.length
+      ).map((_, idx: number) => getAnswerRes.correctIdxes.includes(idx));
+      set(answerExplanationAtom, {
+        correctFlags,
+        explanations: getAnswerRes.explanations,
+        isSubmitting: false,
+        isCorrect: selectedFlags.every(
+          (selectedFlag, idx) => selectedFlag === correctFlags[idx]
+        ),
+      });
+    } catch (err) {
+      // 404エラーの場合は、[POST] /tests/{testId}/answers/{questionNumber}にアクセスして正解・解説文の生成を実行し、
+      // 取得した正解・解説文で更新
+      if (err instanceof AxiosError && err.response?.status === 404) {
+        const postAnswerRes: PostAnswerRes = await accessBackend<
+          PostAnswerRes,
+          PostAnswerReq
+        >(
+          "POST",
+          `/tests/${testId}/answers/${questionNumber}`,
+          instance,
+          accountInfo,
+          {
+            courseName: testDetails[testId].courseName,
+            subjects: questionSelector.subjects.map(
+              (subject: Subject) => subject.sentence
+            ),
+            choices: questionSelector.choices.map(
+              (choice: Choice) => choice.sentence
+            ),
+          }
+        );
+
+        const correctFlags: boolean[] = Array(
+          questionSelector.choices.length
+        ).map((_, idx: number) => postAnswerRes.correctIdxes.includes(idx));
+        set(answerExplanationAtom, {
+          correctFlags,
+          explanations: postAnswerRes.explanations,
+          isSubmitting: false,
+          isCorrect: selectedFlags.every(
+            (selectedFlag, idx) => selectedFlag === correctFlags[idx]
+          ),
+        });
+      } else {
+        throw err;
+      }
     }
   }
 );
@@ -98,14 +190,16 @@ export const toggleSelectedChoiceAtom = atom(null, (get, set, idx: number) => {
   // 1つの回答のみが存在する場合はidx番目を選択・idx番目以外を未選択とする
   set(questionSelectorAtom, {
     ...questionSelector,
-    choices: questionSelector.choices.map((choice: Selector, i: number) => ({
-      ...choice,
-      isSelected: questionSelector.isMultiplied
-        ? i === idx
-          ? !choice.isSelected
-          : choice.isSelected
-        : i === idx,
-    })),
+    choices: questionSelector.choices.map(
+      (choice: ChoiceAndSelect, i: number) => ({
+        ...choice,
+        isSelected: questionSelector.isMultiplied
+          ? i === idx
+            ? !choice.isSelected
+            : choice.isSelected
+          : i === idx,
+      })
+    ),
   });
 });
 

@@ -1,18 +1,24 @@
 import { Choice, GetTest, Subject } from "./backend";
 
 /**
- * 選択肢の型
+ * 正解・解説文・解答の生成状態の型
+ * * undefined: 未生成
+ * * isSubmittingが存在してtrue: 生成中
+ * * isSubmittingが存在してfalse: 生成済み
  */
-export type Selector = Choice & { isSelected: boolean };
+export type AnswerExplanation =
+  | {
+      correctFlags?: boolean[];
+      explanations?: string[];
+      isSubmitting: boolean;
+      isCorrect?: boolean;
+    }
+  | undefined;
 
 /**
- * 回答の生成状態の型
- * * NOT_ANSWERED: 回答未生成
- * * ANSWERING: 回答生成中
- * * CORRECT: 回答生成済(正解)
- * * INCORRECT: 回答生成済(不正解)
+ * 選択状態を含む選択肢の型
  */
-export type Submit = "NOT_ANSWERED" | "ANSWERING" | "CORRECT" | "INCORRECT";
+export type ChoiceAndSelect = Choice & { isSelected: boolean };
 
 /**
  * 問題文・選択肢の型
@@ -20,7 +26,7 @@ export type Submit = "NOT_ANSWERED" | "ANSWERING" | "CORRECT" | "INCORRECT";
 export type QuestionSelector =
   | {
       subjects: Subject[];
-      choices: Selector[];
+      choices: ChoiceAndSelect[];
       isMultiplied: boolean;
     }
   | undefined;

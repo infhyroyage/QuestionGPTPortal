@@ -1,7 +1,7 @@
 import {
+  fetchAnswerExplanationAtom,
   fetchQuestionSelectorAtom,
   fetchTranslationInitAtom,
-  proceedSubmitAtom,
   toggleSelectedChoiceAtom,
 } from "@/lib/atoms";
 import { Choice } from "@/types/backend";
@@ -11,7 +11,7 @@ import { Button } from "./ui/button";
 import { Skeleton } from "./ui/skeleton";
 
 export default function Selector() {
-  const [submit] = useAtom(proceedSubmitAtom);
+  const [answerExplanation] = useAtom(fetchAnswerExplanationAtom);
   const [questionSelector] = useAtom(fetchQuestionSelectorAtom);
   const [, toggleSelectedChoice] = useAtom(toggleSelectedChoiceAtom);
   const [translationInit] = useAtom(fetchTranslationInitAtom);
@@ -20,12 +20,12 @@ export default function Selector() {
   const onClickSelector = useCallback(
     (idx: number) => () => {
       // 回答・解説の生成開始後は選択状態を切り替えない
-      if (submit !== "NOT_ANSWERED") return;
+      if (answerExplanation) return;
 
       // idx番目の選択肢の選択状態を切り替え
       toggleSelectedChoice(idx);
     },
-    [submit, toggleSelectedChoice]
+    [answerExplanation, toggleSelectedChoice]
   );
 
   return (
@@ -38,7 +38,7 @@ export default function Selector() {
                 questionSelector.choices[idx].isSelected ? "default" : "outline"
               }
               className="flex flex-col py-4 pl-4 h-full space-y-1 whitespace-normal text-left"
-              disabled={submit === "ANSWERING"}
+              disabled={!!answerExplanation}
               onClick={onClickSelector(idx)}
             >
               <p className="leading-7">{choice.sentence}</p>
