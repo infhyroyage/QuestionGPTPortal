@@ -29,12 +29,11 @@ export default function SubmitButton() {
   // * 選択肢を取得していない
   // * 選択肢がいずれも選択していない
   // * 回答・解説が生成中
-  // * 回答・解説が生成済み
   const isDisabledSubmitButton = useMemo<boolean>(
     () =>
       !questionSelector ||
       questionSelector.choices.every((choice) => !choice.isSelected) ||
-      !!answerExplanation,
+      (!!answerExplanation && answerExplanation.isSubmitting),
     [answerExplanation, questionSelector]
   );
 
@@ -78,8 +77,8 @@ export default function SubmitButton() {
         !answerExplanation || answerExplanation.isSubmitting
           ? ""
           : answerExplanation.isCorrect
-          ? " bg-green-500"
-          : " bg-red-500"
+          ? " bg-green-500 hover:bg-green-600"
+          : " bg-red-500 hover:bg-red-600"
       }`}
       size="icon"
       disabled={isDisabledSubmitButton}
