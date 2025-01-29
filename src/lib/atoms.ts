@@ -78,9 +78,9 @@ export const fetchAnswerExplanationAtom = atom(
         instance,
         accountInfo
       );
-      const correctFlags: boolean[] = Array(
-        questionSelector.choices.length
-      ).map((_, idx: number) => getAnswerRes.correctIdxes.includes(idx));
+      const correctFlags: boolean[] = [
+        ...Array(questionSelector.choices.length),
+      ].map((_, idx: number) => getAnswerRes.correctIdxes.includes(idx));
       set(answerExplanationAtom, {
         correctFlags,
         explanations: getAnswerRes.explanations,
@@ -112,9 +112,9 @@ export const fetchAnswerExplanationAtom = atom(
           }
         );
 
-        const correctFlags: boolean[] = Array(
-          questionSelector.choices.length
-        ).map((_, idx: number) => postAnswerRes.correctIdxes.includes(idx));
+        const correctFlags: boolean[] = [
+          ...Array(questionSelector.choices.length),
+        ].map((_, idx: number) => postAnswerRes.correctIdxes.includes(idx));
         set(answerExplanationAtom, {
           correctFlags,
           explanations: postAnswerRes.explanations,
