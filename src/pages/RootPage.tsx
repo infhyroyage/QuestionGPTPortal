@@ -34,7 +34,7 @@ export default function RootPage() {
           accountInfo
         );
 
-        setOpens(Array(Object.keys(res).length).fill(false));
+        setOpens([...Array(Object.keys(res).length)].fill(false));
         setGetTests(res);
       } catch (e) {
         console.error(e);
