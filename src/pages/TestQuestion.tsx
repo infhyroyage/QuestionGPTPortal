@@ -3,7 +3,7 @@ import Selector from "@/components/Selector";
 import SubmitButton from "@/components/SubmitButton";
 import TopBar from "@/components/TopBar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { toast } from "@/hooks/ui/use-toast";
+import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import {
   fetchQuestionSelectorAtom,
   fetchTestDetailsAtom,
@@ -28,12 +28,12 @@ export default function TestQuestionPage() {
   const [, fetchTranslationInit] = useAtom(fetchTranslationInitAtom);
   const [, resetAtomsForTestQuestion] = useAtom(resetAtomsForTestQuestionAtom);
 
+  const navigate = useNavigate();
   const { testId, questionNumber } = useParams();
-
   const { instance, accounts } = useMsal();
   const accountInfo = useAccount(accounts[0] || {});
 
-  const navigate = useNavigate();
+  const systemErrorToast = useSystemErrorToast();
 
   // testIdでの情報を習得していない場合はテスト準備ページにリダイレクト
   useEffect(() => {
@@ -60,17 +60,7 @@ export default function TestQuestionPage() {
           );
           await fetchTranslationInit(instance, accountInfo);
         } catch (e) {
-          console.error(e);
-          toast({
-            variant: "destructive",
-            title: "システムエラーが発生しました",
-            description: (
-              <>
-                <p>以下をシステム管理者にご連絡ください</p>
-                <p>{String(e)}</p>
-              </>
-            ),
-          });
+          systemErrorToast(e);
         }
       })();
     }
@@ -81,6 +71,7 @@ export default function TestQuestionPage() {
     instance,
     questionNumber,
     questionSelector,
+    systemErrorToast,
     testId,
   ]);
 

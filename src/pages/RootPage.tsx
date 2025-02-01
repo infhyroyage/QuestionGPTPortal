@@ -1,7 +1,7 @@
 import TopBar from "@/components/TopBar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "@/hooks/ui/use-toast";
+import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import { accessBackend } from "@/lib/backend";
 import { basePath } from "@/lib/github";
 import { GetTests, Test } from "@/types/backend";
@@ -18,10 +18,11 @@ export default function RootPage() {
   const [getTests, setGetTests] = useState<GetTests | undefined>(undefined);
   const [opens, setOpens] = useState<boolean[]>([]);
 
+  const navigate = useNavigate();
   const { instance, accounts } = useMsal();
   const accountInfo = useAccount(accounts[0] || {});
 
-  const navigate = useNavigate();
+  const systemErrorToast = useSystemErrorToast();
 
   // 初回レンダリング時のみテスト一覧情報を取得
   useEffect(() => {
@@ -37,20 +38,10 @@ export default function RootPage() {
         setOpens([...Array(Object.keys(res).length)].fill(false));
         setGetTests(res);
       } catch (e) {
-        console.error(e);
-        toast({
-          variant: "destructive",
-          title: "システムエラーが発生しました",
-          description: (
-            <>
-              <p>以下をシステム管理者にご連絡ください</p>
-              <p>{String(e)}</p>
-            </>
-          ),
-        });
+        systemErrorToast(e);
       }
     })();
-  }, [accountInfo, instance]);
+  }, [accountInfo, instance, systemErrorToast]);
 
   return (
     <>

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { toast } from "@/hooks/ui/use-toast";
+import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import {
   fetchAnswerExplanationAtom,
   fetchQuestionSelectorAtom,
@@ -21,9 +21,10 @@ export default function SubmitButton() {
   const [questionSelector] = useAtom(fetchQuestionSelectorAtom);
 
   const { testId, questionNumber } = useParams();
-
   const { instance, accounts } = useMsal();
   const accountInfo = useAccount(accounts[0] || {});
+
+  const systemErrorToast = useSystemErrorToast();
 
   // 以下のいずれかの場合は、回答・解説生成ボタンを非活性とする
   // * 選択肢を取得していない
@@ -50,17 +51,7 @@ export default function SubmitButton() {
         accountInfo
       );
     } catch (e) {
-      console.error(e);
-      toast({
-        variant: "destructive",
-        title: "システムエラーが発生しました",
-        description: (
-          <>
-            <p>以下をシステム管理者にご連絡ください</p>
-            <p>{String(e)}</p>
-          </>
-        ),
-      });
+      systemErrorToast(e);
     }
   }, [
     accountInfo,
@@ -68,6 +59,7 @@ export default function SubmitButton() {
     fetchAnswerExplanation,
     instance,
     questionNumber,
+    systemErrorToast,
     testId,
   ]);
 

@@ -1,7 +1,7 @@
 import TopBar from "@/components/TopBar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "@/hooks/ui/use-toast";
+import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import { fetchTestDetailsAtom } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
 import { useAccount, useMsal } from "@azure/msal-react";
@@ -17,12 +17,12 @@ import { useNavigate, useParams } from "react-router";
 export default function TestReadyPage() {
   const [testDetails, fetchTestDetails] = useAtom(fetchTestDetailsAtom);
 
+  const navigate = useNavigate();
   const { testId } = useParams();
-
   const { instance, accounts } = useMsal();
   const accountInfo = useAccount(accounts[0] || {});
 
-  const navigate = useNavigate();
+  const systemErrorToast = useSystemErrorToast();
 
   // テスト詳細情報を取得していない場合のみ取得
   useEffect(() => {
@@ -31,21 +31,18 @@ export default function TestReadyPage() {
         try {
           await fetchTestDetails(testId, instance, accountInfo);
         } catch (e) {
-          console.error(e);
-          toast({
-            variant: "destructive",
-            title: "システムエラーが発生しました",
-            description: (
-              <>
-                <p>以下をシステム管理者にご連絡ください</p>
-                <p>{String(e)}</p>
-              </>
-            ),
-          });
+          systemErrorToast(e);
         }
       })();
     }
-  }, [accountInfo, fetchTestDetails, instance, testDetails, testId]);
+  }, [
+    accountInfo,
+    fetchTestDetails,
+    instance,
+    systemErrorToast,
+    testDetails,
+    testId,
+  ]);
 
   return (
     <>
