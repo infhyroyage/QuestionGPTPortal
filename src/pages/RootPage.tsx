@@ -15,6 +15,7 @@ import { useNavigate } from "react-router";
  * @returns ルートページのコンポーネント
  */
 export default function RootPage() {
+  // TODO: atom化する
   const [getTests, setGetTests] = useState<GetTests | undefined>(undefined);
   const [opens, setOpens] = useState<boolean[]>([]);
 
@@ -24,24 +25,26 @@ export default function RootPage() {
 
   const systemErrorToast = useSystemErrorToast();
 
-  // 初回レンダリング時のみテスト一覧情報を取得
+  // テスト一覧情報を1度だけ取得
   useEffect(() => {
-    (async () => {
-      try {
-        const res: GetTests = await accessBackend<GetTests>(
-          "GET",
-          "/tests",
-          instance,
-          accountInfo
-        );
+    if (!getTests) {
+      (async () => {
+        try {
+          const res: GetTests = await accessBackend<GetTests>(
+            "GET",
+            "/tests",
+            instance,
+            accountInfo
+          );
 
-        setOpens([...Array(Object.keys(res).length)].fill(false));
-        setGetTests(res);
-      } catch (e) {
-        systemErrorToast(e);
-      }
-    })();
-  }, [accountInfo, instance, systemErrorToast]);
+          setOpens([...Array(Object.keys(res).length)].fill(false));
+          setGetTests(res);
+        } catch (e) {
+          systemErrorToast(e);
+        }
+      })();
+    }
+  }, [accountInfo, getTests, instance, systemErrorToast]);
 
   return (
     <>
