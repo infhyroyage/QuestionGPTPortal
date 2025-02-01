@@ -27,6 +27,27 @@ import { accessBackend } from "./backend";
 const answerExplanationAtom = atom<AnswerExplanation>(undefined);
 
 /**
+ * ダークモードの場合はtrue、ライトモードの場合はfalseのatom
+ * toggleDarkModeAtomで隠蔽するためexportしない
+ */
+const isDarkModeAtom = atom<boolean>(true);
+
+/**
+ * 問題文・選択肢を管理するatom
+ */
+const questionSelectorAtom = atom<QuestionSelector>(undefined);
+
+/**
+ * testId単位のテスト詳細情報を管理するatom
+ */
+const testDetailsAtom = atom<TestDetails>({});
+
+/**
+ * 問題文・選択肢に対する翻訳文を管理するatom
+ */
+const translationInitAtom = atom<TranslationInit>(undefined);
+
+/**
  * 正解・解説文を取得するatom
  */
 export const fetchAnswerExplanationAtom = atom(
@@ -131,17 +152,6 @@ export const fetchAnswerExplanationAtom = atom(
 );
 
 /**
- * ダークモードの場合はtrue、ライトモードの場合はfalseのatom
- * toggleDarkModeAtomで隠蔽するためexportしない
- */
-const isDarkModeAtom = atom<boolean>(true);
-
-/**
- * 問題文・選択肢を管理するatom
- */
-const questionSelectorAtom = atom<QuestionSelector>(undefined);
-
-/**
  * 問題文・選択肢を取得するatom
  */
 export const fetchQuestionSelectorAtom = atom(
@@ -179,47 +189,6 @@ export const fetchQuestionSelectorAtom = atom(
 );
 
 /**
- * 選択肢の選択状態の切り替え(write only)を管理するatom
- */
-export const toggleSelectedChoiceAtom = atom(null, (get, set, idx: number) => {
-  // まだ選択肢を取得していない場合は何もしない
-  const questionSelector = get(questionSelectorAtom);
-  if (!questionSelector) return;
-
-  // 複数個の回答が存在する場合はidx番目のみ選択状態を反転し、
-  // 1つの回答のみが存在する場合はidx番目を選択・idx番目以外を未選択とする
-  set(questionSelectorAtom, {
-    ...questionSelector,
-    choices: questionSelector.choices.map(
-      (choice: ChoiceAndSelect, i: number) => ({
-        ...choice,
-        isSelected: questionSelector.isMultiplied
-          ? i === idx
-            ? !choice.isSelected
-            : choice.isSelected
-          : i === idx,
-      })
-    ),
-  });
-});
-
-/**
- * ダークモード化のフラグと、ダークモード切替え用のatom
- */
-export const toggleDarkModeAtom = atom(
-  (get) => get(isDarkModeAtom),
-  (get, set) => {
-    const isDarkMode = get(isDarkModeAtom);
-    set(isDarkModeAtom, !isDarkMode);
-  }
-);
-
-/**
- * testId単位のテスト詳細情報を管理するatom
- */
-const testDetailsAtom = atom<TestDetails>({});
-
-/**
  * testId単位のテスト詳細情報を取得するatom
  */
 export const fetchTestDetailsAtom = atom(
@@ -247,11 +216,6 @@ export const fetchTestDetailsAtom = atom(
     set(testDetailsAtom, { ...testDetails, [testId]: res });
   }
 );
-
-/**
- * 問題文・選択肢に対する翻訳文を管理するatom
- */
-const translationInitAtom = atom<TranslationInit>(undefined);
 
 /**
  * 問題文・選択肢に対する翻訳文を取得するatom
@@ -311,3 +275,48 @@ export const fetchTranslationInitAtom = atom(
     set(translationInitAtom, { subjects, choices });
   }
 );
+
+/**
+ * TestQuestionPageのレンダリングで必要なatomをすべて初期値に戻すatom(write only)
+ */
+export const resetAtomsForTestQuestionAtom = atom(null, (_, set) => {
+  set(answerExplanationAtom, undefined);
+  set(questionSelectorAtom, undefined);
+  set(translationInitAtom, undefined);
+});
+
+/**
+ * ダークモード化のフラグと、ダークモード切替え用のatom
+ */
+export const toggleDarkModeAtom = atom(
+  (get) => get(isDarkModeAtom),
+  (get, set) => {
+    const isDarkMode = get(isDarkModeAtom);
+    set(isDarkModeAtom, !isDarkMode);
+  }
+);
+
+/**
+ * 選択肢の選択状態の切り替えを管理するatom(write only)
+ */
+export const toggleSelectedChoiceAtom = atom(null, (get, set, idx: number) => {
+  // まだ選択肢を取得していない場合は何もしない
+  const questionSelector = get(questionSelectorAtom);
+  if (!questionSelector) return;
+
+  // 複数個の回答が存在する場合はidx番目のみ選択状態を反転し、
+  // 1つの回答のみが存在する場合はidx番目を選択・idx番目以外を未選択とする
+  set(questionSelectorAtom, {
+    ...questionSelector,
+    choices: questionSelector.choices.map(
+      (choice: ChoiceAndSelect, i: number) => ({
+        ...choice,
+        isSelected: questionSelector.isMultiplied
+          ? i === idx
+            ? !choice.isSelected
+            : choice.isSelected
+          : i === idx,
+      })
+    ),
+  });
+});

@@ -8,6 +8,7 @@ import {
   fetchQuestionSelectorAtom,
   fetchTestDetailsAtom,
   fetchTranslationInitAtom,
+  resetAtomsForTestQuestionAtom,
 } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
 import { useAccount, useMsal } from "@azure/msal-react";
@@ -25,6 +26,7 @@ export default function TestQuestionPage() {
     fetchQuestionSelectorAtom
   );
   const [, fetchTranslationInit] = useAtom(fetchTranslationInitAtom);
+  const [, resetAtomsForTestQuestion] = useAtom(resetAtomsForTestQuestionAtom);
 
   const { testId, questionNumber } = useParams();
 
@@ -33,14 +35,19 @@ export default function TestQuestionPage() {
 
   const navigate = useNavigate();
 
-  // tesiIdでの情報を習得していない場合はテスト準備ページにリダイレクト
+  // testIdでの情報を習得していない場合はテスト準備ページにリダイレクト
   useEffect(() => {
     if (testId && !testDetails[testId]) {
       navigate(`${basePath}/tests/${testId}/ready`);
     }
   }, [navigate, testDetails, testId]);
 
-  // ページ遷移時に、問題文・選択肢を取得・翻訳
+  // ページ遷移直後に、TestQuestionPageのレンダリングで必要なatomをすべてクリア
+  useEffect(() => {
+    resetAtomsForTestQuestion();
+  }, [resetAtomsForTestQuestion]);
+
+  // ページ遷移直後に、問題文・選択肢を取得・翻訳
   useEffect(() => {
     if (testId && questionNumber && !questionSelector) {
       (async () => {
