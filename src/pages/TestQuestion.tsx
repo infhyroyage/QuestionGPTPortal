@@ -1,3 +1,4 @@
+import OpenExplanationButton from "@/components/OpenExplanationButton";
 import QuestionSubjects from "@/components/QuestionSubjects";
 import Selector from "@/components/Selector";
 import SubmitButton from "@/components/SubmitButton";
@@ -93,7 +94,10 @@ export default function TestQuestionPage() {
             <Selector />
           </ScrollArea>
         </div>
-        <SubmitButton />
+        <div className="fixed bottom-[calc(40vh+1rem)] right-4 flex flex-col space-y-4">
+          <OpenExplanationButton />
+          <SubmitButton />
+        </div>
       </>
     )
   );

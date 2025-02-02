@@ -65,13 +65,13 @@ export default function SubmitButton() {
 
   return (
     <Button
-      className={`fixed bottom-[calc(40vh+1rem)] right-4${
+      className={
         !answerExplanation || answerExplanation.isSubmitting
           ? ""
           : answerExplanation.isCorrect
           ? " bg-green-500 hover:bg-green-600"
           : " bg-red-500 hover:bg-red-600"
-      }`}
+      }
       size="icon"
       disabled={isDisabledSubmitButton}
       onClick={onClickSubmit}
