@@ -3,6 +3,7 @@ import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import {
   fetchAnswerExplanationAtom,
   fetchQuestionSelectorAtom,
+  fetchTranslationExplanationAtom,
 } from "@/lib/atoms";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom } from "jotai";
@@ -19,6 +20,9 @@ export default function SubmitButton() {
     fetchAnswerExplanationAtom
   );
   const [questionSelector] = useAtom(fetchQuestionSelectorAtom);
+  const [, fetchTranslationExplanation] = useAtom(
+    fetchTranslationExplanationAtom
+  );
 
   const { testId, questionNumber } = useParams();
   const { instance, accounts } = useMsal();
@@ -50,6 +54,7 @@ export default function SubmitButton() {
         instance,
         accountInfo
       );
+      await fetchTranslationExplanation(instance, accountInfo);
     } catch (e) {
       systemErrorToast(e);
     }
@@ -57,6 +62,7 @@ export default function SubmitButton() {
     accountInfo,
     answerExplanation,
     fetchAnswerExplanation,
+    fetchTranslationExplanation,
     instance,
     questionNumber,
     systemErrorToast,

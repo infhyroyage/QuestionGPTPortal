@@ -8,7 +8,7 @@ import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import {
   fetchQuestionSelectorAtom,
   fetchTestDetailsAtom,
-  fetchTranslationInitAtom,
+  fetchTranslationSubjectChoiceAtom,
   resetAtomsForTestQuestionAtom,
 } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
@@ -26,7 +26,9 @@ export default function TestQuestionPage() {
   const [questionSelector, fetchQuestionSelector] = useAtom(
     fetchQuestionSelectorAtom
   );
-  const [, fetchTranslationInit] = useAtom(fetchTranslationInitAtom);
+  const [, fetchTranslationSubjectChoice] = useAtom(
+    fetchTranslationSubjectChoiceAtom
+  );
   const [, resetAtomsForTestQuestion] = useAtom(resetAtomsForTestQuestionAtom);
 
   const navigate = useNavigate();
@@ -59,7 +61,7 @@ export default function TestQuestionPage() {
             instance,
             accountInfo
           );
-          await fetchTranslationInit(instance, accountInfo);
+          await fetchTranslationSubjectChoice(instance, accountInfo);
         } catch (e) {
           systemErrorToast(e);
         }
@@ -68,7 +70,7 @@ export default function TestQuestionPage() {
   }, [
     accountInfo,
     fetchQuestionSelector,
-    fetchTranslationInit,
+    fetchTranslationSubjectChoice,
     instance,
     questionNumber,
     questionSelector,

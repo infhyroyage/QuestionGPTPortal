@@ -3,7 +3,8 @@ import {
   ChoiceAndSelect,
   QuestionSelector,
   TestDetails,
-  TranslationInit,
+  TranslationExplanation,
+  TranslationSubjectChoice,
 } from "@/types/atoms";
 import {
   Choice,
@@ -43,9 +44,14 @@ const questionSelectorAtom = atom<QuestionSelector>(undefined);
 const testDetailsAtom = atom<TestDetails>({});
 
 /**
+ * 解説文に対する翻訳文を管理するatom
+ */
+const translationExplanationAtom = atom<TranslationExplanation>(undefined);
+
+/**
  * 問題文・選択肢に対する翻訳文を管理するatom
  */
-const translationInitAtom = atom<TranslationInit>(undefined);
+const translationSubjectChoiceAtom = atom<TranslationSubjectChoice>(undefined);
 
 /**
  * 正解・解説文を取得するatom
@@ -218,10 +224,10 @@ export const fetchTestDetailsAtom = atom(
 );
 
 /**
- * 問題文・選択肢に対する翻訳文を取得するatom
+ * 解説文に対する翻訳文を取得するatom
  */
-export const fetchTranslationInitAtom = atom(
-  (get) => get(translationInitAtom),
+export const fetchTranslationExplanationAtom = atom(
+  (get) => get(translationExplanationAtom),
   async (
     get,
     set,
@@ -229,8 +235,44 @@ export const fetchTranslationInitAtom = atom(
     accountInfo: AccountInfo | null
   ) => {
     // すでに翻訳文が存在する場合は何も取得・更新しない
-    const translationInit = get(translationInitAtom);
-    if (translationInit) {
+    const translationExplanation = get(translationExplanationAtom);
+    if (translationExplanation) {
+      return;
+    }
+
+    // 翻訳対象の解説文がまだ存在しない場合は何も翻訳しない
+    const answerExplanation = get(answerExplanationAtom);
+    if (!answerExplanation || !answerExplanation.explanations) {
+      return;
+    }
+
+    // [GET] /en2jaにアクセスして取得した翻訳文で更新
+    const res: PutEn2JaRes = await accessBackend<PutEn2JaRes, PutEn2JaReq>(
+      "PUT",
+      "/en2ja",
+      instance,
+      accountInfo,
+      answerExplanation.explanations
+    );
+
+    set(translationExplanationAtom, { explanations: res });
+  }
+);
+
+/**
+ * 問題文・選択肢に対する翻訳文を取得するatom
+ */
+export const fetchTranslationSubjectChoiceAtom = atom(
+  (get) => get(translationSubjectChoiceAtom),
+  async (
+    get,
+    set,
+    instance: IPublicClientApplication,
+    accountInfo: AccountInfo | null
+  ) => {
+    // すでに翻訳文が存在する場合は何も取得・更新しない
+    const translationSubjectChoice = get(translationSubjectChoiceAtom);
+    if (translationSubjectChoice) {
       return;
     }
 
@@ -272,7 +314,7 @@ export const fetchTranslationInitAtom = atom(
     const choices: string[] = question.choices.map((choice: Choice) =>
       choice.isEscapedTranslation ? choice.sentence : (res.shift() as string)
     );
-    set(translationInitAtom, { subjects, choices });
+    set(translationSubjectChoiceAtom, { subjects, choices });
   }
 );
 
@@ -282,7 +324,8 @@ export const fetchTranslationInitAtom = atom(
 export const resetAtomsForTestQuestionAtom = atom(null, (_, set) => {
   set(answerExplanationAtom, undefined);
   set(questionSelectorAtom, undefined);
-  set(translationInitAtom, undefined);
+  set(translationSubjectChoiceAtom, undefined);
+  set(translationExplanationAtom, undefined);
 });
 
 /**

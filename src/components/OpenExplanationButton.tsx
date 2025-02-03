@@ -1,4 +1,7 @@
-import { fetchAnswerExplanationAtom } from "@/lib/atoms";
+import {
+  fetchAnswerExplanationAtom,
+  fetchTranslationExplanationAtom,
+} from "@/lib/atoms";
 import { useAtom } from "jotai";
 import { ArrowLeftFromLine } from "lucide-react";
 import { useMemo } from "react";
@@ -12,7 +15,7 @@ import { Skeleton } from "./ui/skeleton";
  */
 export default function OpenExplanationButton() {
   const [answerExplanation] = useAtom(fetchAnswerExplanationAtom);
-
+  const [translationExplanation] = useAtom(fetchTranslationExplanationAtom);
   // 回答・解説を生成していない場合は、解説表示ボタンを非活性とする
   const isDisabledOpenExplanationButton = useMemo<boolean>(
     () => !answerExplanation || !answerExplanation.explanations,
@@ -35,8 +38,14 @@ export default function OpenExplanationButton() {
             answerExplanation.explanations.map((explanation, idx) => (
               <div key={idx} className="space-y-1">
                 <p className="leading-7">{explanation}</p>
-                {/* TODO: 翻訳 */}
-                <Skeleton className="h-5 w-full" />
+                {translationExplanation &&
+                translationExplanation.explanations[idx] ? (
+                  <p className="text-sm text-muted-foreground">
+                    {translationExplanation.explanations[idx]}
+                  </p>
+                ) : (
+                  <Skeleton className="h-5 w-full" />
+                )}
               </div>
             ))
           ) : (

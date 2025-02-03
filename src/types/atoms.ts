@@ -39,9 +39,18 @@ export type TestDetails = {
 };
 
 /**
+ * 解説文に対する翻訳文の型
+ */
+export type TranslationExplanation =
+  | {
+      explanations: string[];
+    }
+  | undefined;
+
+/**
  * 問題文・選択肢に対する翻訳文の型
  */
-export type TranslationInit =
+export type TranslationSubjectChoice =
   | {
       subjects: string[];
       choices: string[];

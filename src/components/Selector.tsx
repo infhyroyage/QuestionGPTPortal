@@ -1,7 +1,7 @@
 import {
   fetchAnswerExplanationAtom,
   fetchQuestionSelectorAtom,
-  fetchTranslationInitAtom,
+  fetchTranslationSubjectChoiceAtom,
   toggleSelectedChoiceAtom,
 } from "@/lib/atoms";
 import { Choice } from "@/types/backend";
@@ -14,7 +14,7 @@ export default function Selector() {
   const [answerExplanation] = useAtom(fetchAnswerExplanationAtom);
   const [questionSelector] = useAtom(fetchQuestionSelectorAtom);
   const [, toggleSelectedChoice] = useAtom(toggleSelectedChoiceAtom);
-  const [translationInit] = useAtom(fetchTranslationInitAtom);
+  const [translationSubjectChoice] = useAtom(fetchTranslationSubjectChoiceAtom);
 
   // 回答・解説が生成中の場合は、選択肢をすべて非活性とする
   const isDisabledSelector = useMemo<boolean>(
@@ -68,9 +68,9 @@ export default function Selector() {
               onClick={onClickSelector(idx)}
             >
               <p className="leading-7">{choice.sentence}</p>
-              {translationInit ? (
+              {translationSubjectChoice ? (
                 <p className="text-sm text-muted-foreground">
-                  {translationInit.choices[idx]}
+                  {translationSubjectChoice.choices[idx]}
                 </p>
               ) : (
                 <Skeleton className="h-5 w-full" />

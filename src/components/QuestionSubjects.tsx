@@ -1,6 +1,6 @@
 import {
   fetchQuestionSelectorAtom,
-  fetchTranslationInitAtom,
+  fetchTranslationSubjectChoiceAtom,
 } from "@/lib/atoms";
 import { Subject } from "@/types/backend";
 import { useAtom } from "jotai";
@@ -8,7 +8,7 @@ import { Skeleton } from "./ui/skeleton";
 
 export default function QuestionSubjects() {
   const [questionSelector] = useAtom(fetchQuestionSelectorAtom);
-  const [translationInit] = useAtom(fetchTranslationInitAtom);
+  const [translationSubjectChoice] = useAtom(fetchTranslationSubjectChoiceAtom);
 
   return (
     <>
@@ -17,9 +17,9 @@ export default function QuestionSubjects() {
           questionSelector.subjects.map((subject: Subject, idx: number) => (
             <div key={idx} className="space-y-1">
               <p className="leading-7">{subject.sentence}</p>
-              {translationInit ? (
+              {translationSubjectChoice ? (
                 <p className="text-sm text-muted-foreground">
-                  {translationInit.subjects[idx]}
+                  {translationSubjectChoice.subjects[idx]}
                 </p>
               ) : (
                 <Skeleton className="h-5 w-full" />
