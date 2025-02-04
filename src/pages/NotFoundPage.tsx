@@ -2,6 +2,7 @@ import TopBar from "@/components/TopBar";
 import { Button } from "@/components/ui/button";
 import { basePath } from "@/lib/github";
 import { Frown } from "lucide-react";
+import { useCallback } from "react";
 import { useNavigate } from "react-router";
 
 /**
@@ -11,19 +12,17 @@ import { useNavigate } from "react-router";
 export default function NotFoundPage() {
   const navigate = useNavigate();
 
+  const onClick = useCallback(() => {
+    navigate(`${basePath}/`);
+  }, [navigate]);
+
   return (
     <>
       <TopBar title="Question GPT Portal" />
       <div className="flex justify-center items-center h-screen flex-col gap-4">
         <Frown size={100} />
         <div>Not Found</div>
-        <Button
-          onClick={() => {
-            navigate(`${basePath}/`);
-          }}
-        >
-          トップページへ戻る
-        </Button>
+        <Button onClick={onClick}>トップページへ戻る</Button>
       </div>
     </>
   );

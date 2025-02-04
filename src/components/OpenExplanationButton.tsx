@@ -1,6 +1,6 @@
 import { fetchAnswerExplanationAtom } from "@/lib/atoms";
 import { useAtom } from "jotai";
-import { ArrowLeftFromLine } from "lucide-react";
+import { Info } from "lucide-react";
 import { useMemo } from "react";
 import ExplanationSheet from "./ExplanationSheet";
 import { Button } from "./ui/button";
@@ -23,7 +23,7 @@ export default function OpenExplanationButton() {
     <Sheet>
       <SheetTrigger asChild>
         <Button size="icon" disabled={isDisabledOpenExplanationButton}>
-          <ArrowLeftFromLine />
+          <Info />
         </Button>
       </SheetTrigger>
       <SheetContent className="min-w-[40vw] max-h-[100vh] overflow-y-auto">
