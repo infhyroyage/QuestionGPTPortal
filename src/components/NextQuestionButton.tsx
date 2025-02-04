@@ -28,7 +28,7 @@ export default function NextQuestionButton() {
     [answerExplanation]
   );
 
-  // TestQuestionのレンダリングで必要なatomをすべてクリアし、
+  // TestQuestionPageのレンダリングで必要なatomをすべてクリアし、
   // 次の問題かテスト結果ページへ遷移
   const onClick = useCallback(() => {
     if (testId && questionNumber) {

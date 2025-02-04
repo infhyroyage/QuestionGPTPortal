@@ -7,7 +7,7 @@ import { Toaster } from "./components/ui/toaster";
 import { basePath } from "./lib/github";
 import NotFoundPage from "./pages/NotFoundPage";
 import RootPage from "./pages/RootPage";
-import TestQuestionPage from "./pages/TestQuestion";
+import TestQuestionPage from "./pages/TestQuestionPage";
 import TestReadyPage from "./pages/TestReadyPage";
 import TestResultPage from "./pages/TestResultPage";
 

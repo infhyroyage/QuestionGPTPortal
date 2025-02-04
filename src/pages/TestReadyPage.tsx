@@ -48,7 +48,7 @@ export default function TestReadyPage() {
     testId,
   ]);
 
-  // TestQuestionのレンダリングで必要なatomをすべてクリアし、最初の問題へ遷移
+  // TestQuestionPageのレンダリングで必要なatomをすべてクリアし、最初の問題へ遷移
   const onClick = useCallback(() => {
     if (testId) {
       resetAtomsForTestQuestion();
