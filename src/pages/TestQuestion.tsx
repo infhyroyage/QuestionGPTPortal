@@ -1,3 +1,4 @@
+import NextQuestionButton from "@/components/NextQuestionButton";
 import OpenExplanationButton from "@/components/OpenExplanationButton";
 import QuestionSubjects from "@/components/QuestionSubjects";
 import Selector from "@/components/Selector";
@@ -9,7 +10,6 @@ import {
   fetchQuestionSelectorAtom,
   fetchTestDetailsAtom,
   fetchTranslationSubjectChoiceAtom,
-  resetAtomsForTestQuestionAtom,
 } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
 import { useAccount, useMsal } from "@azure/msal-react";
@@ -29,7 +29,6 @@ export default function TestQuestionPage() {
   const [, fetchTranslationSubjectChoice] = useAtom(
     fetchTranslationSubjectChoiceAtom
   );
-  const [, resetAtomsForTestQuestion] = useAtom(resetAtomsForTestQuestionAtom);
 
   const navigate = useNavigate();
   const { testId, questionNumber } = useParams();
@@ -44,11 +43,6 @@ export default function TestQuestionPage() {
       navigate(`${basePath}/tests/${testId}/ready`);
     }
   }, [navigate, testDetails, testId]);
-
-  // ページ遷移直後に、TestQuestionPageのレンダリングで必要なatomをすべてクリア
-  useEffect(() => {
-    resetAtomsForTestQuestion();
-  }, [resetAtomsForTestQuestion]);
 
   // ページ遷移直後に、問題文・選択肢を取得・翻訳
   useEffect(() => {
@@ -97,8 +91,9 @@ export default function TestQuestionPage() {
           </ScrollArea>
         </div>
         <div className="fixed bottom-[calc(40vh+1rem)] right-4 flex flex-col space-y-4">
-          <OpenExplanationButton />
           <SubmitButton />
+          <OpenExplanationButton />
+          <NextQuestionButton />
         </div>
       </>
     )

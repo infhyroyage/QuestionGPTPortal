@@ -2,12 +2,15 @@ import TopBar from "@/components/TopBar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
-import { fetchTestDetailsAtom } from "@/lib/atoms";
+import {
+  fetchTestDetailsAtom,
+  resetAtomsForTestQuestionAtom,
+} from "@/lib/atoms";
 import { basePath } from "@/lib/github";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom } from "jotai";
 import { Loader2 } from "lucide-react";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
 
 /**
@@ -16,6 +19,7 @@ import { useNavigate, useParams } from "react-router";
  */
 export default function TestReadyPage() {
   const [testDetails, fetchTestDetails] = useAtom(fetchTestDetailsAtom);
+  const [, resetAtomsForTestQuestion] = useAtom(resetAtomsForTestQuestionAtom);
 
   const navigate = useNavigate();
   const { testId } = useParams();
@@ -44,6 +48,14 @@ export default function TestReadyPage() {
     testId,
   ]);
 
+  // TestQuestionのレンダリングで必要なatomをすべてクリアし、最初の問題へ遷移
+  const onClick = useCallback(() => {
+    if (testId) {
+      resetAtomsForTestQuestion();
+      navigate(`${basePath}/tests/${testId}/questions/1`);
+    }
+  }, [navigate, resetAtomsForTestQuestion, testId]);
+
   return (
     <>
       <TopBar title="Question GPT Portal" />
@@ -65,7 +77,7 @@ export default function TestReadyPage() {
         )}
         <Button
           disabled={!testId || !testDetails[testId]}
-          onClick={() => navigate(`${basePath}/tests/${testId}/questions/1`)}
+          onClick={onClick}
           size="lg"
         >
           {testId && testDetails[testId] ? (
