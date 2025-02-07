@@ -1,8 +1,9 @@
+import TopBar from "@/components/TopBar";
 import { fetchTestDetailsAtom } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
-import { Progress } from "@/types/storage";
+import { Progress, ProgressTestHistory } from "@/types/storage";
 import { useAtom } from "jotai";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
 /**
@@ -11,6 +12,7 @@ import { useNavigate, useParams } from "react-router";
  */
 export default function TestResultPage() {
   const [testDetails] = useAtom(fetchTestDetailsAtom);
+  const [histories, setHistories] = useState<ProgressTestHistory[]>([]);
 
   const { testId } = useParams();
 
@@ -27,15 +29,46 @@ export default function TestResultPage() {
   useEffect(() => {
     const progressStr: string | null = localStorage.getItem("progress");
     if (testId && progressStr) {
-      // TODO: テストの回答履歴を画面にレンダリング
       const progress: Progress = JSON.parse(progressStr);
-      // const testHistory: ProgressTestHistory = progress[testId];
-
-      // testIdにおけるテストの回答履歴を削除
+      setHistories(progress[testId] ? progress[testId].histories : []);
       delete progress[testId];
       localStorage.setItem("progress", JSON.stringify(progress));
     }
   }, [testId]);
 
-  return <div>TestResultPage {testId}</div>;
+  // 正答数
+  const correctNum: number = useMemo(
+    () => histories.filter((history) => history.isCorrect).length,
+    [histories]
+  );
+
+  // 正答率
+  const correctRate: number = useMemo(
+    () =>
+      Math.round(
+        (histories.filter((history) => history.isCorrect).length /
+          histories.length) *
+          100
+      ),
+    [histories]
+  );
+
+  return (
+    testId &&
+    testDetails[testId] && (
+      <>
+        <TopBar
+          title={`[${testDetails[testId].courseName}] ${testDetails[testId].testName}`}
+        />
+        <div className="pt-16 px-4">
+          <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight my-6">
+            結果
+          </h3>
+          <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+            {`全${testDetails[testId].length}問中${correctNum}問正解 (正答率${correctRate}%)`}
+          </h4>
+        </div>
+      </>
+    )
+  );
 }
