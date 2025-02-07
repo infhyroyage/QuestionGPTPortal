@@ -1,17 +1,9 @@
+import TestResultTable from "@/components/TestResultTable";
 import TopBar from "@/components/TopBar";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { fetchTestDetailsAtom } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
 import { Progress, ProgressTestHistory } from "@/types/storage";
 import { useAtom } from "jotai";
-import { Check, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
@@ -84,28 +76,9 @@ export default function TestResultPage() {
           <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
             {`全${testDetails[testId].length}問中${correctNum}問正解 (正答率${correctRate}%)`}
           </h4>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>問題</TableHead>
-                <TableHead>回答</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {histories.map((history: ProgressTestHistory, idx: number) => (
-                <TableRow key={idx}>
-                  <TableCell className="font-medium">{idx + 1}</TableCell>
-                  <TableCell>
-                    {history.isCorrect ? (
-                      <Check className="text-green-500" />
-                    ) : (
-                      <X className="text-red-500" />
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <div className="mx-4 mt-4">
+            <TestResultTable histories={histories} />
+          </div>
         </div>
       </>
     )
