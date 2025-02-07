@@ -17,6 +17,7 @@ import {
   PutEn2JaRes,
   Subject,
 } from "@/types/backend";
+import { Progress, ProgressTestHistory } from "@/types/storage";
 import { AccountInfo, IPublicClientApplication } from "@azure/msal-browser";
 import { AxiosError } from "axios";
 import { atom } from "jotai";
@@ -108,14 +109,60 @@ export const fetchAnswerExplanationAtom = atom(
       const correctFlags: boolean[] = [
         ...Array(questionSelector.choices.length),
       ].map((_, idx: number) => getAnswerRes.correctIdxes.includes(idx));
+      const isCorrect: boolean = selectedFlags.every(
+        (selectedFlag, idx) => selectedFlag === correctFlags[idx]
+      );
       set(answerExplanationAtom, {
         correctFlags,
         explanations: getAnswerRes.explanations,
         isSubmitting: false,
-        isCorrect: selectedFlags.every(
-          (selectedFlag, idx) => selectedFlag === correctFlags[idx]
-        ),
+        isCorrect,
       });
+
+      // 回答履歴を作成
+      const history: ProgressTestHistory = {
+        isCorrect,
+        choices: questionSelector.choices.map((choice) => choice.sentence),
+        selectedIdxes: questionSelector.choices.reduce<number[]>(
+          (prev: number[], choice: ChoiceAndSelect, idx: number) => {
+            if (choice.isSelected) {
+              prev.push(idx);
+            }
+            return prev;
+          },
+          []
+        ),
+        correctIdxes: getAnswerRes.correctIdxes,
+      };
+
+      // テストの回答履歴をローカルストレージに保存
+      const progressStr: string | null = localStorage.getItem("progress");
+      if (progressStr) {
+        const progress: Progress = JSON.parse(progressStr);
+        if (progress[testId]) {
+          // テスト実績あり＆現テスト2問目以降
+          progress[testId].histories.push(history);
+          localStorage.setItem("progress", JSON.stringify(progress));
+        } else {
+          // テスト実績あり＆現テスト1問目
+          progress[testId] = {
+            testLength: testDetails[testId].length,
+            histories: [history],
+          };
+          localStorage.setItem("progress", JSON.stringify(progress));
+        }
+      } else {
+        // テスト実績なし
+        localStorage.setItem(
+          "progress",
+          JSON.stringify({
+            [testId]: {
+              testLength: testDetails[testId].length,
+              histories: [history],
+            },
+          })
+        );
+      }
     } catch (err) {
       // 404エラーの場合は、[POST] /tests/{testId}/answers/{questionNumber}にアクセスして正解・解説文の生成を実行し、
       // 取得した正解・解説文で更新

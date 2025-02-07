@@ -7,10 +7,11 @@ import {
   resetAtomsForTestQuestionAtom,
 } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
+import { Progress, ProgressTest } from "@/types/storage";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom } from "jotai";
 import { Loader2 } from "lucide-react";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
 /**
@@ -20,6 +21,7 @@ import { useNavigate, useParams } from "react-router";
 export default function TestReadyPage() {
   const [testDetails, fetchTestDetails] = useAtom(fetchTestDetailsAtom);
   const [, resetAtomsForTestQuestion] = useAtom(resetAtomsForTestQuestionAtom);
+  const [historyNum, setHistoryNum] = useState<number>(0);
 
   const navigate = useNavigate();
   const { testId } = useParams();
@@ -48,13 +50,28 @@ export default function TestReadyPage() {
     testId,
   ]);
 
-  // TestQuestionPageのレンダリングで必要なatomをすべてクリアし、最初の問題へ遷移
+  // ローカルストレージに保存しているテストの回答履歴から、回答した問題数を取得
+  useEffect(() => {
+    const progressStr: string | null = localStorage.getItem("progress");
+    if (testId && progressStr) {
+      const progress: Progress = JSON.parse(progressStr);
+      const progressTest: ProgressTest | undefined = progress[testId];
+      setHistoryNum(progressTest ? progressTest.histories.length : 0);
+    }
+  }, [testId]);
+
+  // TestQuestionPageのレンダリングで必要なatomをすべてクリアしてページ遷移
   const onClick = useCallback(() => {
     if (testId) {
       resetAtomsForTestQuestion();
-      navigate(`${basePath}/tests/${testId}/questions/1`);
+
+      if (historyNum === testDetails[testId].length) {
+        navigate(`${basePath}/tests/${testId}/result`);
+      } else {
+        navigate(`${basePath}/tests/${testId}/questions/${historyNum + 1}`);
+      }
     }
-  }, [navigate, resetAtomsForTestQuestion, testId]);
+  }, [historyNum, navigate, resetAtomsForTestQuestion, testDetails, testId]);
 
   return (
     <>
@@ -80,13 +97,17 @@ export default function TestReadyPage() {
           onClick={onClick}
           size="lg"
         >
-          {testId && testDetails[testId] ? (
-            "開始"
-          ) : (
+          {!testId || !testDetails[testId] ? (
             <>
               <Loader2 className="animate-spin" />
               Please wait
             </>
+          ) : historyNum === testDetails[testId].length ? (
+            "結果を見る"
+          ) : historyNum > 0 ? (
+            `${historyNum + 1}問目から再開`
+          ) : (
+            "1問目から開始"
           )}
         </Button>
       </div>
