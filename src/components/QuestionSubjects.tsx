@@ -14,18 +14,26 @@ export default function QuestionSubjects() {
     <>
       <div className="space-y-4 mb-4">
         {questionSelector ? (
-          questionSelector.subjects.map((subject: Subject, idx: number) => (
-            <div key={idx} className="space-y-1">
-              <p className="leading-7">{subject.sentence}</p>
-              {translationSubjectChoice ? (
-                <p className="text-sm text-muted-foreground">
-                  {translationSubjectChoice.subjects[idx]}
-                </p>
-              ) : (
-                <Skeleton className="h-5 w-full" />
-              )}
-            </div>
-          ))
+          questionSelector.subjects.map((subject: Subject, idx: number) =>
+            subject.isIndicatedImg ? (
+              <img
+                src={subject.sentence}
+                alt={subject.sentence}
+                className="w-auto max-h-[30vh]"
+              />
+            ) : (
+              <div key={idx} className="space-y-1">
+                <p className="leading-7">{subject.sentence}</p>
+                {translationSubjectChoice ? (
+                  <p className="text-sm text-muted-foreground">
+                    {translationSubjectChoice.subjects[idx]}
+                  </p>
+                ) : (
+                  <Skeleton className="h-5 w-full" />
+                )}
+              </div>
+            )
+          )
         ) : (
           <>
             <div className="space-y-1">
