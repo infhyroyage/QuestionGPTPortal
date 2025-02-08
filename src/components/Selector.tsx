@@ -6,8 +6,16 @@ import {
 } from "@/lib/atoms";
 import { Choice } from "@/types/backend";
 import { useAtom } from "jotai";
+import { ZoomIn } from "lucide-react";
 import { useCallback, useMemo } from "react";
+import ImageDialogContent from "./ImageDialogContent";
 import { Button } from "./ui/button";
+import {
+  Dialog,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 import { Skeleton } from "./ui/skeleton";
 
 export default function Selector() {
@@ -46,7 +54,7 @@ export default function Selector() {
                   ? "default"
                   : "outline"
               }
-              className={`flex flex-col py-4 pl-4 h-full space-y-1 whitespace-normal text-left${
+              className={`flex flex-col py-4 pl-4 w-full h-full space-y-1 whitespace-normal items-start ${
                 (answerExplanation &&
                   answerExplanation.correctFlags &&
                   answerExplanation.correctFlags[idx] &&
@@ -74,6 +82,29 @@ export default function Selector() {
                 </p>
               ) : (
                 <Skeleton className="h-5 w-full" />
+              )}
+              {choice.img && (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      className="group relative inline-block"
+                    >
+                      <img
+                        src={choice.img}
+                        alt={choice.img}
+                        className="w-auto max-h-[30vh] object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gray-500 opacity-0 group-hover:opacity-70 transition duration-300" />
+                      <ZoomIn className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition duration-300 text-white size-[10vh]" />
+                    </div>
+                  </DialogTrigger>
+                  <ImageDialogContent>
+                    <DialogTitle />
+                    <DialogDescription />
+                    <img src={choice.img} alt={choice.img} />
+                  </ImageDialogContent>
+                </Dialog>
               )}
             </Button>
           ))

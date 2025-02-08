@@ -12,7 +12,7 @@ export default function TopBar({ title }: TopBarProps) {
   const location = useLocation();
 
   return (
-    <div className="fixed top-0 left-0 right-0 h-16 p-3 bg-slate-200 dark:bg-slate-800">
+    <div className="fixed top-0 left-0 right-0 h-16 p-3 bg-slate-200 dark:bg-slate-800 z-10">
       <div className="mx-3 flex items-center justify-between">
         <h1 className="text-lg font-bold">{title}</h1>
         <div className="flex items-center space-x-2">
