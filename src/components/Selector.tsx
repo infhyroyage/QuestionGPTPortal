@@ -47,7 +47,7 @@ export default function Selector() {
                   ? "default"
                   : "outline"
               }
-              className={`flex flex-col py-4 pl-4 w-full h-full space-y-1 whitespace-normal items-start ${
+              className={`flex flex-col py-4 pl-4 w-full h-full space-y-1 whitespace-normal text-left items-start ${
                 (answerExplanation &&
                   answerExplanation.correctFlags &&
                   answerExplanation.correctFlags[idx] &&
