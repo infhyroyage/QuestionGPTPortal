@@ -2,6 +2,10 @@ import { cn } from "@/lib/utils";
 import { Overlay } from "@radix-ui/react-dialog";
 import { ComponentPropsWithoutRef, ElementRef, forwardRef } from "react";
 
+/**
+ * 画像拡大時のダイアログのオーバーレイのコンポーネント
+ * @returns 画像拡大時のダイアログのオーバーレイのコンポーネント
+ */
 const ImageDialogOverlay = forwardRef<
   ElementRef<typeof Overlay>,
   ComponentPropsWithoutRef<typeof Overlay>

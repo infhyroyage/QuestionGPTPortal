@@ -5,6 +5,10 @@ import { ComponentPropsWithoutRef, ElementRef, forwardRef } from "react";
 import ImageDialogOverlay from "./ImageDialogOverlay";
 import { DialogContent, DialogPortal } from "./ui/dialog";
 
+/**
+ * 画像拡大時のダイアログのコンテンツのコンポーネント
+ * @returns 画像拡大時のダイアログのコンテンツのコンポーネント
+ */
 const ImageDialogContent = forwardRef<
   ElementRef<typeof Content>,
   ComponentPropsWithoutRef<typeof Content>
