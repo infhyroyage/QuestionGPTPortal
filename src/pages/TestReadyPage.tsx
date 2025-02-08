@@ -2,10 +2,7 @@ import TopBar from "@/components/TopBar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
-import {
-  fetchTestDetailsAtom,
-  resetAtomsForTestQuestionAtom,
-} from "@/lib/atoms";
+import { fetchTestDetailsAtom } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
 import { Progress, ProgressTest } from "@/types/storage";
 import { useAccount, useMsal } from "@azure/msal-react";
@@ -20,7 +17,6 @@ import { useNavigate, useParams } from "react-router";
  */
 export default function TestReadyPage() {
   const [testDetails, fetchTestDetails] = useAtom(fetchTestDetailsAtom);
-  const [, resetAtomsForTestQuestion] = useAtom(resetAtomsForTestQuestionAtom);
   const [historyNum, setHistoryNum] = useState<number>(0);
 
   const navigate = useNavigate();
@@ -60,18 +56,16 @@ export default function TestReadyPage() {
     }
   }, [testId]);
 
-  // TestQuestionPageのレンダリングで必要なatomをすべてクリアしてページ遷移
+  // ローカルストレージに保存しているテストの回答履歴から、テストページかテスト結果ページへ遷移
   const onClick = useCallback(() => {
     if (testId) {
-      resetAtomsForTestQuestion();
-
       if (historyNum === testDetails[testId].length) {
         navigate(`${basePath}/tests/${testId}/result`);
       } else {
         navigate(`${basePath}/tests/${testId}/questions/${historyNum + 1}`);
       }
     }
-  }, [historyNum, navigate, resetAtomsForTestQuestion, testDetails, testId]);
+  }, [historyNum, navigate, testDetails, testId]);
 
   return (
     <>

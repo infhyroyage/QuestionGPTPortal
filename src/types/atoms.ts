@@ -25,6 +25,7 @@ export type ChoiceAndSelect = Choice & { isSelected: boolean };
  */
 export type QuestionSelector =
   | {
+      questionNumber: string;
       subjects: Subject[];
       choices: ChoiceAndSelect[];
       isMultiplied: boolean;

@@ -10,6 +10,7 @@ import {
   fetchQuestionSelectorAtom,
   fetchTestDetailsAtom,
   fetchTranslationSubjectChoiceAtom,
+  resetAtomsForTestQuestionAtom,
 } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
 import { useAccount, useMsal } from "@azure/msal-react";
@@ -29,6 +30,7 @@ export default function TestQuestionPage() {
   const [, fetchTranslationSubjectChoice] = useAtom(
     fetchTranslationSubjectChoiceAtom
   );
+  const [, resetAtomsForTestQuestion] = useAtom(resetAtomsForTestQuestionAtom);
 
   const navigate = useNavigate();
   const { testId, questionNumber } = useParams();
@@ -43,6 +45,18 @@ export default function TestQuestionPage() {
       navigate(`${basePath}/tests/${testId}/ready`);
     }
   }, [navigate, testDetails, testId]);
+
+  // 問題番号が変更された場合は、前問題で取得したatomをすべて初期化
+  useEffect(() => {
+    if (
+      testId &&
+      questionNumber &&
+      questionSelector &&
+      questionSelector.questionNumber !== questionNumber
+    ) {
+      resetAtomsForTestQuestion();
+    }
+  }, [questionSelector, resetAtomsForTestQuestion, testId, questionNumber]);
 
   // ページ遷移直後に、問題文・選択肢を取得・翻訳
   useEffect(() => {

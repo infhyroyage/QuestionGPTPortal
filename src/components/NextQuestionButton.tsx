@@ -1,8 +1,4 @@
-import {
-  fetchAnswerExplanationAtom,
-  fetchTestDetailsAtom,
-  resetAtomsForTestQuestionAtom,
-} from "@/lib/atoms";
+import { fetchAnswerExplanationAtom, fetchTestDetailsAtom } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
 import { useAtom } from "jotai";
 import { ChevronRight } from "lucide-react";
@@ -17,7 +13,6 @@ import { Button } from "./ui/button";
 export default function NextQuestionButton() {
   const [answerExplanation] = useAtom(fetchAnswerExplanationAtom);
   const [testDetails] = useAtom(fetchTestDetailsAtom);
-  const [, resetAtomsForTestQuestion] = useAtom(resetAtomsForTestQuestionAtom);
 
   const navigate = useNavigate();
   const { testId, questionNumber } = useParams();
@@ -28,27 +23,19 @@ export default function NextQuestionButton() {
     [answerExplanation]
   );
 
-  // TestQuestionPageのレンダリングで必要なatomをすべてクリアし、
   // 次の問題かテスト結果ページへ遷移
   const onClick = useCallback(() => {
     if (testId && questionNumber) {
-      const currentQuestionNumber: number = parseInt(questionNumber);
-      resetAtomsForTestQuestion();
-      if (currentQuestionNumber === testDetails[testId].length) {
+      const parsedQuestionNumber: number = parseInt(questionNumber);
+      if (parsedQuestionNumber === testDetails[testId].length) {
         navigate(`${basePath}/tests/${testId}/result`);
       } else {
         navigate(
-          `${basePath}/tests/${testId}/questions/${currentQuestionNumber + 1}`
+          `${basePath}/tests/${testId}/questions/${parsedQuestionNumber + 1}`
         );
       }
     }
-  }, [
-    navigate,
-    questionNumber,
-    resetAtomsForTestQuestion,
-    testDetails,
-    testId,
-  ]);
+  }, [navigate, questionNumber, testDetails, testId]);
 
   return (
     <Button

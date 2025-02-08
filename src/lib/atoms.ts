@@ -231,6 +231,7 @@ export const fetchQuestionSelectorAtom = atom(
       accountInfo
     );
     set(questionSelectorAtom, {
+      questionNumber,
       subjects: res.subjects,
       choices: res.choices.map((choice: Choice) => ({
         ...choice,
