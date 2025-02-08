@@ -4,6 +4,8 @@ import {
 } from "@/lib/atoms";
 import { Subject } from "@/types/backend";
 import { useAtom } from "jotai";
+import { ZoomIn } from "lucide-react";
+import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { Skeleton } from "./ui/skeleton";
 
 export default function QuestionSubjects() {
@@ -16,11 +18,22 @@ export default function QuestionSubjects() {
         {questionSelector ? (
           questionSelector.subjects.map((subject: Subject, idx: number) =>
             subject.isIndicatedImg ? (
-              <img
-                src={subject.sentence}
-                alt={subject.sentence}
-                className="w-auto max-h-[30vh]"
-              />
+              <Dialog key={idx}>
+                <DialogTrigger asChild>
+                  <div className="group relative inline-block">
+                    <img
+                      src={subject.sentence}
+                      alt={subject.sentence}
+                      className="w-auto max-h-[30vh] object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gray-500 opacity-0 group-hover:opacity-70 transition duration-300" />
+                    <ZoomIn className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition duration-300 text-white size-[10vh]" />
+                  </div>
+                </DialogTrigger>
+                <DialogContent>
+                  <img src={subject.sentence} alt={subject.sentence} />
+                </DialogContent>
+              </Dialog>
             ) : (
               <div key={idx} className="space-y-1">
                 <p className="leading-7">{subject.sentence}</p>
