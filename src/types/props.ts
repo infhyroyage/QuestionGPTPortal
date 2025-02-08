@@ -27,6 +27,46 @@ export type ImageDialogProps = {
 };
 
 /**
+ * SelectorButtonのProps
+ */
+export type SelectorButtonProps = {
+  /**
+   * 選択肢のクラス名
+   */
+  className: string;
+
+  /**
+   * 非活性の場合はtrue、活性の場合はfalse
+   */
+  disabled?: boolean;
+
+  /**
+   * 選択肢の画像
+   */
+  img: string | null;
+
+  /**
+   * 選択肢のクリック時の処理
+   */
+  onClick?: () => void;
+
+  /**
+   * 選択肢のテキスト
+   */
+  sentence: string;
+
+  /**
+   * 選択肢の翻訳文のDOM
+   */
+  translation?: ReactNode;
+
+  /**
+   * 選択肢のバリアント
+   */
+  variant: "default" | "outline";
+};
+
+/**
  * TestResultAccordionのProps
  */
 export type TestResultAccordionProps = {
