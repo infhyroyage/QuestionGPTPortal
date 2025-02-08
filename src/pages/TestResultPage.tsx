@@ -1,4 +1,4 @@
-import TestResultTable from "@/components/TestResultTable";
+import TestResultAccordion from "@/components/TestResultAccordion";
 import TopBar from "@/components/TopBar";
 import { fetchTestDetailsAtom } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
@@ -77,7 +77,7 @@ export default function TestResultPage() {
             {`全${testDetails[testId].length}問中${correctNum}問正解 (正答率${correctRate}%)`}
           </h4>
           <div className="mx-4 mt-4">
-            <TestResultTable histories={histories} />
+            <TestResultAccordion histories={histories} />
           </div>
         </div>
       </>

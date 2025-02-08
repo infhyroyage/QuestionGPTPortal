@@ -27,9 +27,9 @@ export type ImageDialogProps = {
 };
 
 /**
- * TestResultTableのProps
+ * TestResultAccordionのProps
  */
-export type TestResultTableProps = {
+export type TestResultAccordionProps = {
   /**
    * テストの回答履歴
    */
