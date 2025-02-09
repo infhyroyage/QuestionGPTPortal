@@ -86,6 +86,7 @@ export default function TestQuestionPage() {
     testId,
   ]);
 
+  // TODO: shadcn/uiのResizableを用いて、テストページの上半分と下半分を可変スクロールにする
   return (
     testId &&
     testDetails[testId] && (

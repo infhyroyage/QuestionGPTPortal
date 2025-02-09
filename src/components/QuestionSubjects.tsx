@@ -7,6 +7,10 @@ import { useAtom } from "jotai";
 import ImageDialog from "./ImageDialog";
 import { Skeleton } from "./ui/skeleton";
 
+/**
+ * テストページの上半分の問題文のコンポーネント
+ * @returns テストページの上半分の問題文のコンポーネント
+ */
 export default function QuestionSubjects() {
   const [questionSelector] = useAtom(fetchQuestionSelectorAtom);
   const [translationSubjectChoice] = useAtom(fetchTranslationSubjectChoiceAtom);

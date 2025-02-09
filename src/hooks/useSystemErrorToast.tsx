@@ -1,5 +1,9 @@
 import { useToast } from "@/hooks/ui/use-toast";
 
+/**
+ * システムエラー用のトーストのカスタムフック
+ * @returns システムエラー用のトーストのカスタムフック
+ */
 export default function useSystemErrorToast() {
   const { toast } = useToast();
 

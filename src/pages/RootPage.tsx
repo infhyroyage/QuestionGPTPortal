@@ -15,7 +15,7 @@ import { useNavigate } from "react-router";
  * @returns トップページのコンポーネント
  */
 export default function RootPage() {
-  // TODO: atom化する
+  // TODO: atom化し、GetTestsのみで管理する(GetTestは廃止)
   const [getTests, setGetTests] = useState<GetTests | undefined>(undefined);
   const [opens, setOpens] = useState<boolean[]>([]);
 

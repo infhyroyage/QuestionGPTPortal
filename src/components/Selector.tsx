@@ -10,6 +10,10 @@ import { useCallback, useMemo } from "react";
 import SelectorButton from "./SelectorButton";
 import { Skeleton } from "./ui/skeleton";
 
+/**
+ * テストページの下半分の選択肢のコンポーネント
+ * @returns テストページの下半分の選択肢のコンポーネント
+ */
 export default function Selector() {
   const [answerExplanation] = useAtom(fetchAnswerExplanationAtom);
   const [questionSelector] = useAtom(fetchQuestionSelectorAtom);

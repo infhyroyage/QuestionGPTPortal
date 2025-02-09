@@ -3,6 +3,10 @@ import ImageDialog from "./ImageDialog";
 import { Button } from "./ui/button";
 import { Skeleton } from "./ui/skeleton";
 
+/**
+ * 選択肢のボタンのコンポーネント
+ * @returns 選択肢のボタンのコンポーネント
+ */
 export default function SelectorButton({
   className,
   disabled,
