@@ -99,6 +99,7 @@ export default function TestReadyPage() {
           ) : historyNum === testDetails[testId].length ? (
             "結果を見る"
           ) : historyNum > 0 ? (
+            // TODO: 再開ボタンのほかに、1問目から開始ボタンも表示し、1問目から開始ボタン押下時はローカルストレージを削除する
             `${historyNum + 1}問目から再開`
           ) : (
             "1問目から開始"
