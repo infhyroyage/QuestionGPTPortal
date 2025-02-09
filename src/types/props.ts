@@ -56,9 +56,9 @@ export type SelectorButtonProps = {
   sentence: string;
 
   /**
-   * 選択肢の翻訳文のDOM
+   * 選択肢の翻訳文(翻訳文が存在しない場合はundefined)
    */
-  translation?: ReactNode;
+  translation?: string;
 
   /**
    * 選択肢のバリアント

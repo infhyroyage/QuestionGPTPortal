@@ -63,13 +63,8 @@ export default function Selector() {
               onClick={onClickSelectButton(idx)}
               sentence={choice.sentence}
               translation={
-                translationSubjectChoice ? (
-                  <p className="text-sm text-muted-foreground">
-                    {translationSubjectChoice.choices[idx]}
-                  </p>
-                ) : (
-                  <Skeleton className="h-5 w-full" />
-                )
+                translationSubjectChoice &&
+                translationSubjectChoice.choices[idx]
               }
               variant={
                 questionSelector.choices[idx].isSelected &&
