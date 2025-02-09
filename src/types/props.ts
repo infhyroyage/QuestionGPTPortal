@@ -31,9 +31,10 @@ export type ImageDialogProps = {
  */
 export type SelectorButtonProps = {
   /**
-   * 選択肢のクラス名
+   * 選択肢のTailwindCSSのクラス名
+   * デフォルトは"flex flex-col py-4 pl-4 w-full h-full space-y-1 whitespace-normal text-left items-start"
    */
-  className: string;
+  className?: string;
 
   /**
    * 非活性の場合はtrue、活性の場合はfalse

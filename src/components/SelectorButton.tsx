@@ -15,7 +15,9 @@ export default function SelectorButton({
   return (
     <Button
       variant={variant}
-      className={`flex flex-col py-4 pl-4 w-full h-full space-y-1 whitespace-normal text-left items-start ${className}`}
+      className={`flex flex-col py-4 pl-4 w-full h-full space-y-1 whitespace-normal text-left items-start${
+        className ? ` ${className}` : ""
+      }`}
       disabled={disabled}
       onClick={onClick}
     >
