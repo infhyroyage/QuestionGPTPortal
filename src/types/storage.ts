@@ -19,6 +19,8 @@ export type ProgressTest = {
 export type ProgressTestHistory = {
   isCorrect: boolean;
   choices: string[];
+  imgs: (string | null)[];
+  translations?: string[];
   selectedIdxes: number[];
   correctIdxes: number[];
 };

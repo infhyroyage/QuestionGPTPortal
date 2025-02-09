@@ -120,9 +120,13 @@ export const fetchAnswerExplanationAtom = atom(
       });
 
       // 回答履歴を作成
+      const translationSubjectChoice = get(translationSubjectChoiceAtom);
       const history: ProgressTestHistory = {
         isCorrect,
         choices: questionSelector.choices.map((choice) => choice.sentence),
+        imgs: questionSelector.choices.map((choice) => choice.img),
+        translations:
+          translationSubjectChoice && translationSubjectChoice.choices,
         selectedIdxes: questionSelector.choices.reduce<number[]>(
           (prev: number[], choice: ChoiceAndSelect, idx: number) => {
             if (choice.isSelected) {
