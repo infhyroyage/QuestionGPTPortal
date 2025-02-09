@@ -5,6 +5,7 @@ import { ChevronRight } from "lucide-react";
 import { useCallback, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
 import { Button } from "./ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 /**
  * 次問題遷移ボタンのコンポーネント
@@ -38,12 +39,17 @@ export default function NextQuestionButton() {
   }, [navigate, questionNumber, testDetails, testId]);
 
   return (
-    <Button
-      size="icon"
-      disabled={isDisabledOpenExplanationButton}
-      onClick={onClick}
-    >
-      <ChevronRight />
-    </Button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          size="icon"
+          disabled={isDisabledOpenExplanationButton}
+          onClick={onClick}
+        >
+          <ChevronRight />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>次の問題へ</TooltipContent>
+    </Tooltip>
   );
 }

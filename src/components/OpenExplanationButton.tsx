@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import ExplanationSheet from "./ExplanationSheet";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 /**
  * 解説表示ボタンのコンポーネント
@@ -22,9 +23,14 @@ export default function OpenExplanationButton() {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button size="icon" disabled={isDisabledOpenExplanationButton}>
-          <Info />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button size="icon" disabled={isDisabledOpenExplanationButton}>
+              <Info />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>解説表示</TooltipContent>
+        </Tooltip>
       </SheetTrigger>
       <SheetContent className="min-w-[40vw] max-h-[100vh] overflow-y-auto">
         <ExplanationSheet />

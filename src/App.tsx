@@ -4,6 +4,7 @@ import { useAtom } from "jotai";
 import { useEffect } from "react";
 import { BrowserRouter, Route, Routes } from "react-router";
 import { Toaster } from "./components/ui/toaster";
+import { TooltipProvider } from "./components/ui/tooltip";
 import { basePath } from "./lib/github";
 import NotFoundPage from "./pages/NotFoundPage";
 import RootPage from "./pages/RootPage";
@@ -30,20 +31,22 @@ export default function App() {
 
   return (
     <ApplyMSAL>
-      <BrowserRouter>
-        <Routes>
-          <Route path={`${basePath}/`} element={<RootPage />} />
-          <Route path={`${basePath}/tests/:testId`}>
-            <Route path="ready" element={<TestReadyPage />} />
-            <Route
-              path="questions/:questionNumber"
-              element={<TestQuestionPage />}
-            />
-            <Route path="result" element={<TestResultPage />} />
-          </Route>
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </BrowserRouter>
+      <TooltipProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path={`${basePath}/`} element={<RootPage />} />
+            <Route path={`${basePath}/tests/:testId`}>
+              <Route path="ready" element={<TestReadyPage />} />
+              <Route
+                path="questions/:questionNumber"
+                element={<TestQuestionPage />}
+              />
+              <Route path="result" element={<TestResultPage />} />
+            </Route>
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
       <Toaster />
     </ApplyMSAL>
   );

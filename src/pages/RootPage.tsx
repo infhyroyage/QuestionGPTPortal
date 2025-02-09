@@ -11,8 +11,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 /**
- * ルートページのコンポーネント
- * @returns ルートページのコンポーネント
+ * トップページのコンポーネント
+ * @returns トップページのコンポーネント
  */
 export default function RootPage() {
   // TODO: atom化する

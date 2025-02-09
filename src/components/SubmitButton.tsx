@@ -10,6 +10,7 @@ import { useAtom } from "jotai";
 import { Check, Loader2, SendHorizontal, X } from "lucide-react";
 import { useCallback, useMemo } from "react";
 import { useParams } from "react-router";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 /**
  * 回答・解説生成ボタンのコンポーネント
@@ -70,27 +71,32 @@ export default function SubmitButton() {
   ]);
 
   return (
-    <Button
-      className={
-        !answerExplanation || answerExplanation.isSubmitting
-          ? ""
-          : answerExplanation.isCorrect
-          ? " bg-green-500 hover:bg-green-600"
-          : " bg-red-500 hover:bg-red-600"
-      }
-      size="icon"
-      disabled={isDisabledSubmitButton}
-      onClick={onClickSubmit}
-    >
-      {!answerExplanation ? (
-        <SendHorizontal />
-      ) : answerExplanation.isSubmitting ? (
-        <Loader2 className="animate-spin" />
-      ) : answerExplanation.isCorrect ? (
-        <Check />
-      ) : (
-        <X />
-      )}
-    </Button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          className={
+            !answerExplanation || answerExplanation.isSubmitting
+              ? ""
+              : answerExplanation.isCorrect
+              ? " bg-green-500 hover:bg-green-600"
+              : " bg-red-500 hover:bg-red-600"
+          }
+          size="icon"
+          disabled={isDisabledSubmitButton}
+          onClick={onClickSubmit}
+        >
+          {!answerExplanation ? (
+            <SendHorizontal />
+          ) : answerExplanation.isSubmitting ? (
+            <Loader2 className="animate-spin" />
+          ) : answerExplanation.isCorrect ? (
+            <Check />
+          ) : (
+            <X />
+          )}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>回答・解説生成</TooltipContent>
+    </Tooltip>
   );
 }
