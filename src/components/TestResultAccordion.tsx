@@ -1,6 +1,7 @@
 import { TestResultAccordionProps } from "@/types/props";
 import { ProgressTestHistory } from "@/types/storage";
 import { Check, X } from "lucide-react";
+import SelectorButton from "./SelectorButton";
 import {
   Accordion,
   AccordionContent,
@@ -17,21 +18,60 @@ export default function TestResultAccordion({
 }: TestResultAccordionProps) {
   return (
     <Accordion type="multiple">
-      {histories.map((history: ProgressTestHistory, idx: number) => (
-        <AccordionItem key={idx} value={`${idx}`}>
+      {histories.map((history: ProgressTestHistory, i: number) => (
+        <AccordionItem key={i} value={`${i}`}>
           <AccordionTrigger className="px-4">
-            <small className="text-sm font-medium leading-none">
-              {`${idx + 1}問目`}
-            </small>
+            <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
+              {`${i + 1}問目`}
+            </h3>
             <span>
               {history.isCorrect ? (
-                <Check className="size-4 text-green-500" />
+                <Check className="size-8 text-green-500" />
               ) : (
-                <X className="size-4 text-red-500" />
+                <X className="size-8 text-red-500" />
               )}
             </span>
           </AccordionTrigger>
-          <AccordionContent>TODO</AccordionContent>
+          <AccordionContent>
+            <div className="mx-8 my-4 space-y-8">
+              <div className="space-y-4">
+                <p className="leading-7 [&:not(:first-child)]:mt-6">
+                  選択した選択肢
+                </p>
+                <div className="mx-4 space-y-4">
+                  {history.selectedIdxes.map((j: number) => (
+                    <SelectorButton
+                      key={j}
+                      img={history.imgs[j]}
+                      sentence={history.choices[j]}
+                      translation={
+                        history.translations && history.translations[j]
+                      }
+                      variant="outline"
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-4">
+                <p className="leading-7 [&:not(:first-child)]:mt-6">
+                  正解の選択肢
+                </p>
+                <div className="mx-4 space-y-4">
+                  {history.correctIdxes.map((j: number) => (
+                    <SelectorButton
+                      key={j}
+                      img={history.imgs[j]}
+                      sentence={history.choices[j]}
+                      translation={
+                        history.translations && history.translations[j]
+                      }
+                      variant="outline"
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </AccordionContent>
         </AccordionItem>
       ))}
     </Accordion>
