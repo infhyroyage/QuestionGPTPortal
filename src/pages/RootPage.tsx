@@ -27,24 +27,22 @@ export default function RootPage() {
 
   // テスト一覧情報を1度だけ取得
   useEffect(() => {
-    if (!getTests) {
-      (async () => {
-        try {
-          const res: GetTests = await accessBackend<GetTests>(
-            "GET",
-            "/tests",
-            instance,
-            accountInfo
-          );
+    (async () => {
+      try {
+        const res: GetTests = await accessBackend<GetTests>(
+          "GET",
+          "/tests",
+          instance,
+          accountInfo
+        );
 
-          setOpens([...Array(Object.keys(res).length)].fill(false));
-          setGetTests(res);
-        } catch (e) {
-          systemErrorToast(e);
-        }
-      })();
-    }
-  }, [accountInfo, getTests, instance, systemErrorToast]);
+        setOpens([...Array(Object.keys(res).length)].fill(false));
+        setGetTests(res);
+      } catch (e) {
+        systemErrorToast(e);
+      }
+    })();
+  }, [accountInfo, instance, systemErrorToast]);
 
   // idx番目のコースのテストの最大化/最小化の切替え
   const onClickOuterButton = useCallback((idx: number) => {
