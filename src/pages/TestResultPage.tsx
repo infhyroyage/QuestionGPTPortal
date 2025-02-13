@@ -2,6 +2,7 @@ import TestResultAccordion from "@/components/TestResultAccordion";
 import TopBar from "@/components/TopBar";
 import { fetchTestDetailsAtom } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
+import { TestDetail } from "@/types/atoms";
 import { Progress, ProgressTestHistory } from "@/types/storage";
 import { useAtom } from "jotai";
 import { useEffect, useMemo, useState } from "react";
@@ -19,12 +20,21 @@ export default function TestResultPage() {
 
   const navigate = useNavigate();
 
-  // tesiIdでの情報を習得していない場合はテスト準備ページにリダイレクト
+  const testDetail = useMemo<TestDetail | undefined>(
+    () =>
+      testDetails &&
+      testDetails.find(
+        (testDetail: TestDetail) => testDetail.testId === testId
+      ),
+    [testDetails, testId]
+  );
+
+  // テスト詳細情報を習得していない場合はトップページにリダイレクト
   useEffect(() => {
-    if (testId && !testDetails[testId]) {
-      navigate(`${basePath}/tests/${testId}/ready`);
+    if (!testDetail) {
+      navigate(`${basePath}/`);
     }
-  }, [navigate, testDetails, testId]);
+  }, [navigate, testDetail]);
 
   // ローカルストレージに保存しているテストの回答履歴を取得
   useEffect(() => {
@@ -64,14 +74,12 @@ export default function TestResultPage() {
 
   return (
     testId &&
-    testDetails[testId] && (
+    testDetail && (
       <>
-        <TopBar
-          title={`[${testDetails[testId].courseName}] ${testDetails[testId].testName}`}
-        />
+        <TopBar title={`[${testDetail.courseName}] ${testDetail.testName}`} />
         <div className="pt-16 px-4">
           <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight my-6">
-            {`全${testDetails[testId].length}問中${correctNum}問正解 (正答率${correctRate}%)`}
+            {`全${testDetail.length}問中${correctNum}問正解 (正答率${correctRate}%)`}
           </h3>
           <div className="mx-4 mt-4">
             <TestResultAccordion histories={histories} />

@@ -13,9 +13,10 @@ import {
   resetAtomsForTestQuestionAtom,
 } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
+import { TestDetail } from "@/types/atoms";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom } from "jotai";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
 
 /**
@@ -39,12 +40,21 @@ export default function TestQuestionPage() {
 
   const systemErrorToast = useSystemErrorToast();
 
-  // testIdでの情報を習得していない場合はテスト準備ページにリダイレクト
+  const testDetail = useMemo<TestDetail | undefined>(
+    () =>
+      testDetails &&
+      testDetails.find(
+        (testDetail: TestDetail) => testDetail.testId === testId
+      ),
+    [testDetails, testId]
+  );
+
+  // テスト詳細情報を習得していない場合はトップページにリダイレクト
   useEffect(() => {
-    if (testId && !testDetails[testId]) {
-      navigate(`${basePath}/tests/${testId}/ready`);
+    if (!testDetail) {
+      navigate(`${basePath}/`);
     }
-  }, [navigate, testDetails, testId]);
+  }, [navigate, testDetail]);
 
   // 問題番号が変更された場合は、前問題で取得したatomをすべて初期化
   useEffect(() => {
@@ -89,14 +99,12 @@ export default function TestQuestionPage() {
   // TODO: shadcn/uiのResizableを用いて、テストページの上半分と下半分を可変スクロールにする
   return (
     testId &&
-    testDetails[testId] && (
+    testDetail && (
       <>
-        <TopBar
-          title={`[${testDetails[testId].courseName}] ${testDetails[testId].testName}`}
-        />
+        <TopBar title={`[${testDetail.courseName}] ${testDetail.testName}`} />
         <div className="pt-16 px-4">
           <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight my-6">
-            {`${questionNumber}問目 (全${testDetails[testId].length}問)`}
+            {`${questionNumber}問目 (全${testDetail.length}問)`}
           </h3>
           <QuestionSubjects />
         </div>

@@ -1,14 +1,11 @@
 import TopBar from "@/components/TopBar";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import { fetchTestDetailsAtom } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
+import { TestDetail } from "@/types/atoms";
 import { Progress, ProgressTest } from "@/types/storage";
-import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom } from "jotai";
-import { Loader2 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
 /**
@@ -16,35 +13,28 @@ import { useNavigate, useParams } from "react-router";
  * @returns テスト準備ページのコンポーネント
  */
 export default function TestReadyPage() {
-  const [testDetails, fetchTestDetails] = useAtom(fetchTestDetailsAtom);
+  const [testDetails] = useAtom(fetchTestDetailsAtom);
   const [historyNum, setHistoryNum] = useState<number>(0);
 
   const navigate = useNavigate();
   const { testId } = useParams();
-  const { instance, accounts } = useMsal();
-  const accountInfo = useAccount(accounts[0] || {});
 
-  const systemErrorToast = useSystemErrorToast();
+  // TODO: useTestDetailでカスタムフック化する
+  const testDetail = useMemo<TestDetail | undefined>(
+    () =>
+      testDetails &&
+      testDetails.find(
+        (testDetail: TestDetail) => testDetail.testId === testId
+      ),
+    [testDetails, testId]
+  );
 
-  // テスト詳細情報を取得していない場合のみ取得
+  // テスト詳細情報を習得していない場合はトップページにリダイレクト
   useEffect(() => {
-    if (testId && !testDetails[testId]) {
-      (async () => {
-        try {
-          await fetchTestDetails(testId, instance, accountInfo);
-        } catch (e) {
-          systemErrorToast(e);
-        }
-      })();
+    if (!testDetail) {
+      navigate(`${basePath}/`);
     }
-  }, [
-    accountInfo,
-    fetchTestDetails,
-    instance,
-    systemErrorToast,
-    testDetails,
-    testId,
-  ]);
+  }, [navigate, testDetail]);
 
   // ローカルストレージに保存しているテストの回答履歴から、回答した問題数を取得
   useEffect(() => {
@@ -58,54 +48,39 @@ export default function TestReadyPage() {
 
   // ローカルストレージに保存しているテストの回答履歴から、テストページかテスト結果ページへ遷移
   const onClick = useCallback(() => {
-    if (testId) {
-      if (historyNum === testDetails[testId].length) {
+    if (testId && testDetail) {
+      if (historyNum === testDetail.length) {
         navigate(`${basePath}/tests/${testId}/result`);
       } else {
         navigate(`${basePath}/tests/${testId}/questions/${historyNum + 1}`);
       }
     }
-  }, [historyNum, navigate, testDetails, testId]);
+  }, [historyNum, navigate, testDetail, testId]);
 
   return (
-    <>
-      <TopBar title="Question GPT Portal" />
-      <div className="pt-16 flex items-center justify-center min-h-screen flex-col space-y-8">
-        {testId && testDetails[testId] ? (
+    testId &&
+    testDetail && (
+      <>
+        <TopBar title="Question GPT Portal" />
+        <div className="pt-16 flex items-center justify-center min-h-screen flex-col space-y-8">
           <div className="flex flex-col items-center justify-center space-y-4">
             <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-              {testDetails[testId].courseName}
+              {testDetail.courseName}
             </h3>
             <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-              {testDetails[testId].testName}
+              {testDetail.testName}
             </h4>
           </div>
-        ) : (
-          <div className="container mx-auto px-8 flex flex-col items-center justify-center space-y-4">
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-6 w-full" />
-          </div>
-        )}
-        <Button
-          disabled={!testId || !testDetails[testId]}
-          onClick={onClick}
-          size="lg"
-        >
-          {!testId || !testDetails[testId] ? (
-            <>
-              <Loader2 className="animate-spin" />
-              Please wait
-            </>
-          ) : historyNum === testDetails[testId].length ? (
-            "結果を見る"
-          ) : historyNum > 0 ? (
-            // TODO: 再開ボタンのほかに、1問目から開始ボタンも表示し、1問目から開始ボタン押下時はローカルストレージを削除する
-            `${historyNum + 1}問目から再開`
-          ) : (
-            "1問目から開始"
-          )}
-        </Button>
-      </div>
-    </>
+          <Button onClick={onClick} size="lg">
+            {historyNum === testDetail.length
+              ? "結果を見る"
+              : historyNum > 0
+              ? // TODO: 再開ボタンのほかに、1問目から開始ボタンも表示し、1問目から開始ボタン押下時はローカルストレージを削除する
+                `${historyNum + 1}問目から再開`
+              : "1問目から開始"}
+          </Button>
+        </div>
+      </>
+    )
   );
 }

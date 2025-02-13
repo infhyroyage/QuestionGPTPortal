@@ -2,10 +2,11 @@ import TopBar from "@/components/TopBar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
-import { accessBackend } from "@/lib/backend";
+import { fetchTestDetailsAtom } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
-import { GetTests, Test } from "@/types/backend";
+import { TestDetail } from "@/types/atoms";
 import { useAccount, useMsal } from "@azure/msal-react";
+import { useAtom } from "jotai";
 import { ChevronDown, ScrollText, TriangleAlert } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
@@ -15,8 +16,7 @@ import { useNavigate } from "react-router";
  * @returns トップページのコンポーネント
  */
 export default function RootPage() {
-  // TODO: atom化し、GetTestsのみで管理する(GetTestは廃止)
-  const [getTests, setGetTests] = useState<GetTests | undefined>(undefined);
+  const [testDetails, fetchTestDetails] = useAtom(fetchTestDetailsAtom);
   const [opens, setOpens] = useState<boolean[]>([]);
 
   const navigate = useNavigate();
@@ -29,20 +29,22 @@ export default function RootPage() {
   useEffect(() => {
     (async () => {
       try {
-        const res: GetTests = await accessBackend<GetTests>(
-          "GET",
-          "/tests",
-          instance,
-          accountInfo
-        );
-
-        setOpens([...Array(Object.keys(res).length)].fill(false));
-        setGetTests(res);
+        await fetchTestDetails(instance, accountInfo);
       } catch (e) {
         systemErrorToast(e);
       }
     })();
-  }, [accountInfo, instance, systemErrorToast]);
+  }, [accountInfo, fetchTestDetails, instance, systemErrorToast]);
+
+  // テスト一覧情報を取得後、テスト一覧情報のオープン/クローズの状態を初期化
+  useEffect(() => {
+    if (testDetails) {
+      const courseNames: Set<string> = new Set(
+        testDetails.map((testDetail: TestDetail) => testDetail.courseName)
+      );
+      setOpens([...Array(courseNames.size)].fill(false));
+    }
+  }, [testDetails]);
 
   // idx番目のコースのテストの最大化/最小化の切替え
   const onClickOuterButton = useCallback((idx: number) => {
@@ -65,20 +67,26 @@ export default function RootPage() {
     <>
       <TopBar title="Question GPT Portal" />
       <div className="pt-16">
-        {!getTests ? (
+        {!testDetails ? (
           <div className="space-y-2">
             <Skeleton className="px-6 py-8 w-full rounded-md" />
             <Skeleton className="px-6 py-8 w-full rounded-md" />
             <Skeleton className="px-6 py-8 w-full rounded-md" />
           </div>
-        ) : Object.keys(getTests).length === 0 ? (
+        ) : Object.keys(testDetails).length === 0 ? (
           <div className="flex items-center justify-center h-screen flex-col gap-4">
             <TriangleAlert size={100} />
             <div>テストが見つかりませんでした</div>
           </div>
         ) : (
           <div className="space-y-2">
-            {Object.keys(getTests).map((course: string, idx: number) => (
+            {Array.from(
+              new Set(
+                testDetails.map(
+                  (testDetail: TestDetail) => testDetail.courseName
+                )
+              )
+            ).map((courseName: string, idx: number) => (
               <div key={idx}>
                 <Button
                   variant="ghost"
@@ -91,27 +99,34 @@ export default function RootPage() {
                     }`}
                   />
                   <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-                    {course}
+                    {courseName}
                   </h3>
                 </Button>
                 {opens[idx] && (
                   <div className="pl-16 space-y-2">
-                    {getTests[course].map((test: Test) => (
-                      <div
-                        key={test.id}
-                        className="flex items-center justify-start space-x-4"
-                      >
-                        <ScrollText className="h-5 w-5" />
-                        <Button
-                          variant="link"
-                          onClick={() => onClickInnerButton(test.id)}
+                    {testDetails
+                      .filter(
+                        (testDetail: TestDetail) =>
+                          testDetail.courseName === courseName
+                      )
+                      .map((testDetail: TestDetail) => (
+                        <div
+                          key={testDetail.testId}
+                          className="flex items-center justify-start space-x-4"
                         >
-                          <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-                            {test.testName}
-                          </h4>
-                        </Button>
-                      </div>
-                    ))}
+                          <ScrollText className="h-5 w-5" />
+                          <Button
+                            variant="link"
+                            onClick={() =>
+                              onClickInnerButton(testDetail.testId)
+                            }
+                          >
+                            <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+                              {testDetail.testName}
+                            </h4>
+                          </Button>
+                        </div>
+                      ))}
                   </div>
                 )}
               </div>

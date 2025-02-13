@@ -1,5 +1,6 @@
 import { fetchAnswerExplanationAtom, fetchTestDetailsAtom } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
+import { TestDetail } from "@/types/atoms";
 import { useAtom } from "jotai";
 import { ChevronRight } from "lucide-react";
 import { useCallback, useMemo } from "react";
@@ -18,6 +19,15 @@ export default function NextQuestionButton() {
   const navigate = useNavigate();
   const { testId, questionNumber } = useParams();
 
+  const testDetail = useMemo<TestDetail | undefined>(
+    () =>
+      testDetails &&
+      testDetails.find(
+        (testDetail: TestDetail) => testDetail.testId === testId
+      ),
+    [testDetails, testId]
+  );
+
   // 回答・解説を生成していない場合は、次問題遷移ボタンを非活性とする
   const isDisabledOpenExplanationButton = useMemo<boolean>(
     () => !answerExplanation || !answerExplanation.explanations,
@@ -26,9 +36,9 @@ export default function NextQuestionButton() {
 
   // 次の問題かテスト結果ページへ遷移
   const onClick = useCallback(() => {
-    if (testId && questionNumber) {
+    if (testId && testDetail && questionNumber) {
       const parsedQuestionNumber: number = parseInt(questionNumber);
-      if (parsedQuestionNumber === testDetails[testId].length) {
+      if (parsedQuestionNumber === testDetail.length) {
         navigate(`${basePath}/tests/${testId}/result`);
       } else {
         navigate(
@@ -36,7 +46,7 @@ export default function NextQuestionButton() {
         );
       }
     }
-  }, [navigate, questionNumber, testDetails, testId]);
+  }, [navigate, questionNumber, testDetail, testId]);
 
   return (
     <Tooltip>

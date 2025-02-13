@@ -1,4 +1,4 @@
-import { Choice, GetTest, Subject } from "./backend";
+import { Choice, Subject } from "./backend";
 
 /**
  * 正解・解説文・解答の生成状態の型
@@ -33,11 +33,19 @@ export type QuestionSelector =
   | undefined;
 
 /**
+ * テスト詳細情報の要素の型
+ */
+export type TestDetail = {
+  courseName: string;
+  testId: string;
+  testName: string;
+  length: number;
+};
+
+/**
  * テスト詳細情報の型
  */
-export type TestDetails = {
-  [testId: string]: GetTest;
-};
+export type TestDetails = TestDetail[] | undefined;
 
 /**
  * 解説文に対する翻訳文の型

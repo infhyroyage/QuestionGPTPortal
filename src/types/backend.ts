@@ -51,27 +51,19 @@ export type GetQuestion = {
 };
 
 /**
- * [GET] /tests/{testId} のレスポンスボディの型
- */
-export type GetTest = {
-  courseName: string;
-  testName: string;
-  length: number;
-};
-
-/**
  * [GET] /tests のレスポンスボディの各要素の型
  */
 export type Test = {
   id: string;
   testName: string;
+  length: number;
 };
 
 /**
  * [GET] /tests のレスポンスボディの型
  */
 export type GetTests = {
-  [course: string]: Test[];
+  [courseName: string]: Test[];
 };
 
 export type PutEn2JaReq = string[];

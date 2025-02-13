@@ -2,6 +2,7 @@ import {
   AnswerExplanation,
   ChoiceAndSelect,
   QuestionSelector,
+  TestDetail,
   TestDetails,
   TranslationExplanation,
   TranslationSubjectChoice,
@@ -10,7 +11,7 @@ import {
   Choice,
   GetAnswer,
   GetQuestion,
-  GetTest,
+  GetTests,
   PostAnswerReq,
   PostAnswerRes,
   PutEn2JaReq,
@@ -40,9 +41,9 @@ const isDarkModeAtom = atom<boolean>(true);
 const questionSelectorAtom = atom<QuestionSelector>(undefined);
 
 /**
- * testId単位のテスト詳細情報を管理するatom
+ * テスト詳細情報を管理するatom
  */
-const testDetailsAtom = atom<TestDetails>({});
+const testDetailsAtom = atom<TestDetails>(undefined);
 
 /**
  * 解説文に対する翻訳文を管理するatom
@@ -75,7 +76,13 @@ export const fetchAnswerExplanationAtom = atom(
 
     // テスト詳細情報がまだ存在しない場合は何も取得・更新しない
     const testDetails = get(testDetailsAtom);
-    if (!testDetails[testId]) {
+    if (!testDetails) {
+      return;
+    }
+    const testDetail = testDetails.find(
+      (testDetail) => testDetail.testId === testId
+    );
+    if (!testDetail) {
       return;
     }
 
@@ -135,7 +142,7 @@ export const fetchAnswerExplanationAtom = atom(
           instance,
           accountInfo,
           {
-            courseName: testDetails[testId].courseName,
+            courseName: testDetail.courseName,
             subjects: questionSelector.subjects.map(
               (subject: Subject) => subject.sentence
             ),
@@ -195,7 +202,7 @@ export const fetchAnswerExplanationAtom = atom(
       } else {
         // テスト実績あり＆現テスト1問目
         progress[testId] = {
-          testLength: testDetails[testId].length,
+          testLength: testDetail.length,
           histories: [history],
         };
         localStorage.setItem("progress", JSON.stringify(progress));
@@ -206,7 +213,7 @@ export const fetchAnswerExplanationAtom = atom(
         "progress",
         JSON.stringify({
           [testId]: {
-            testLength: testDetails[testId].length,
+            testLength: testDetail.length,
             histories: [history],
           },
         })
@@ -254,31 +261,36 @@ export const fetchQuestionSelectorAtom = atom(
 );
 
 /**
- * testId単位のテスト詳細情報を取得するatom
+ * テスト詳細情報を取得するatom
  */
 export const fetchTestDetailsAtom = atom(
   (get) => get(testDetailsAtom),
   async (
     get,
     set,
-    testId: string,
     instance: IPublicClientApplication,
     accountInfo: AccountInfo | null
   ) => {
-    // すでにtestIdのテスト詳細情報が存在する場合は何も取得・更新しない
-    const testDetails = get(testDetailsAtom);
-    if (testDetails[testId]) {
+    // すでにテスト詳細情報が存在する場合は何も取得・更新しない
+    if (!!get(testDetailsAtom)) {
       return;
     }
 
-    // [GET] /tests/{testId}にアクセスして取得したテスト詳細情報で更新
-    const res: GetTest = await accessBackend<GetTest>(
+    // [GET] /testsにアクセス
+    const res: GetTests = await accessBackend<GetTests>(
       "GET",
-      `/tests/${testId}`,
+      `/tests`,
       instance,
       accountInfo
     );
-    set(testDetailsAtom, { ...testDetails, [testId]: res });
+
+    // テスト詳細情報の組み立て
+    const testDetails: TestDetail[] = Object.entries(res).flatMap(
+      ([courseName, tests]) =>
+        tests.map((test) => ({ courseName, ...test, testId: test.id }))
+    );
+
+    set(testDetailsAtom, testDetails);
   }
 );
 
