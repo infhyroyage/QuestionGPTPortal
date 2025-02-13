@@ -22,16 +22,16 @@ export default function OpenExplanationButton() {
 
   return (
     <Sheet>
-      <SheetTrigger asChild>
-        <Tooltip>
-          <TooltipTrigger asChild>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <SheetTrigger asChild>
             <Button size="icon" disabled={isDisabledOpenExplanationButton}>
               <Info />
             </Button>
-          </TooltipTrigger>
-          <TooltipContent>解説表示</TooltipContent>
-        </Tooltip>
-      </SheetTrigger>
+          </SheetTrigger>
+        </TooltipTrigger>
+        <TooltipContent>解説表示</TooltipContent>
+      </Tooltip>
       <SheetContent className="min-w-[40vw] max-h-[100vh] overflow-y-auto">
         <ExplanationSheet />
       </SheetContent>
