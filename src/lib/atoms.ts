@@ -66,7 +66,8 @@ export const fetchAnswerExplanationAtom = atom(
     testId: string,
     questionNumber: string,
     instance: IPublicClientApplication,
-    accountInfo: AccountInfo | null
+    accountInfo: AccountInfo | null,
+    isResubmit: boolean = false
   ) => {
     // テスト詳細情報がまだ存在しない場合は何も取得・更新しない
     const testDetails = get(testDetailsAtom);
@@ -101,26 +102,52 @@ export const fetchAnswerExplanationAtom = atom(
 
     let isCorrect: boolean;
     let correctIdxes: number[];
+    let explanations: string[];
     try {
-      // [GET] /tests/{testId}/answers/{questionNumber}にアクセス
-      const getAnswerRes: GetAnswer = await accessBackend<GetAnswer>(
-        "GET",
-        `/tests/${testId}/answers/${questionNumber}`,
-        instance,
-        accountInfo
-      );
-      correctIdxes = getAnswerRes.correctIdxes;
+      if (isResubmit) {
+        // [POST] /tests/{testId}/answers/{questionNumber}にアクセス
+        const postAnswerRes: PostAnswerRes = await accessBackend<
+          PostAnswerRes,
+          PostAnswerReq
+        >(
+          "POST",
+          `/tests/${testId}/answers/${questionNumber}`,
+          instance,
+          accountInfo,
+          {
+            courseName: testDetail.courseName,
+            subjects: questionSelector.subjects.map(
+              (subject: Subject) => subject.sentence
+            ),
+            choices: questionSelector.choices.map(
+              (choice: Choice) => choice.sentence
+            ),
+          }
+        );
+        correctIdxes = postAnswerRes.correctIdxes;
+        explanations = postAnswerRes.explanations;
+      } else {
+        // [GET] /tests/{testId}/answers/{questionNumber}にアクセス
+        const getAnswerRes: GetAnswer = await accessBackend<GetAnswer>(
+          "GET",
+          `/tests/${testId}/answers/${questionNumber}`,
+          instance,
+          accountInfo
+        );
+        correctIdxes = getAnswerRes.correctIdxes;
+        explanations = getAnswerRes.explanations;
+      }
 
       // アクセスして取得した正解・解説文で更新
       const correctFlags: boolean[] = [
         ...Array(questionSelector.choices.length),
-      ].map((_, idx: number) => getAnswerRes.correctIdxes.includes(idx));
+      ].map((_, idx: number) => correctIdxes.includes(idx));
       isCorrect = selectedFlags.every(
         (selectedFlag, idx) => selectedFlag === correctFlags[idx]
       );
       set(answerExplanationAtom, {
         correctFlags,
-        explanations: getAnswerRes.explanations,
+        explanations,
         isSubmitting: false,
         isCorrect,
       });
@@ -146,17 +173,18 @@ export const fetchAnswerExplanationAtom = atom(
           }
         );
         correctIdxes = postAnswerRes.correctIdxes;
+        explanations = postAnswerRes.explanations;
 
         // アクセスして生成した正解・解説文で更新
         const correctFlags: boolean[] = [
           ...Array(questionSelector.choices.length),
-        ].map((_, idx: number) => postAnswerRes.correctIdxes.includes(idx));
+        ].map((_, idx: number) => correctIdxes.includes(idx));
         isCorrect = selectedFlags.every(
           (selectedFlag, idx) => selectedFlag === correctFlags[idx]
         );
         set(answerExplanationAtom, {
           correctFlags,
-          explanations: postAnswerRes.explanations,
+          explanations,
           isSubmitting: false,
           isCorrect,
         });
