@@ -21,14 +21,14 @@ export default function TestResultAccordion({
       {histories.map((history: ProgressTestHistory, i: number) => (
         <AccordionItem key={i} value={`${i}`}>
           <AccordionTrigger className="px-4">
-            <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
+            <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
               {`${i + 1}問目`}
-            </h3>
+            </h4>
             <span>
               {history.isCorrect ? (
-                <Check className="size-8 text-green-500" />
+                <Check className="size-7 text-green-500" />
               ) : (
-                <X className="size-8 text-red-500" />
+                <X className="size-7 text-red-500" />
               )}
             </span>
           </AccordionTrigger>
