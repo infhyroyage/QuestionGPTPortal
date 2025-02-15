@@ -37,7 +37,6 @@ export default function TestQuestionPage() {
   const accountInfo = useAccount(accounts[0] || {});
 
   const systemErrorToast = useSystemErrorToast();
-
   const testDetail = useTestDetail();
 
   // テスト詳細情報を習得していない場合はトップページにリダイレクト
@@ -59,7 +58,7 @@ export default function TestQuestionPage() {
     }
   }, [questionSelector, resetAtomsForTestQuestion, testId, questionNumber]);
 
-  // ページ遷移直後に、問題文・選択肢を取得・翻訳
+  // ページ遷移直後に、問題文・選択肢を1回だけ取得・翻訳
   useEffect(() => {
     if (testId && questionNumber && !questionSelector) {
       (async () => {

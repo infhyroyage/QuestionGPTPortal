@@ -68,12 +68,6 @@ export const fetchAnswerExplanationAtom = atom(
     instance: IPublicClientApplication,
     accountInfo: AccountInfo | null
   ) => {
-    // すでに正解・解説文が存在する場合は何も取得・更新しない
-    const answerExplanation = get(answerExplanationAtom);
-    if (answerExplanation) {
-      return;
-    }
-
     // テスト詳細情報がまだ存在しない場合は何も取得・更新しない
     const testDetails = get(testDetailsAtom);
     if (!testDetails) {
@@ -228,19 +222,13 @@ export const fetchAnswerExplanationAtom = atom(
 export const fetchQuestionSelectorAtom = atom(
   (get) => get(questionSelectorAtom),
   async (
-    get,
+    _,
     set,
     testId: string,
     questionNumber: string,
     instance: IPublicClientApplication,
     accountInfo: AccountInfo | null
   ) => {
-    // すでに問題文が存在する場合は何も取得・更新しない
-    const questionSelector = get(questionSelectorAtom);
-    if (questionSelector) {
-      return;
-    }
-
     // [GET] /tests/{testId}/questions/{questionNumber}にアクセスして取得した問題文で更新
     const res: GetQuestion = await accessBackend<GetQuestion>(
       "GET",
@@ -266,16 +254,11 @@ export const fetchQuestionSelectorAtom = atom(
 export const fetchTestDetailsAtom = atom(
   (get) => get(testDetailsAtom),
   async (
-    get,
+    _,
     set,
     instance: IPublicClientApplication,
     accountInfo: AccountInfo | null
   ) => {
-    // すでにテスト詳細情報が存在する場合は何も取得・更新しない
-    if (!!get(testDetailsAtom)) {
-      return;
-    }
-
     // [GET] /testsにアクセス
     const res: GetTests = await accessBackend<GetTests>(
       "GET",
@@ -305,12 +288,6 @@ export const fetchTranslationExplanationAtom = atom(
     instance: IPublicClientApplication,
     accountInfo: AccountInfo | null
   ) => {
-    // すでに翻訳文が存在する場合は何も取得・更新しない
-    const translationExplanation = get(translationExplanationAtom);
-    if (translationExplanation) {
-      return;
-    }
-
     // 翻訳対象の解説文がまだ存在しない場合は何も翻訳しない
     const answerExplanation = get(answerExplanationAtom);
     if (!answerExplanation || !answerExplanation.explanations) {
@@ -341,12 +318,6 @@ export const fetchTranslationSubjectChoiceAtom = atom(
     instance: IPublicClientApplication,
     accountInfo: AccountInfo | null
   ) => {
-    // すでに翻訳文が存在する場合は何も取得・更新しない
-    const translationSubjectChoice = get(translationSubjectChoiceAtom);
-    if (translationSubjectChoice) {
-      return;
-    }
-
     // 翻訳対象の問題文・選択肢がまだ存在しない場合は何も翻訳しない
     const question = get(questionSelectorAtom);
     if (!question) {

@@ -20,16 +20,18 @@ export default function RootPage() {
 
   const systemErrorToast = useSystemErrorToast();
 
-  // テスト一覧情報を1度だけ取得
+  // テスト一覧情報を1回だけ取得
   useEffect(() => {
-    (async () => {
-      try {
-        await fetchTestDetails(instance, accountInfo);
-      } catch (e) {
-        systemErrorToast(e);
-      }
-    })();
-  }, [accountInfo, fetchTestDetails, instance, systemErrorToast]);
+    if (!testDetails) {
+      (async () => {
+        try {
+          await fetchTestDetails(instance, accountInfo);
+        } catch (e) {
+          systemErrorToast(e);
+        }
+      })();
+    }
+  }, [accountInfo, fetchTestDetails, instance, systemErrorToast, testDetails]);
 
   return (
     <>

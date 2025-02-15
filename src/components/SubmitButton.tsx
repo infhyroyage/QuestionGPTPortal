@@ -43,21 +43,20 @@ export default function SubmitButton() {
     [answerExplanation, questionSelector]
   );
 
-  // 回答・解説生成ボタン押下時の処理
+  // 回答・解説生成ボタン押下時に、回答・解説の生成・翻訳を1回だけ行う
   const onClickSubmit = useCallback(async () => {
-    // 同じ問題に対し、回答・解説の生成は1回のみ
-    if (!testId || !questionNumber || !!answerExplanation) return;
-
-    try {
-      await fetchAnswerExplanation(
-        testId,
-        questionNumber,
-        instance,
-        accountInfo
-      );
-      await fetchTranslationExplanation(instance, accountInfo);
-    } catch (e) {
-      systemErrorToast(e);
+    if (testId && questionNumber && !answerExplanation) {
+      try {
+        await fetchAnswerExplanation(
+          testId,
+          questionNumber,
+          instance,
+          accountInfo
+        );
+        await fetchTranslationExplanation(instance, accountInfo);
+      } catch (e) {
+        systemErrorToast(e);
+      }
     }
   }, [
     accountInfo,
