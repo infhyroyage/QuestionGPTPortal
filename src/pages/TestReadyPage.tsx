@@ -35,16 +35,33 @@ export default function TestReadyPage() {
     }
   }, [testId]);
 
-  // ローカルストレージに保存しているテストの回答履歴から、テストページかテスト結果ページへ遷移
-  const onClick = useCallback(() => {
-    if (testId && testDetail) {
-      if (historyNum === testDetail.length) {
-        navigate(`${basePath}/tests/${testId}/result`);
-      } else {
-        navigate(`${basePath}/tests/${testId}/questions/${historyNum + 1}`);
-      }
+  // テスト結果ページへ遷移
+  const onClickResultButton = useCallback(() => {
+    if (testId) {
+      navigate(`${basePath}/tests/${testId}/result`);
     }
-  }, [historyNum, navigate, testDetail, testId]);
+  }, [navigate, testId]);
+
+  // 再開してテストページへ遷移
+  const onClickResumeButton = useCallback(() => {
+    if (testId) {
+      navigate(`${basePath}/tests/${testId}/questions/${historyNum + 1}`);
+    }
+  }, [historyNum, navigate, testId]);
+
+  // ローカルストレージに保存しているテストの回答履歴を削除し、1問目のテストページへ遷移
+  const onClickStartButton = useCallback(() => {
+    if (testId) {
+      const progressStr: string | null = localStorage.getItem("progress");
+      if (progressStr) {
+        const progress: Progress = JSON.parse(progressStr);
+        delete progress[testId];
+        localStorage.setItem("progress", JSON.stringify(progress));
+      }
+
+      navigate(`${basePath}/tests/${testId}/questions/1`);
+    }
+  }, [navigate, testId]);
 
   return (
     testId &&
@@ -60,13 +77,24 @@ export default function TestReadyPage() {
               {testDetail.testName}
             </h4>
           </div>
-          <Button onClick={onClick} size="lg">
-            {historyNum === testDetail.length
-              ? "結果を見る"
-              : historyNum > 0
-              ? // TODO: 再開ボタンのほかに、1問目から開始ボタンも表示し、1問目から開始ボタン押下時はローカルストレージを削除する
-                `${historyNum + 1}問目から再開`
-              : "1問目から開始"}
+          {historyNum === testDetail.length && (
+            <Button onClick={onClickResultButton} size="lg">
+              結果を見る
+            </Button>
+          )}
+          {historyNum !== testDetail.length && historyNum > 0 && (
+            <Button onClick={onClickResumeButton} size="lg">
+              {`${historyNum + 1}問目から再開`}
+            </Button>
+          )}
+          <Button
+            onClick={onClickStartButton}
+            size="lg"
+            variant={historyNum === 0 ? "default" : "destructive"}
+          >
+            {historyNum === 0
+              ? "1問目から開始"
+              : "1問目から開始(回答履歴が削除されます)"}
           </Button>
         </div>
       </>
