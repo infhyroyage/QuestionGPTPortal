@@ -1,6 +1,6 @@
-import { fetchAnswerExplanationAtom, fetchTestDetailsAtom } from "@/lib/atoms";
+import useTestDetail from "@/hooks/useTestDetail";
+import { fetchAnswerExplanationAtom } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
-import { TestDetail } from "@/types/atoms";
 import { useAtom } from "jotai";
 import { ChevronRight } from "lucide-react";
 import { useCallback, useMemo } from "react";
@@ -14,19 +14,11 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
  */
 export default function NextQuestionButton() {
   const [answerExplanation] = useAtom(fetchAnswerExplanationAtom);
-  const [testDetails] = useAtom(fetchTestDetailsAtom);
 
   const navigate = useNavigate();
   const { testId, questionNumber } = useParams();
 
-  const testDetail = useMemo<TestDetail | undefined>(
-    () =>
-      testDetails &&
-      testDetails.find(
-        (testDetail: TestDetail) => testDetail.testId === testId
-      ),
-    [testDetails, testId]
-  );
+  const testDetail = useTestDetail();
 
   // 回答・解説を生成していない場合は、次問題遷移ボタンを非活性とする
   const isDisabledOpenExplanationButton = useMemo<boolean>(

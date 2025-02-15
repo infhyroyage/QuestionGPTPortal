@@ -1,11 +1,9 @@
 import TopBar from "@/components/TopBar";
 import { Button } from "@/components/ui/button";
-import { fetchTestDetailsAtom } from "@/lib/atoms";
+import useTestDetail from "@/hooks/useTestDetail";
 import { basePath } from "@/lib/github";
-import { TestDetail } from "@/types/atoms";
 import { Progress, ProgressTest } from "@/types/storage";
-import { useAtom } from "jotai";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
 /**
@@ -13,21 +11,12 @@ import { useNavigate, useParams } from "react-router";
  * @returns テスト準備ページのコンポーネント
  */
 export default function TestReadyPage() {
-  const [testDetails] = useAtom(fetchTestDetailsAtom);
   const [historyNum, setHistoryNum] = useState<number>(0);
 
   const navigate = useNavigate();
   const { testId } = useParams();
 
-  // TODO: useTestDetailでカスタムフック化する
-  const testDetail = useMemo<TestDetail | undefined>(
-    () =>
-      testDetails &&
-      testDetails.find(
-        (testDetail: TestDetail) => testDetail.testId === testId
-      ),
-    [testDetails, testId]
-  );
+  const testDetail = useTestDetail();
 
   // テスト詳細情報を習得していない場合はトップページにリダイレクト
   useEffect(() => {

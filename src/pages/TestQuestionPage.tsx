@@ -6,17 +6,16 @@ import SubmitButton from "@/components/SubmitButton";
 import TopBar from "@/components/TopBar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
+import useTestDetail from "@/hooks/useTestDetail";
 import {
   fetchQuestionSelectorAtom,
-  fetchTestDetailsAtom,
   fetchTranslationSubjectChoiceAtom,
   resetAtomsForTestQuestionAtom,
 } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
-import { TestDetail } from "@/types/atoms";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom } from "jotai";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
 
 /**
@@ -24,7 +23,6 @@ import { useNavigate, useParams } from "react-router";
  * @returns テストページのコンポーネント
  */
 export default function TestQuestionPage() {
-  const [testDetails] = useAtom(fetchTestDetailsAtom);
   const [questionSelector, fetchQuestionSelector] = useAtom(
     fetchQuestionSelectorAtom
   );
@@ -40,14 +38,7 @@ export default function TestQuestionPage() {
 
   const systemErrorToast = useSystemErrorToast();
 
-  const testDetail = useMemo<TestDetail | undefined>(
-    () =>
-      testDetails &&
-      testDetails.find(
-        (testDetail: TestDetail) => testDetail.testId === testId
-      ),
-    [testDetails, testId]
-  );
+  const testDetail = useTestDetail();
 
   // テスト詳細情報を習得していない場合はトップページにリダイレクト
   useEffect(() => {

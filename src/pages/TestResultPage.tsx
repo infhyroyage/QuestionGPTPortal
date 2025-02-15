@@ -1,10 +1,8 @@
 import TestResultAccordion from "@/components/TestResultAccordion";
 import TopBar from "@/components/TopBar";
-import { fetchTestDetailsAtom } from "@/lib/atoms";
+import useTestDetail from "@/hooks/useTestDetail";
 import { basePath } from "@/lib/github";
-import { TestDetail } from "@/types/atoms";
 import { Progress, ProgressTestHistory } from "@/types/storage";
-import { useAtom } from "jotai";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
@@ -13,21 +11,12 @@ import { useNavigate, useParams } from "react-router";
  * @returns テスト結果ページのコンポーネント
  */
 export default function TestResultPage() {
-  const [testDetails] = useAtom(fetchTestDetailsAtom);
   const [histories, setHistories] = useState<ProgressTestHistory[]>([]);
 
   const { testId } = useParams();
-
   const navigate = useNavigate();
 
-  const testDetail = useMemo<TestDetail | undefined>(
-    () =>
-      testDetails &&
-      testDetails.find(
-        (testDetail: TestDetail) => testDetail.testId === testId
-      ),
-    [testDetails, testId]
-  );
+  const testDetail = useTestDetail();
 
   // テスト詳細情報を習得していない場合はトップページにリダイレクト
   useEffect(() => {
