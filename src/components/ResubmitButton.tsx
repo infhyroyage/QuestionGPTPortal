@@ -1,8 +1,5 @@
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
-import {
-  fetchAnswerExplanationAtom,
-  fetchTranslationExplanationAtom,
-} from "@/lib/atoms";
+import { fetchAnswerExplanationAtom } from "@/lib/atoms";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom } from "jotai";
 import { RefreshCcw } from "lucide-react";
@@ -19,9 +16,6 @@ export default function ResubmitButton() {
   const [answerExplanation, fetchAnswerExplanation] = useAtom(
     fetchAnswerExplanationAtom
   );
-  const [, fetchTranslationExplanation] = useAtom(
-    fetchTranslationExplanationAtom
-  );
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
 
@@ -37,7 +31,8 @@ export default function ResubmitButton() {
     [answerExplanation]
   );
 
-  // 回答・解説再生成ボタン押下するたびに、回答・解説の再生成・翻訳を行う
+  // 回答・解説再生成ボタン押下時に、回答・解説を1度だけ再生成
+  // 再生成した解説の再翻訳の処理は、SubmitButtonで実行する
   const onClickResubmit = useCallback(async () => {
     if (testId && questionNumber && !isOccurredSystemError) {
       try {
@@ -48,7 +43,6 @@ export default function ResubmitButton() {
           accountInfo,
           true
         );
-        await fetchTranslationExplanation(instance, accountInfo);
       } catch (e) {
         setIsOccurredSystemError(true);
         systemErrorToast(e);
@@ -57,7 +51,6 @@ export default function ResubmitButton() {
   }, [
     accountInfo,
     fetchAnswerExplanation,
-    fetchTranslationExplanation,
     instance,
     isOccurredSystemError,
     questionNumber,

@@ -8,6 +8,7 @@ import TopBar from "@/components/TopBar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import useTestDetail from "@/hooks/useTestDetail";
+import useTranslationFailedToast from "@/hooks/useTranslationFailedToast";
 import {
   fetchQuestionSelectorAtom,
   fetchTranslationSubjectChoiceAtom,
@@ -27,11 +28,13 @@ export default function TestQuestionPage() {
   const [questionSelector, fetchQuestionSelector] = useAtom(
     fetchQuestionSelectorAtom
   );
-  const [, fetchTranslationSubjectChoice] = useAtom(
+  const [translationSubjectChoice, fetchTranslationSubjectChoice] = useAtom(
     fetchTranslationSubjectChoiceAtom
   );
   const [, resetAtomsForTestQuestion] = useAtom(resetAtomsForTestQuestionAtom);
   const [isOccurredSystemError, setIsOccurredSystemError] =
+    useState<boolean>(false);
+  const [isOccurredTranslationFailed, setIsOccurredTranslationFailed] =
     useState<boolean>(false);
 
   const navigate = useNavigate();
@@ -39,6 +42,7 @@ export default function TestQuestionPage() {
   const { instance, accounts } = useMsal();
   const accountInfo = useAccount(accounts[0] || {});
 
+  const translationFailedToast = useTranslationFailedToast();
   const systemErrorToast = useSystemErrorToast();
   const testDetail = useTestDetail();
 
@@ -77,7 +81,6 @@ export default function TestQuestionPage() {
             instance,
             accountInfo
           );
-          await fetchTranslationSubjectChoice(instance, accountInfo);
         } catch (e) {
           setIsOccurredSystemError(true);
           systemErrorToast(e);
@@ -87,13 +90,40 @@ export default function TestQuestionPage() {
   }, [
     accountInfo,
     fetchQuestionSelector,
-    fetchTranslationSubjectChoice,
     instance,
     isOccurredSystemError,
     questionNumber,
     questionSelector,
     systemErrorToast,
     testId,
+  ]);
+
+  // 問題文・選択肢の取得直後に、それらの翻訳文を1度だけ取得
+  useEffect(() => {
+    if (
+      questionSelector &&
+      !translationSubjectChoice &&
+      !isOccurredTranslationFailed
+    ) {
+      (async () => {
+        try {
+          await fetchTranslationSubjectChoice(instance, accountInfo);
+        } catch {
+          setIsOccurredTranslationFailed(true);
+          translationFailedToast("問題文・選択肢", () =>
+            setIsOccurredTranslationFailed(false)
+          );
+        }
+      })();
+    }
+  }, [
+    accountInfo,
+    fetchTranslationSubjectChoice,
+    instance,
+    isOccurredTranslationFailed,
+    questionSelector,
+    translationFailedToast,
+    translationSubjectChoice,
   ]);
 
   // TODO: shadcn/uiのResizableを用いて、テストページの上半分と下半分を可変スクロールにする
