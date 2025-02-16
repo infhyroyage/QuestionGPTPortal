@@ -6,7 +6,7 @@ import {
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom } from "jotai";
 import { RefreshCcw } from "lucide-react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useParams } from "react-router";
 import { Button } from "./ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
@@ -22,6 +22,8 @@ export default function ResubmitButton() {
   const [, fetchTranslationExplanation] = useAtom(
     fetchTranslationExplanationAtom
   );
+  const [isOccurredSystemError, setIsOccurredSystemError] =
+    useState<boolean>(false);
 
   const { testId, questionNumber } = useParams();
   const { instance, accounts } = useMsal();
@@ -37,7 +39,7 @@ export default function ResubmitButton() {
 
   // 回答・解説再生成ボタン押下するたびに、回答・解説の再生成・翻訳を行う
   const onClickResubmit = useCallback(async () => {
-    if (testId && questionNumber) {
+    if (testId && questionNumber && !isOccurredSystemError) {
       try {
         await fetchAnswerExplanation(
           testId,
@@ -48,6 +50,7 @@ export default function ResubmitButton() {
         );
         await fetchTranslationExplanation(instance, accountInfo);
       } catch (e) {
+        setIsOccurredSystemError(true);
         systemErrorToast(e);
       }
     }
@@ -56,6 +59,7 @@ export default function ResubmitButton() {
     fetchAnswerExplanation,
     fetchTranslationExplanation,
     instance,
+    isOccurredSystemError,
     questionNumber,
     systemErrorToast,
     testId,

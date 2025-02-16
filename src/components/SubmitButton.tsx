@@ -8,7 +8,7 @@ import {
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom } from "jotai";
 import { Check, Loader2, SendHorizontal, X } from "lucide-react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useParams } from "react-router";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
@@ -24,6 +24,8 @@ export default function SubmitButton() {
   const [, fetchTranslationExplanation] = useAtom(
     fetchTranslationExplanationAtom
   );
+  const [isOccurredSystemError, setIsOccurredSystemError] =
+    useState<boolean>(false);
 
   const { testId, questionNumber } = useParams();
   const { instance, accounts } = useMsal();
@@ -45,7 +47,12 @@ export default function SubmitButton() {
 
   // 回答・解説生成ボタン押下時に、回答・解説の生成・翻訳を1回だけ行う
   const onClickSubmit = useCallback(async () => {
-    if (testId && questionNumber && !answerExplanation) {
+    if (
+      testId &&
+      questionNumber &&
+      !answerExplanation &&
+      !isOccurredSystemError
+    ) {
       try {
         await fetchAnswerExplanation(
           testId,
@@ -55,6 +62,7 @@ export default function SubmitButton() {
         );
         await fetchTranslationExplanation(instance, accountInfo);
       } catch (e) {
+        setIsOccurredSystemError(true);
         systemErrorToast(e);
       }
     }
@@ -64,6 +72,7 @@ export default function SubmitButton() {
     fetchAnswerExplanation,
     fetchTranslationExplanation,
     instance,
+    isOccurredSystemError,
     questionNumber,
     systemErrorToast,
     testId,

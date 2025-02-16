@@ -16,7 +16,7 @@ import {
 import { basePath } from "@/lib/github";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom } from "jotai";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
 /**
@@ -31,6 +31,8 @@ export default function TestQuestionPage() {
     fetchTranslationSubjectChoiceAtom
   );
   const [, resetAtomsForTestQuestion] = useAtom(resetAtomsForTestQuestionAtom);
+  const [isOccurredSystemError, setIsOccurredSystemError] =
+    useState<boolean>(false);
 
   const navigate = useNavigate();
   const { testId, questionNumber } = useParams();
@@ -59,9 +61,14 @@ export default function TestQuestionPage() {
     }
   }, [questionSelector, resetAtomsForTestQuestion, testId, questionNumber]);
 
-  // ページ遷移直後に、問題文・選択肢を1回だけ取得・翻訳
+  // ページ遷移直後に、問題文・選択肢を1回だけ取得
   useEffect(() => {
-    if (testId && questionNumber && !questionSelector) {
+    if (
+      testId &&
+      questionNumber &&
+      !questionSelector &&
+      !isOccurredSystemError
+    ) {
       (async () => {
         try {
           await fetchQuestionSelector(
@@ -72,6 +79,7 @@ export default function TestQuestionPage() {
           );
           await fetchTranslationSubjectChoice(instance, accountInfo);
         } catch (e) {
+          setIsOccurredSystemError(true);
           systemErrorToast(e);
         }
       })();
@@ -81,6 +89,7 @@ export default function TestQuestionPage() {
     fetchQuestionSelector,
     fetchTranslationSubjectChoice,
     instance,
+    isOccurredSystemError,
     questionNumber,
     questionSelector,
     systemErrorToast,

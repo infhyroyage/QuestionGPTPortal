@@ -11,7 +11,7 @@ export default function useSystemErrorToast() {
     console.error(e);
     toast({
       variant: "destructive",
-      title: "システムエラーが発生しました",
+      title: "システムエラー",
       description: (
         <>
           <p>以下をシステム管理者にご連絡ください</p>

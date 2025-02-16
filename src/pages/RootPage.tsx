@@ -6,7 +6,7 @@ import { fetchTestDetailsAtom } from "@/lib/atoms";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom } from "jotai";
 import { TriangleAlert } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 /**
  * トップページのコンポーネント
@@ -14,6 +14,8 @@ import { useEffect } from "react";
  */
 export default function RootPage() {
   const [testDetails, fetchTestDetails] = useAtom(fetchTestDetailsAtom);
+  const [isOccurredSystemError, setIsOccurredSystemError] =
+    useState<boolean>(false);
 
   const { instance, accounts } = useMsal();
   const accountInfo = useAccount(accounts[0] || {});
@@ -22,16 +24,24 @@ export default function RootPage() {
 
   // テスト一覧情報を1回だけ取得
   useEffect(() => {
-    if (!testDetails) {
+    if (!testDetails && !isOccurredSystemError) {
       (async () => {
         try {
           await fetchTestDetails(instance, accountInfo);
         } catch (e) {
+          setIsOccurredSystemError(true);
           systemErrorToast(e);
         }
       })();
     }
-  }, [accountInfo, fetchTestDetails, instance, systemErrorToast, testDetails]);
+  }, [
+    accountInfo,
+    fetchTestDetails,
+    instance,
+    isOccurredSystemError,
+    systemErrorToast,
+    testDetails,
+  ]);
 
   return (
     <>
