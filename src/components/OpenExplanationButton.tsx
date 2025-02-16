@@ -2,9 +2,16 @@ import { fetchAnswerExplanationAtom } from "@/lib/atoms";
 import { useAtom } from "jotai";
 import { Info } from "lucide-react";
 import { useMemo } from "react";
-import ExplanationSheet from "./ExplanationSheet";
+import ExplanationSheetContent from "./ExplanationSheetContent";
 import { Button } from "./ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "./ui/sheet";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 /**
@@ -33,7 +40,11 @@ export default function OpenExplanationButton() {
         <TooltipContent>解説表示</TooltipContent>
       </Tooltip>
       <SheetContent className="min-w-[40vw] max-h-[100vh] overflow-y-auto">
-        <ExplanationSheet />
+        <SheetHeader>
+          <SheetTitle />
+          <SheetDescription />
+        </SheetHeader>
+        <ExplanationSheetContent />
       </SheetContent>
     </Sheet>
   );

@@ -6,10 +6,10 @@ import { useAtom } from "jotai";
 import { Skeleton } from "./ui/skeleton";
 
 /**
- * 解説シートのコンポーネント
- * @returns 解説シートのコンポーネント
+ * 解説シートのコンテンツのコンポーネント
+ * @returns 解説シートのコンテンツのコンポーネント
  */
-export default function ExplanationSheet() {
+export default function ExplanationSheetContent() {
   const [answerExplanation] = useAtom(fetchAnswerExplanationAtom);
   const [translationExplanation] = useAtom(fetchTranslationExplanationAtom);
 
