@@ -19,7 +19,7 @@ export default function NotFoundPage() {
   return (
     <>
       <TopBar title="Question GPT Portal" />
-      <div className="flex justify-center items-center h-screen flex-col gap-4">
+      <div className="pt-16 flex items-center justify-center min-h-screen flex-col space-y-4">
         <Frown size={100} />
         <div>Not Found</div>
         <Button onClick={onClick}>トップページへ戻る</Button>

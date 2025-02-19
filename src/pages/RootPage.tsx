@@ -54,7 +54,7 @@ export default function RootPage() {
             <Skeleton className="px-6 py-8 w-full rounded-md" />
           </div>
         ) : Object.keys(testDetails).length === 0 ? (
-          <div className="flex items-center justify-center h-screen flex-col gap-4">
+          <div className="flex items-center justify-center min-h-screen flex-col space-y-4">
             <TriangleAlert size={100} />
             <div>テストが見つかりませんでした</div>
           </div>
