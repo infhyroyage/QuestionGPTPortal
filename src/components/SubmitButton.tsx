@@ -1,15 +1,13 @@
 import { Button } from "@/components/ui/button";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
-import useTranslationFailedToast from "@/hooks/useTranslationFailedToast";
 import {
   fetchAnswerExplanationAtom,
   fetchQuestionSelectorAtom,
-  fetchTranslationExplanationAtom,
 } from "@/lib/atoms";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom } from "jotai";
 import { Check, Loader2, SendHorizontal, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useParams } from "react-router";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
@@ -22,11 +20,6 @@ export default function SubmitButton() {
     fetchAnswerExplanationAtom
   );
   const [questionSelector] = useAtom(fetchQuestionSelectorAtom);
-  const [translationExplanation, fetchTranslationExplanation] = useAtom(
-    fetchTranslationExplanationAtom
-  );
-  const [isOccurredTranslationFailed, setIsOccurredTranslationFailed] =
-    useState<boolean>(false);
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
 
@@ -34,7 +27,6 @@ export default function SubmitButton() {
   const { instance, accounts } = useMsal();
   const accountInfo = useAccount(accounts[0] || {});
 
-  const translationFailedToast = useTranslationFailedToast();
   const systemErrorToast = useSystemErrorToast();
 
   // 以下のいずれかの場合は、回答・解説生成ボタンを非活性とする
@@ -78,34 +70,6 @@ export default function SubmitButton() {
     questionNumber,
     systemErrorToast,
     testId,
-  ]);
-
-  // 回答・解説の生成/取得直後に、解説の翻訳文を1度だけ取得
-  useEffect(() => {
-    if (
-      answerExplanation &&
-      !translationExplanation &&
-      !isOccurredTranslationFailed
-    ) {
-      (async () => {
-        try {
-          await fetchTranslationExplanation(instance, accountInfo);
-        } catch {
-          setIsOccurredTranslationFailed(true);
-          translationFailedToast("解説", () =>
-            setIsOccurredTranslationFailed(false)
-          );
-        }
-      })();
-    }
-  }, [
-    accountInfo,
-    answerExplanation,
-    fetchTranslationExplanation,
-    instance,
-    isOccurredTranslationFailed,
-    translationExplanation,
-    translationFailedToast,
   ]);
 
   return (

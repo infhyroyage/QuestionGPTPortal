@@ -1,8 +1,11 @@
+import useTranslationFailedToast from "@/hooks/useTranslationFailedToast";
 import {
   fetchAnswerExplanationAtom,
   fetchTranslationExplanationAtom,
 } from "@/lib/atoms";
+import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom } from "jotai";
+import { useEffect, useState } from "react";
 import { Skeleton } from "./ui/skeleton";
 
 /**
@@ -11,7 +14,44 @@ import { Skeleton } from "./ui/skeleton";
  */
 export default function ExplanationSheetContent() {
   const [answerExplanation] = useAtom(fetchAnswerExplanationAtom);
-  const [translationExplanation] = useAtom(fetchTranslationExplanationAtom);
+  const [translationExplanation, fetchTranslationExplanation] = useAtom(
+    fetchTranslationExplanationAtom
+  );
+  const [isOccurredTranslationFailed, setIsOccurredTranslationFailed] =
+    useState<boolean>(false);
+
+  const { instance, accounts } = useMsal();
+  const accountInfo = useAccount(accounts[0] || {});
+
+  const translationFailedToast = useTranslationFailedToast();
+
+  // 回答・解説の生成/取得直後に、解説の翻訳文を1度だけ取得
+  useEffect(() => {
+    if (
+      answerExplanation &&
+      !translationExplanation &&
+      !isOccurredTranslationFailed
+    ) {
+      (async () => {
+        try {
+          await fetchTranslationExplanation(instance, accountInfo);
+        } catch {
+          setIsOccurredTranslationFailed(true);
+          translationFailedToast("解説", () =>
+            setIsOccurredTranslationFailed(false)
+          );
+        }
+      })();
+    }
+  }, [
+    accountInfo,
+    answerExplanation,
+    fetchTranslationExplanation,
+    instance,
+    isOccurredTranslationFailed,
+    translationExplanation,
+    translationFailedToast,
+  ]);
 
   return (
     <>
