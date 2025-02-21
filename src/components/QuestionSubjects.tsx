@@ -52,7 +52,6 @@ export default function QuestionSubjects() {
           </>
         )}
       </div>
-      <div className="h-[40vh]" />
     </>
   );
 }

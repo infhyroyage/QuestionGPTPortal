@@ -5,7 +5,11 @@ import ResubmitButton from "@/components/ResubmitButton";
 import Selector from "@/components/Selector";
 import SubmitButton from "@/components/SubmitButton";
 import TopBar from "@/components/TopBar";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import useTestDetail from "@/hooks/useTestDetail";
 import useTranslationFailedToast from "@/hooks/useTranslationFailedToast";
@@ -126,33 +130,42 @@ export default function TestQuestionPage() {
     translationSubjectChoice,
   ]);
 
-  // TODO: shadcn/uiのResizableを用いて、テストページの上半分と下半分を可変スクロールにする
   return (
     testId &&
     testDetail && (
       <>
         <TopBar title={`[${testDetail.courseName}] ${testDetail.testName}`} />
-        <div className="pt-16 px-4">
-          <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight my-6">
-            {`${questionNumber}問目 (全${testDetail.length}問)`}
-          </h3>
-          <QuestionSubjects />
-        </div>
-        <div className="fixed bottom-0 h-[40vh] w-full">
-          <ScrollArea className="h-full rounded-md bg-slate-200 dark:bg-slate-800">
-            <Selector />
-          </ScrollArea>
-        </div>
-        <div className="fixed bottom-[calc(40vh+1rem)] right-4 flex flex-col space-y-4">
-          <div className="flex space-x-4">
-            <SubmitButton />
-            <OpenExplanationButton />
-          </div>
-          <div className="flex space-x-4">
-            <ResubmitButton />
-            <NextQuestionButton />
-          </div>
-        </div>
+        <ResizablePanelGroup
+          direction="vertical"
+          className="pt-16 min-h-screen w-full"
+        >
+          <ResizablePanel defaultSize={60}>
+            <div className="relative h-full">
+              <div className="h-full min-h-0 overflow-y-auto px-4">
+                <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight my-6">
+                  {`${questionNumber}問目 (全${testDetail.length}問)`}
+                </h3>
+                <QuestionSubjects />
+              </div>
+              <div className="absolute bottom-4 right-4 flex flex-col space-y-4">
+                <div className="flex space-x-4">
+                  <SubmitButton />
+                  <OpenExplanationButton />
+                </div>
+                <div className="flex space-x-4">
+                  <ResubmitButton />
+                  <NextQuestionButton />
+                </div>
+              </div>
+            </div>
+          </ResizablePanel>
+          <ResizableHandle withHandle />
+          <ResizablePanel defaultSize={40}>
+            <div className="h-full min-h-0 overflow-y-auto bg-slate-200 dark:bg-slate-800">
+              <Selector />
+            </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </>
     )
   );
