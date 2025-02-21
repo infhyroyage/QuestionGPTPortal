@@ -1,9 +1,12 @@
+import useTranslationFailedToast from "@/hooks/useTranslationFailedToast";
 import {
   fetchQuestionSelectorAtom,
   fetchTranslationSubjectChoiceAtom,
 } from "@/lib/atoms";
 import { Subject } from "@/types/backend";
+import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom } from "jotai";
+import { useEffect, useState } from "react";
 import ImageDialog from "./ImageDialog";
 import { Skeleton } from "./ui/skeleton";
 
@@ -13,7 +16,44 @@ import { Skeleton } from "./ui/skeleton";
  */
 export default function QuestionSubjects() {
   const [questionSelector] = useAtom(fetchQuestionSelectorAtom);
-  const [translationSubjectChoice] = useAtom(fetchTranslationSubjectChoiceAtom);
+  const [translationSubjectChoice, fetchTranslationSubjectChoice] = useAtom(
+    fetchTranslationSubjectChoiceAtom
+  );
+  const [isOccurredTranslationFailed, setIsOccurredTranslationFailed] =
+    useState<boolean>(false);
+
+  const { instance, accounts } = useMsal();
+  const accountInfo = useAccount(accounts[0] || {});
+
+  const translationFailedToast = useTranslationFailedToast();
+
+  // 問題文・選択肢の取得直後に、それらの翻訳文を1度だけ取得
+  useEffect(() => {
+    if (
+      questionSelector &&
+      !translationSubjectChoice &&
+      !isOccurredTranslationFailed
+    ) {
+      (async () => {
+        try {
+          await fetchTranslationSubjectChoice(instance, accountInfo);
+        } catch {
+          setIsOccurredTranslationFailed(true);
+          translationFailedToast("問題文・選択肢", () =>
+            setIsOccurredTranslationFailed(false)
+          );
+        }
+      })();
+    }
+  }, [
+    accountInfo,
+    fetchTranslationSubjectChoice,
+    instance,
+    isOccurredTranslationFailed,
+    questionSelector,
+    translationFailedToast,
+    translationSubjectChoice,
+  ]);
 
   return (
     <>

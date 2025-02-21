@@ -9,10 +9,8 @@ import {
 } from "@/components/ui/resizable";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import useTestDetail from "@/hooks/useTestDetail";
-import useTranslationFailedToast from "@/hooks/useTranslationFailedToast";
 import {
   fetchQuestionSelectorAtom,
-  fetchTranslationSubjectChoiceAtom,
   resetAtomsForTestQuestionAtom,
 } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
@@ -29,13 +27,8 @@ export default function TestQuestionPage() {
   const [questionSelector, fetchQuestionSelector] = useAtom(
     fetchQuestionSelectorAtom
   );
-  const [translationSubjectChoice, fetchTranslationSubjectChoice] = useAtom(
-    fetchTranslationSubjectChoiceAtom
-  );
   const [, resetAtomsForTestQuestion] = useAtom(resetAtomsForTestQuestionAtom);
   const [isOccurredSystemError, setIsOccurredSystemError] =
-    useState<boolean>(false);
-  const [isOccurredTranslationFailed, setIsOccurredTranslationFailed] =
     useState<boolean>(false);
 
   const navigate = useNavigate();
@@ -43,7 +36,6 @@ export default function TestQuestionPage() {
   const { instance, accounts } = useMsal();
   const accountInfo = useAccount(accounts[0] || {});
 
-  const translationFailedToast = useTranslationFailedToast();
   const systemErrorToast = useSystemErrorToast();
   const testDetail = useTestDetail();
 
@@ -97,34 +89,6 @@ export default function TestQuestionPage() {
     questionSelector,
     systemErrorToast,
     testId,
-  ]);
-
-  // 問題文・選択肢の取得直後に、それらの翻訳文を1度だけ取得
-  useEffect(() => {
-    if (
-      questionSelector &&
-      !translationSubjectChoice &&
-      !isOccurredTranslationFailed
-    ) {
-      (async () => {
-        try {
-          await fetchTranslationSubjectChoice(instance, accountInfo);
-        } catch {
-          setIsOccurredTranslationFailed(true);
-          translationFailedToast("問題文・選択肢", () =>
-            setIsOccurredTranslationFailed(false)
-          );
-        }
-      })();
-    }
-  }, [
-    accountInfo,
-    fetchTranslationSubjectChoice,
-    instance,
-    isOccurredTranslationFailed,
-    questionSelector,
-    translationFailedToast,
-    translationSubjectChoice,
   ]);
 
   return (
