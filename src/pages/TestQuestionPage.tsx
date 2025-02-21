@@ -1,9 +1,6 @@
-import NextQuestionButton from "@/components/NextQuestionButton";
-import OpenExplanationButton from "@/components/OpenExplanationButton";
+import IconButtonsContainer from "@/components/IconButtonsContainer";
 import QuestionSubjects from "@/components/QuestionSubjects";
-import ResubmitButton from "@/components/ResubmitButton";
 import Selector from "@/components/Selector";
-import SubmitButton from "@/components/SubmitButton";
 import TopBar from "@/components/TopBar";
 import {
   ResizableHandle,
@@ -147,16 +144,7 @@ export default function TestQuestionPage() {
                 </h3>
                 <QuestionSubjects />
               </div>
-              <div className="absolute bottom-4 right-4 flex flex-col space-y-4">
-                <div className="flex space-x-4">
-                  <SubmitButton />
-                  <OpenExplanationButton />
-                </div>
-                <div className="flex space-x-4">
-                  <ResubmitButton />
-                  <NextQuestionButton />
-                </div>
-              </div>
+              <IconButtonsContainer />
             </div>
           </ResizablePanel>
           <ResizableHandle withHandle />
