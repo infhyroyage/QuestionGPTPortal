@@ -95,17 +95,14 @@ export default function TestQuestionPage() {
     testId &&
     testDetail && (
       <>
-        <TopBar title={`[${testDetail.courseName}] ${testDetail.testName}`} />
+        <TopBar title={`${questionNumber}問目 (全${testDetail.length}問)`} />
         <ResizablePanelGroup
           direction="vertical"
           className="pt-16 min-h-screen w-full"
         >
           <ResizablePanel defaultSize={60}>
             <div className="relative h-full">
-              <div className="h-full min-h-0 overflow-y-auto px-4">
-                <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight my-6">
-                  {`${questionNumber}問目 (全${testDetail.length}問)`}
-                </h3>
+              <div className="h-full min-h-0 overflow-y-auto">
                 <QuestionSubjects />
               </div>
               <IconButtonsContainer />

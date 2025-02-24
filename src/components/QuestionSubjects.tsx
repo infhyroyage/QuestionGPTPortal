@@ -57,7 +57,7 @@ export default function QuestionSubjects() {
 
   return (
     <>
-      <div className="space-y-4 mb-4">
+      <div className="p-4 space-y-4">
         {questionSelector ? (
           questionSelector.subjects.map((subject: Subject, idx: number) =>
             subject.isIndicatedImg ? (
