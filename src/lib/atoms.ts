@@ -115,7 +115,6 @@ export const fetchAnswerExplanationAtom = atom(
           instance,
           accountInfo,
           {
-            courseName: testDetail.courseName,
             subjects: questionSelector.subjects.map(
               (subject: Subject) => subject.sentence
             ),
@@ -163,7 +162,6 @@ export const fetchAnswerExplanationAtom = atom(
           instance,
           accountInfo,
           {
-            courseName: testDetail.courseName,
             subjects: questionSelector.subjects.map(
               (subject: Subject) => subject.sentence
             ),

@@ -10,7 +10,6 @@ export type GetAnswer = {
  * [POST] /tests/{testId}/answers/{questionNumber} のリクエストボディの型
  */
 export type PostAnswerReq = {
-  courseName: string;
   subjects: string[];
   choices: string[];
 };
