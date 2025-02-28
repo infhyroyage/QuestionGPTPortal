@@ -12,7 +12,6 @@ import {
   GetAnswer,
   GetQuestion,
   GetTests,
-  PostAnswerReq,
   PostAnswerRes,
   PutEn2JaReq,
   PutEn2JaRes,
@@ -106,22 +105,11 @@ export const fetchAnswerExplanationAtom = atom(
     try {
       if (isResubmit) {
         // [POST] /tests/{testId}/answers/{questionNumber}にアクセス
-        const postAnswerRes: PostAnswerRes = await accessBackend<
-          PostAnswerRes,
-          PostAnswerReq
-        >(
+        const postAnswerRes: PostAnswerRes = await accessBackend<PostAnswerRes>(
           "POST",
           `/tests/${testId}/answers/${questionNumber}`,
           instance,
-          accountInfo,
-          {
-            subjects: questionSelector.subjects.map(
-              (subject: Subject) => subject.sentence
-            ),
-            choices: questionSelector.choices.map(
-              (choice: Choice) => choice.sentence
-            ),
-          }
+          accountInfo
         );
         correctIdxes = postAnswerRes.correctIdxes;
         explanations = postAnswerRes.explanations;
@@ -153,22 +141,11 @@ export const fetchAnswerExplanationAtom = atom(
     } catch (err) {
       // 404エラーの場合は、[POST] /tests/{testId}/answers/{questionNumber}にアクセス
       if (err instanceof AxiosError && err.response?.status === 404) {
-        const postAnswerRes: PostAnswerRes = await accessBackend<
-          PostAnswerRes,
-          PostAnswerReq
-        >(
+        const postAnswerRes: PostAnswerRes = await accessBackend<PostAnswerRes>(
           "POST",
           `/tests/${testId}/answers/${questionNumber}`,
           instance,
-          accountInfo,
-          {
-            subjects: questionSelector.subjects.map(
-              (subject: Subject) => subject.sentence
-            ),
-            choices: questionSelector.choices.map(
-              (choice: Choice) => choice.sentence
-            ),
-          }
+          accountInfo
         );
         correctIdxes = postAnswerRes.correctIdxes;
         explanations = postAnswerRes.explanations;

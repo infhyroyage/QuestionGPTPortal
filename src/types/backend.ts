@@ -7,14 +7,6 @@ export type GetAnswer = {
 };
 
 /**
- * [POST] /tests/{testId}/answers/{questionNumber} のリクエストボディの型
- */
-export type PostAnswerReq = {
-  subjects: string[];
-  choices: string[];
-};
-
-/**
  * [POST] /tests/{testId}/answers/{questionNumber} のレスポンスボディの型
  */
 export type PostAnswerRes = {
