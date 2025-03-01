@@ -41,17 +41,24 @@ export default function NextQuestionButton() {
   }, [navigate, questionNumber, testDetail, testId]);
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          size="icon"
-          disabled={isDisabledOpenExplanationButton}
-          onClick={onClick}
-        >
-          <ChevronRight />
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>次の問題へ</TooltipContent>
-    </Tooltip>
+    testDetail &&
+    questionNumber && (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            size="icon"
+            disabled={isDisabledOpenExplanationButton}
+            onClick={onClick}
+          >
+            <ChevronRight />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          {parseInt(questionNumber) === testDetail.length
+            ? "テスト結果へ"
+            : "次の問題へ"}
+        </TooltipContent>
+      </Tooltip>
+    )
   );
 }
