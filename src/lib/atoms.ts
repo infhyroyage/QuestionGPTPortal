@@ -104,7 +104,7 @@ export const fetchAnswerExplanationAtom = atom(
     let explanations: string[];
     try {
       if (isResubmit) {
-        // [POST] /tests/{testId}/answers/{questionNumber}にアクセス
+        // 回答・解説再生成の場合は、[POST] /tests/{testId}/answers/{questionNumber}にアクセス
         const postAnswerRes: PostAnswerRes = await accessBackend<PostAnswerRes>(
           "POST",
           `/tests/${testId}/answers/${questionNumber}`,
@@ -114,7 +114,7 @@ export const fetchAnswerExplanationAtom = atom(
         correctIdxes = postAnswerRes.correctIdxes;
         explanations = postAnswerRes.explanations;
       } else {
-        // [GET] /tests/{testId}/answers/{questionNumber}にアクセス
+        // 回答・解説生成の場合は、[GET] /tests/{testId}/answers/{questionNumber}にアクセス
         const getAnswerRes: GetAnswer = await accessBackend<GetAnswer>(
           "GET",
           `/tests/${testId}/answers/${questionNumber}`,
@@ -193,11 +193,18 @@ export const fetchAnswerExplanationAtom = atom(
     if (progressStr) {
       const progress: Progress = JSON.parse(progressStr);
       if (progress[testId]) {
-        // テスト実績あり＆現テスト2問目以降
-        progress[testId].histories.push(history);
+        // 回答・解説生成したテストで実績あり
+        if (isResubmit) {
+          // 回答・解説再生成の場合は、末尾の回答履歴を更新
+          progress[testId].histories[progress[testId].histories.length - 1] =
+            history;
+        } else {
+          // 回答・解説生成の場合は、回答履歴を末尾に追加
+          progress[testId].histories.push(history);
+        }
         localStorage.setItem("progress", JSON.stringify(progress));
       } else {
-        // テスト実績あり＆現テスト1問目
+        // 回答・解説生成したテストとは別のテストで実績あり
         progress[testId] = {
           testLength: testDetail.length,
           histories: [history],
@@ -205,7 +212,7 @@ export const fetchAnswerExplanationAtom = atom(
         localStorage.setItem("progress", JSON.stringify(progress));
       }
     } else {
-      // テスト実績なし
+      // 回答・解説生成の実績なし
       localStorage.setItem(
         "progress",
         JSON.stringify({
