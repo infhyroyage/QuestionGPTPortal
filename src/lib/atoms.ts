@@ -102,6 +102,7 @@ export const fetchAnswerExplanationAtom = atom(
     let isCorrect: boolean;
     let correctIdxes: number[];
     let explanations: string[];
+    let communityVotes: string[];
     try {
       if (isResubmit) {
         // 回答・解説再生成の場合は、[POST] /tests/{testId}/answers/{questionNumber}にアクセス
@@ -113,6 +114,7 @@ export const fetchAnswerExplanationAtom = atom(
         );
         correctIdxes = postAnswerRes.correctIdxes;
         explanations = postAnswerRes.explanations;
+        communityVotes = postAnswerRes.communityVotes;
       } else {
         // 回答・解説生成の場合は、[GET] /tests/{testId}/answers/{questionNumber}にアクセス
         const getAnswerRes: GetAnswer = await accessBackend<GetAnswer>(
@@ -123,6 +125,7 @@ export const fetchAnswerExplanationAtom = atom(
         );
         correctIdxes = getAnswerRes.correctIdxes;
         explanations = getAnswerRes.explanations;
+        communityVotes = getAnswerRes.communityVotes;
       }
 
       // アクセスして取得した正解・解説文で更新
@@ -135,6 +138,7 @@ export const fetchAnswerExplanationAtom = atom(
       set(answerExplanationAtom, {
         correctFlags,
         explanations,
+        communityVotes,
         isSubmitting: false,
         isCorrect,
       });
@@ -149,6 +153,7 @@ export const fetchAnswerExplanationAtom = atom(
         );
         correctIdxes = postAnswerRes.correctIdxes;
         explanations = postAnswerRes.explanations;
+        communityVotes = postAnswerRes.communityVotes;
 
         // アクセスして生成した正解・解説文で更新
         const correctFlags: boolean[] = [
@@ -160,6 +165,7 @@ export const fetchAnswerExplanationAtom = atom(
         set(answerExplanationAtom, {
           correctFlags,
           explanations,
+          communityVotes,
           isSubmitting: false,
           isCorrect,
         });

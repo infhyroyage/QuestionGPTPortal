@@ -10,6 +10,7 @@ export type AnswerExplanation =
   | {
       correctFlags?: boolean[];
       explanations?: string[];
+      communityVotes?: string[];
       isSubmitting: boolean;
       isCorrect?: boolean;
     }

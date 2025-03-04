@@ -4,6 +4,7 @@
 export type GetAnswer = {
   correctIdxes: number[];
   explanations: string[];
+  communityVotes: string[];
 };
 
 /**
@@ -12,6 +13,7 @@ export type GetAnswer = {
 export type PostAnswerRes = {
   correctIdxes: number[];
   explanations: string[];
+  communityVotes: string[];
 };
 
 /**
