@@ -1,12 +1,17 @@
 import useTranslationFailedToast from "@/hooks/useTranslationFailedToast";
 import {
   fetchAnswerExplanationAtom,
+  fetchQuestionSelectorAtom,
   fetchTranslationExplanationAtom,
+  fetchTranslationSubjectChoiceAtom,
 } from "@/lib/atoms";
+import { Choice } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom } from "jotai";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
+import SelectorButton from "./SelectorButton";
 import { Badge } from "./ui/badge";
+import { Separator } from "./ui/separator";
 import { Skeleton } from "./ui/skeleton";
 
 /**
@@ -15,9 +20,11 @@ import { Skeleton } from "./ui/skeleton";
  */
 export default function ExplanationSheetContent() {
   const [answerExplanation] = useAtom(fetchAnswerExplanationAtom);
+  const [questionSelector] = useAtom(fetchQuestionSelectorAtom);
   const [translationExplanation, fetchTranslationExplanation] = useAtom(
     fetchTranslationExplanationAtom
   );
+  const [translationSubjectChoice] = useAtom(fetchTranslationSubjectChoiceAtom);
   const [isOccurredTranslationFailed, setIsOccurredTranslationFailed] =
     useState<boolean>(false);
 
@@ -55,8 +62,8 @@ export default function ExplanationSheetContent() {
   ]);
 
   return (
+    questionSelector &&
     answerExplanation &&
-    answerExplanation.explanations &&
     answerExplanation.communityVotes && (
       <>
         <h4 className="scroll-m-20 text-xl font-semibold tracking-tight my-4">
@@ -69,25 +76,46 @@ export default function ExplanationSheetContent() {
             )
           )}
         </div>
-        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight mt-12 mb-4">
-          解説
+        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight mt-16 mb-4">
+          選択肢と解説
         </h4>
-        <div className="space-y-4 mb-4">
-          {answerExplanation.explanations.map(
-            (explanation: string, idx: number) => (
-              <div key={idx} className="space-y-1">
-                <p className="leading-7">{explanation}</p>
-                {translationExplanation &&
-                translationExplanation.explanations[idx] ? (
-                  <p className="text-sm text-muted-foreground">
-                    {translationExplanation.explanations[idx]}
+        <div className="mb-4">
+          {questionSelector.choices.map((choice: Choice, idx: number) => (
+            <Fragment key={idx}>
+              {idx > 0 && <Separator className="my-4" />}
+              <div className="space-y-4">
+                <SelectorButton
+                  className={
+                    answerExplanation.correctFlags &&
+                    answerExplanation.correctFlags[idx]
+                      ? "border-green-500 bg-green-50 dark:bg-green-950 hover:bg-green-100 dark:hover:bg-green-900"
+                      : "border-red-500 bg-red-50 dark:bg-red-950 hover:bg-red-100 dark:hover:bg-red-900"
+                  }
+                  img={choice.img}
+                  sentence={choice.sentence}
+                  translation={
+                    translationSubjectChoice &&
+                    translationSubjectChoice.choices[idx]
+                  }
+                  variant="outline"
+                />
+                <div key={idx} className="space-y-1 px-4">
+                  <p className="leading-7">
+                    {answerExplanation.explanations &&
+                      answerExplanation.explanations[idx]}
                   </p>
-                ) : (
-                  <Skeleton className="h-5 w-full" />
-                )}
+                  {translationExplanation &&
+                  translationExplanation.explanations[idx] ? (
+                    <p className="text-sm text-muted-foreground">
+                      {translationExplanation.explanations[idx]}
+                    </p>
+                  ) : (
+                    <Skeleton className="h-5 w-full" />
+                  )}
+                </div>
               </div>
-            )
-          )}
+            </Fragment>
+          ))}
         </div>
       </>
     )

@@ -39,7 +39,10 @@ export default function OpenExplanationButton() {
         </TooltipTrigger>
         <TooltipContent>解説表示</TooltipContent>
       </Tooltip>
-      <SheetContent className="min-w-[40vw] max-h-[100vh] overflow-y-auto">
+      <SheetContent
+        side="bottom"
+        className="min-w-[100vw] max-h-[80vh] overflow-y-auto"
+      >
         <SheetHeader>
           <SheetTitle />
           <SheetDescription />
