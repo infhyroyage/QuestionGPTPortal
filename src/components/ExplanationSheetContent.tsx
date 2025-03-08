@@ -82,7 +82,7 @@ export default function ExplanationSheetContent() {
         <div className="mb-4">
           {questionSelector.choices.map((choice: Choice, idx: number) => (
             <Fragment key={idx}>
-              {idx > 0 && <Separator className="my-4" />}
+              {idx > 0 && <Separator className="my-6" />}
               <div className="space-y-4">
                 <SelectorButton
                   className={
