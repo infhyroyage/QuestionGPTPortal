@@ -66,7 +66,7 @@ export default function TestResultPage() {
     testDetail && (
       <>
         <TopBar title="Question GPT Portal" />
-        <div className="pt-16 px-4">
+        <div className="pt-[52px] px-4">
           <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight my-6">
             {`全${testDetail.length}問中${correctNum}問正解 (正答率${correctRate}%)`}
           </h3>

@@ -68,7 +68,7 @@ export default function TestReadyPage() {
     testDetail && (
       <>
         <TopBar title="Question GPT Portal" />
-        <div className="pt-16 mx-4 flex items-center justify-center min-h-screen flex-col space-y-8">
+        <div className="pt-[52px] mx-4 flex items-center justify-center min-h-screen flex-col space-y-8">
           <div className="flex flex-col items-center justify-center space-y-4">
             <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
               {testDetail.courseName}

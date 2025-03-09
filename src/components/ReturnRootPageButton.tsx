@@ -19,8 +19,13 @@ export default function ReturnRootPageButton() {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button onClick={onClick} variant="outline" size="icon">
-          <CornerDownLeft />
+        <Button
+          className="size-7"
+          onClick={onClick}
+          variant="outline"
+          size="icon"
+        >
+          <CornerDownLeft className="size-4" />
         </Button>
       </TooltipTrigger>
       <TooltipContent>トップページに戻る</TooltipContent>

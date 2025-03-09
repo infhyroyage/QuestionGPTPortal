@@ -13,8 +13,17 @@ export default function DarkModeSwitchButton() {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button onClick={toggleDarkMode} variant="outline" size="icon">
-          {isDarkMode ? <Moon /> : <Sun />}
+        <Button
+          className="size-7"
+          onClick={toggleDarkMode}
+          variant="outline"
+          size="icon"
+        >
+          {isDarkMode ? (
+            <Moon className="size-4" />
+          ) : (
+            <Sun className="size-4" />
+          )}
         </Button>
       </TooltipTrigger>
       <TooltipContent>

@@ -98,7 +98,7 @@ export default function TestQuestionPage() {
         <TopBar title={`${questionNumber}問目 (全${testDetail.length}問)`} />
         <ResizablePanelGroup
           direction="vertical"
-          className="pt-16 min-h-screen w-full"
+          className="pt-[52px] min-h-screen w-full"
         >
           <ResizablePanel defaultSize={60}>
             <div className="relative h-full">
