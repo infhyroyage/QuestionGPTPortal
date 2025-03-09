@@ -105,7 +105,9 @@ export const fetchAnswerExplanationAtom = atom(
     let communityVotes: string[];
     try {
       if (isResubmit) {
-        // 回答・解説再生成の場合は、[POST] /tests/{testId}/answers/{questionNumber}にアクセス
+        // 回答・解説再生成の場合は、まず解説文に対する翻訳文を初期化してから、
+        // [POST] /tests/{testId}/answers/{questionNumber}にアクセス
+        set(translationExplanationAtom, undefined);
         const postAnswerRes: PostAnswerRes = await accessBackend<PostAnswerRes>(
           "POST",
           `/tests/${testId}/answers/${questionNumber}`,
