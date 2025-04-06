@@ -42,10 +42,11 @@ export default function TestResultAccordion({
                   {history.selectedIdxes.map((j: number) => (
                     <SelectorButton
                       key={j}
-                      img={history.imgs[j]}
-                      sentence={history.choices[j]}
+                      img={history.choiceImgs[j]}
+                      sentence={history.choiceSentences[j]}
                       translation={
-                        history.translations && history.translations[j]
+                        history.choiceTranslations &&
+                        history.choiceTranslations[j]
                       }
                       variant="outline"
                     />
@@ -60,10 +61,11 @@ export default function TestResultAccordion({
                   {history.correctIdxes.map((j: number) => (
                     <SelectorButton
                       key={j}
-                      img={history.imgs[j]}
-                      sentence={history.choices[j]}
+                      img={history.choiceImgs[j]}
+                      sentence={history.choiceSentences[j]}
                       translation={
-                        history.translations && history.translations[j]
+                        history.choiceTranslations &&
+                        history.choiceTranslations[j]
                       }
                       variant="outline"
                     />

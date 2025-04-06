@@ -180,9 +180,11 @@ export const fetchAnswerExplanationAtom = atom(
     const translationSubjectChoice = get(translationSubjectChoiceAtom);
     const history: ProgressTestHistory = {
       isCorrect,
-      choices: questionSelector.choices.map((choice) => choice.sentence),
-      imgs: questionSelector.choices.map((choice) => choice.img),
-      translations:
+      choiceSentences: questionSelector.choices.map(
+        (choice) => choice.sentence
+      ),
+      choiceImgs: questionSelector.choices.map((choice) => choice.img),
+      choiceTranslations:
         translationSubjectChoice && translationSubjectChoice.choices,
       selectedIdxes: questionSelector.choices.reduce<number[]>(
         (prev: number[], choice: ChoiceAndSelect, idx: number) => {
