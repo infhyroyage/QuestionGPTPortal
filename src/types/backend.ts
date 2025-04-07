@@ -59,7 +59,29 @@ export type GetTests = {
   [courseName: string]: Test[];
 };
 
+/**
+ * [PUT] /en2ja のリクエストボディの型
+ */
 export type PutEn2JaReq = string[];
+
+/**
+ * [PUT] /en2ja のレスポンスボディの型
+ */
 export type PutEn2JaRes = string[];
 
-export type Method = "GET" | "POST" | "PUT";
+/**
+ * [POST] /tests/{testId}/progresses/{questionNumber} のリクエストボディの型
+ */
+export type PostProgressReq = {
+  isCorrect: boolean;
+  choiceSentences: string[];
+  choiceImgs: (string | null)[];
+  choiceTranslations?: string[];
+  selectedIdxes: number[];
+  correctIdxes: number[];
+};
+
+/**
+ * バックエンドのメソッドの型
+ */
+export type Method = "DELETE" | "GET" | "POST" | "PUT";
