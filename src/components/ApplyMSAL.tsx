@@ -6,12 +6,12 @@ import LoadingCenter from "./LoadingCenter";
 
 /**
  * MSALを適用するコンポーネント
- * @returns MSALを適用した子コンポーネント(localhost環境の場合は適用せず、子コンポーネントをそのまま返す)
+ * @returns MSALを適用した子コンポーネント(ローカル環境の場合は適用せず、子コンポーネントをそのまま返す)
  */
 export default function ApplyMSAL({ children }: ApplyMSALProps) {
   const msalInstance = new PublicClientApplication(config);
 
-  // localhost環境の場合はMSALを使用しない
+  // ローカル環境の場合はMSALを使用しない
   return import.meta.env.DEV ? (
     <>{children}</>
   ) : (
