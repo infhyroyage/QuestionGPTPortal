@@ -13,26 +13,8 @@ export type AnswerExplanation =
       communityVotes?: string[];
       isSubmitting: boolean;
       isCorrect?: boolean;
-      correctIdxes?: number[];
     }
   | undefined;
-
-/**
- * 回答履歴の要素の型
- */
-export type Progress = {
-  isCorrect: boolean;
-  choiceSentences: string[];
-  choiceImgs: (string | null)[];
-  choiceTranslations?: string[];
-  selectedIdxes: number[];
-  correctIdxes: number[];
-};
-
-/**
- * 回答履歴の型
- */
-export type Progresses = Progress[] | undefined;
 
 /**
  * 選択状態を含む選択肢の型

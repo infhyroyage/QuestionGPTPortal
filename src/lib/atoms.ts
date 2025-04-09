@@ -1,7 +1,6 @@
 import {
   AnswerExplanation,
   ChoiceAndSelect,
-  Progresses,
   QuestionSelector,
   TestDetail,
   TestDetails,
@@ -14,11 +13,11 @@ import {
   GetQuestion,
   GetTests,
   PostAnswerRes,
-  PostProgressReq,
   PutEn2JaReq,
   PutEn2JaRes,
   Subject,
 } from "@/types/backend";
+import { Progress, ProgressTestHistory } from "@/types/storage";
 import { AccountInfo, IPublicClientApplication } from "@azure/msal-browser";
 import { AxiosError } from "axios";
 import { atom } from "jotai";
@@ -34,11 +33,6 @@ const answerExplanationAtom = atom<AnswerExplanation>(undefined);
  * toggleDarkModeAtomで隠蔽するためexportしない
  */
 const isDarkModeAtom = atom<boolean>(true);
-
-/**
- * 回答履歴を管理するatom
- */
-const progressesAtom = atom<Progresses>(undefined);
 
 /**
  * 問題文・選択肢を管理するatom
@@ -105,10 +99,11 @@ export const fetchAnswerExplanationAtom = atom(
       isSubmitting: true,
     });
 
+    let isCorrect: boolean;
+    let correctIdxes: number[];
+    let explanations: string[];
+    let communityVotes: string[];
     try {
-      let correctIdxes: number[];
-      let explanations: string[];
-      let communityVotes: string[];
       if (isResubmit) {
         // 回答・解説再生成の場合は、まず解説文に対する翻訳文を初期化してから、
         // [POST] /tests/{testId}/answers/{questionNumber}にアクセス
@@ -139,15 +134,15 @@ export const fetchAnswerExplanationAtom = atom(
       const correctFlags: boolean[] = [
         ...Array(questionSelector.choices.length),
       ].map((_, idx: number) => correctIdxes.includes(idx));
+      isCorrect = selectedFlags.every(
+        (selectedFlag, idx) => selectedFlag === correctFlags[idx]
+      );
       set(answerExplanationAtom, {
         correctFlags,
         explanations,
         communityVotes,
         isSubmitting: false,
-        isCorrect: selectedFlags.every(
-          (selectedFlag, idx) => selectedFlag === correctFlags[idx]
-        ),
-        correctIdxes,
+        isCorrect,
       });
     } catch (err) {
       // 404エラーの場合は、[POST] /tests/{testId}/answers/{questionNumber}にアクセス
@@ -158,61 +153,33 @@ export const fetchAnswerExplanationAtom = atom(
           instance,
           accountInfo
         );
+        correctIdxes = postAnswerRes.correctIdxes;
+        explanations = postAnswerRes.explanations;
+        communityVotes = postAnswerRes.communityVotes;
 
         // アクセスして生成した正解・解説文で更新
         const correctFlags: boolean[] = [
           ...Array(questionSelector.choices.length),
-        ].map((_, idx: number) => postAnswerRes.correctIdxes.includes(idx));
+        ].map((_, idx: number) => correctIdxes.includes(idx));
+        isCorrect = selectedFlags.every(
+          (selectedFlag, idx) => selectedFlag === correctFlags[idx]
+        );
         set(answerExplanationAtom, {
           correctFlags,
-          explanations: postAnswerRes.explanations,
-          communityVotes: postAnswerRes.communityVotes,
+          explanations,
+          communityVotes,
           isSubmitting: false,
-          isCorrect: selectedFlags.every(
-            (selectedFlag, idx) => selectedFlag === correctFlags[idx]
-          ),
-          correctIdxes: postAnswerRes.correctIdxes,
+          isCorrect,
         });
       } else {
         throw err;
       }
     }
-  }
-);
 
-/**
- * 回答履歴を取得するatom
- */
-export const fetchProgressesAtom = atom(
-  (get) => get(progressesAtom),
-  async (
-    get,
-    set,
-    testId: string,
-    questionNumber: string,
-    instance: IPublicClientApplication,
-    accountInfo: AccountInfo | null
-  ) => {
-    // 問題文・選択肢がまだ存在しない場合は何も保存しない
-    const questionSelector = get(questionSelectorAtom);
-    if (!questionSelector) {
-      return;
-    }
-
-    // 正解・解説文をまだ更新していない場合は何も保存しない
-    const answerExplanation = get(answerExplanationAtom);
-    if (
-      !answerExplanation ||
-      answerExplanation.isCorrect === undefined ||
-      answerExplanation.correctIdxes === undefined
-    ) {
-      return;
-    }
-
-    // 回答履歴の作成
+    // 回答履歴を作成
     const translationSubjectChoice = get(translationSubjectChoiceAtom);
-    const history: PostProgressReq = {
-      isCorrect: answerExplanation.isCorrect,
+    const history: ProgressTestHistory = {
+      isCorrect,
       choiceSentences: questionSelector.choices.map(
         (choice) => choice.sentence
       ),
@@ -228,19 +195,44 @@ export const fetchProgressesAtom = atom(
         },
         []
       ),
-      correctIdxes: answerExplanation.correctIdxes,
+      correctIdxes,
     };
 
-    // 回答履歴をバックエンドに保存してから更新
-    await accessBackend<void, PostProgressReq>(
-      "POST",
-      `/tests/${testId}/progresses/${questionNumber}`,
-      instance,
-      accountInfo,
-      history
-    );
-
-    set(progressesAtom, [...(get(progressesAtom) || []), history]);
+    // テストの回答履歴をローカルストレージに保存
+    const progressStr: string | null = localStorage.getItem("progress");
+    if (progressStr) {
+      const progress: Progress = JSON.parse(progressStr);
+      if (progress[testId]) {
+        // 回答・解説生成したテストで実績あり
+        if (isResubmit) {
+          // 回答・解説再生成の場合は、末尾の回答履歴を更新
+          progress[testId].histories[progress[testId].histories.length - 1] =
+            history;
+        } else {
+          // 回答・解説生成の場合は、回答履歴を末尾に追加
+          progress[testId].histories.push(history);
+        }
+        localStorage.setItem("progress", JSON.stringify(progress));
+      } else {
+        // 回答・解説生成したテストとは別のテストで実績あり
+        progress[testId] = {
+          testLength: testDetail.length,
+          histories: [history],
+        };
+        localStorage.setItem("progress", JSON.stringify(progress));
+      }
+    } else {
+      // 回答・解説生成の実績なし
+      localStorage.setItem(
+        "progress",
+        JSON.stringify({
+          [testId]: {
+            testLength: testDetail.length,
+            histories: [history],
+          },
+        })
+      );
+    }
   }
 );
 
@@ -393,7 +385,6 @@ export const fetchTranslationSubjectChoiceAtom = atom(
  */
 export const resetAtomsForTestQuestionAtom = atom(null, (_, set) => {
   set(answerExplanationAtom, undefined);
-  set(progressesAtom, undefined);
   set(questionSelectorAtom, undefined);
   set(translationSubjectChoiceAtom, undefined);
   set(translationExplanationAtom, undefined);
