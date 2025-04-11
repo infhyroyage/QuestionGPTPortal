@@ -13,11 +13,11 @@ import {
   GetQuestion,
   GetTests,
   PostAnswerRes,
+  PostProgressReq,
   PutEn2JaReq,
   PutEn2JaRes,
   Subject,
 } from "@/types/backend";
-import { Progress, ProgressTestHistory } from "@/types/storage";
 import { AccountInfo, IPublicClientApplication } from "@azure/msal-browser";
 import { AxiosError } from "axios";
 import { atom } from "jotai";
@@ -176,9 +176,9 @@ export const fetchAnswerExplanationAtom = atom(
       }
     }
 
-    // 回答履歴を作成
+    // 回答履歴を作成し、バックエンドに保存
     const translationSubjectChoice = get(translationSubjectChoiceAtom);
-    const history: ProgressTestHistory = {
+    const progress: PostProgressReq = {
       isCorrect,
       choiceSentences: questionSelector.choices.map(
         (choice) => choice.sentence
@@ -197,42 +197,13 @@ export const fetchAnswerExplanationAtom = atom(
       ),
       correctIdxes,
     };
-
-    // テストの回答履歴をローカルストレージに保存
-    const progressStr: string | null = localStorage.getItem("progress");
-    if (progressStr) {
-      const progress: Progress = JSON.parse(progressStr);
-      if (progress[testId]) {
-        // 回答・解説生成したテストで実績あり
-        if (isResubmit) {
-          // 回答・解説再生成の場合は、末尾の回答履歴を更新
-          progress[testId].histories[progress[testId].histories.length - 1] =
-            history;
-        } else {
-          // 回答・解説生成の場合は、回答履歴を末尾に追加
-          progress[testId].histories.push(history);
-        }
-        localStorage.setItem("progress", JSON.stringify(progress));
-      } else {
-        // 回答・解説生成したテストとは別のテストで実績あり
-        progress[testId] = {
-          testLength: testDetail.length,
-          histories: [history],
-        };
-        localStorage.setItem("progress", JSON.stringify(progress));
-      }
-    } else {
-      // 回答・解説生成の実績なし
-      localStorage.setItem(
-        "progress",
-        JSON.stringify({
-          [testId]: {
-            testLength: testDetail.length,
-            histories: [history],
-          },
-        })
-      );
-    }
+    await accessBackend<void, PostProgressReq>(
+      "POST",
+      `/tests/${testId}/progresses/${questionNumber}`,
+      instance,
+      accountInfo,
+      progress
+    );
   }
 );
 

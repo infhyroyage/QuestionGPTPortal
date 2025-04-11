@@ -1,8 +1,10 @@
 import TestResultAccordion from "@/components/TestResultAccordion";
 import TopBar from "@/components/TopBar";
 import useTestDetail from "@/hooks/useTestDetail";
+import { accessBackend } from "@/lib/backend";
 import { basePath } from "@/lib/github";
-import { Progress, ProgressTestHistory } from "@/types/storage";
+import { GetProgressesRes, Progress } from "@/types/backend";
+import { useAccount, useMsal } from "@azure/msal-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
@@ -11,10 +13,14 @@ import { useNavigate, useParams } from "react-router";
  * @returns テスト結果ページのコンポーネント
  */
 export default function TestResultPage() {
-  const [histories, setHistories] = useState<ProgressTestHistory[]>([]);
+  const [progresses, setProgresses] = useState<Progress[] | undefined>(
+    undefined
+  );
 
-  const { testId } = useParams();
   const navigate = useNavigate();
+  const { testId } = useParams();
+  const { instance, accounts } = useMsal();
+  const accountInfo = useAccount(accounts[0] || {});
 
   const testDetail = useTestDetail();
 
@@ -25,40 +31,55 @@ export default function TestResultPage() {
     }
   }, [navigate, testDetail]);
 
-  // ローカルストレージに保存しているテストの回答履歴を取得
+  // 今まで回答した問題の回答履歴を取得
   useEffect(() => {
-    const progressStr: string | null = localStorage.getItem("progress");
-    if (testId && progressStr) {
-      const progress: Progress = JSON.parse(progressStr);
-      setHistories(progress[testId] ? progress[testId].histories : []);
+    if (testDetail && testId && !progresses) {
+      (async () => {
+        const res: GetProgressesRes = await accessBackend<GetProgressesRes>(
+          "GET",
+          `/tests/${testId}/progresses`,
+          instance,
+          accountInfo
+        );
+        setProgresses(res);
+      })();
     }
-  }, [testId]);
+  }, [accountInfo, instance, progresses, testDetail, testId]);
 
-  // テストの回答履歴を取得後、ローカルストレージに保存しているテストの回答履歴を削除
+  // 今まで回答した問題の回答履歴を取得後、回答履歴を削除
   useEffect(() => {
-    const progressStr: string | null = localStorage.getItem("progress");
-    if (testId && progressStr && histories.length > 0) {
-      const progress: Progress = JSON.parse(progressStr);
-      delete progress[testId];
-      localStorage.setItem("progress", JSON.stringify(progress));
+    if (testId && testId && !!progresses) {
+      (async () => {
+        await accessBackend(
+          "DELETE",
+          `/tests/${testId}/progresses`,
+          instance,
+          accountInfo
+        );
+      })();
     }
-  }, [histories, testId]);
+  }, [accountInfo, instance, progresses, testId]);
 
   // 正答数
   const correctNum: number = useMemo(
-    () => histories.filter((history) => history.isCorrect).length,
-    [histories]
+    () =>
+      progresses
+        ? progresses.filter((progress) => progress.isCorrect).length
+        : -1,
+    [progresses]
   );
 
   // 正答率
   const correctRate: number = useMemo(
     () =>
-      Math.round(
-        (histories.filter((history) => history.isCorrect).length /
-          histories.length) *
-          100
-      ),
-    [histories]
+      progresses
+        ? Math.round(
+            (progresses.filter((progress) => progress.isCorrect).length /
+              progresses.length) *
+              100
+          )
+        : -1,
+    [progresses]
   );
 
   return (
@@ -71,7 +92,7 @@ export default function TestResultPage() {
             {`全${testDetail.length}問中${correctNum}問正解 (正答率${correctRate}%)`}
           </h3>
           <div className="mx-4 mt-4">
-            <TestResultAccordion histories={histories} />
+            <TestResultAccordion progresses={progresses} />
           </div>
         </div>
       </>
