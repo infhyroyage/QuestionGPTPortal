@@ -8,7 +8,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "./ui/accordion";
-import { Skeleton } from "./ui/skeleton";
 
 /**
  * テスト結果アコーディオンのコンポーネント
@@ -17,7 +16,7 @@ import { Skeleton } from "./ui/skeleton";
 export default function TestResultAccordion({
   progresses,
 }: TestResultAccordionProps) {
-  return progresses ? (
+  return (
     <Accordion type="multiple">
       {progresses.map((progress: Progress, i: number) => (
         <AccordionItem key={i} value={`${i}`}>
@@ -78,11 +77,5 @@ export default function TestResultAccordion({
         </AccordionItem>
       ))}
     </Accordion>
-  ) : (
-    <div className="space-y-2">
-      <Skeleton className="w-full h-14 px-4 flex items-center" />
-      <Skeleton className="w-full h-14 px-4 flex items-center" />
-      <Skeleton className="w-full h-14 px-4 flex items-center" />
-    </div>
   );
 }

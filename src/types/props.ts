@@ -74,7 +74,7 @@ export type TestResultAccordionProps = {
   /**
    * テストの回答履歴
    */
-  progresses?: Progress[];
+  progresses: Progress[];
 };
 
 /**
