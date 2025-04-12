@@ -342,7 +342,7 @@ export const saveProgressAtom = atom(
     const answerExplanation = get(answerExplanationAtom);
     if (
       !answerExplanation ||
-      !answerExplanation.isSavedProgress ||
+      answerExplanation.isSavedProgress ||
       !answerExplanation.isCorrect ||
       !answerExplanation.correctIdxes
     ) {
