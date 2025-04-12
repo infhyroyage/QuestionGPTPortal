@@ -350,15 +350,12 @@ export const saveProgressAtom = atom(
     }
 
     // 回答履歴を作成
-    const translationSubjectChoice = get(translationSubjectChoiceAtom);
     const progress: PostProgressReq = {
       isCorrect: answerExplanation.isCorrect,
       choiceSentences: questionSelector.choices.map(
         (choice) => choice.sentence
       ),
       choiceImgs: questionSelector.choices.map((choice) => choice.img),
-      choiceTranslations:
-        translationSubjectChoice && translationSubjectChoice.choices,
       selectedIdxes: questionSelector.choices.reduce<number[]>(
         (prev: number[], choice: ChoiceAndSelect, idx: number) => {
           if (choice.isSelected) {

@@ -23,7 +23,6 @@ export type Progress = {
   isCorrect: boolean;
   choiceSentences: string[];
   choiceImgs: (string | null)[];
-  choiceTranslations?: string[];
   selectedIdxes: number[];
   correctIdxes: number[];
 };

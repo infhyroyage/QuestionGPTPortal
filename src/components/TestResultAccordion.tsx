@@ -44,10 +44,8 @@ export default function TestResultAccordion({
                       key={j}
                       img={progress.choiceImgs[j]}
                       sentence={progress.choiceSentences[j]}
-                      translation={
-                        progress.choiceTranslations &&
-                        progress.choiceTranslations[j]
-                      }
+                      // TODO: 翻訳文を表示する
+                      // translation={undefined}
                       variant="outline"
                     />
                   ))}
@@ -63,10 +61,8 @@ export default function TestResultAccordion({
                       key={j}
                       img={progress.choiceImgs[j]}
                       sentence={progress.choiceSentences[j]}
-                      translation={
-                        progress.choiceTranslations &&
-                        progress.choiceTranslations[j]
-                      }
+                      // TODO: 翻訳文を表示する
+                      // translation={undefined}
                       variant="outline"
                     />
                   ))}
