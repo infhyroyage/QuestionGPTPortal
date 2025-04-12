@@ -13,6 +13,8 @@ export type AnswerExplanation =
       communityVotes?: string[];
       isSubmitting: boolean;
       isCorrect?: boolean;
+      correctIdxes?: number[];
+      isSavedProgress?: boolean;
     }
   | undefined;
 

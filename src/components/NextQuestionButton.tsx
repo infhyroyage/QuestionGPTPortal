@@ -2,7 +2,7 @@ import useTestDetail from "@/hooks/useTestDetail";
 import { fetchAnswerExplanationAtom } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
 import { useAtom } from "jotai";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Loader2 } from "lucide-react";
 import { useCallback, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
 import { Button } from "./ui/button";
@@ -20,9 +20,9 @@ export default function NextQuestionButton() {
 
   const testDetail = useTestDetail();
 
-  // 回答・解説を生成していない場合は、次問題遷移ボタンを非活性とする
+  // 回答履歴を保存していない場合は、次問題遷移ボタンを非活性とする
   const isDisabledOpenExplanationButton = useMemo<boolean>(
-    () => !answerExplanation || !answerExplanation.explanations,
+    () => !answerExplanation || !answerExplanation.isSavedProgress,
     [answerExplanation]
   );
 
@@ -30,13 +30,11 @@ export default function NextQuestionButton() {
   const onClick = useCallback(() => {
     if (testId && testDetail && questionNumber) {
       const parsedQuestionNumber: number = parseInt(questionNumber);
-      if (parsedQuestionNumber === testDetail.length) {
-        navigate(`${basePath}/tests/${testId}/result`);
-      } else {
-        navigate(
-          `${basePath}/tests/${testId}/questions/${parsedQuestionNumber + 1}`
-        );
-      }
+      navigate(
+        parsedQuestionNumber === testDetail.length
+          ? `${basePath}/tests/${testId}/result`
+          : `${basePath}/tests/${testId}/questions/${parsedQuestionNumber + 1}`
+      );
     }
   }, [navigate, questionNumber, testDetail, testId]);
 
@@ -50,7 +48,11 @@ export default function NextQuestionButton() {
             disabled={isDisabledOpenExplanationButton}
             onClick={onClick}
           >
-            <ChevronRight />
+            {answerExplanation && answerExplanation.isSavedProgress ? (
+              <ChevronRight />
+            ) : (
+              <Loader2 className="animate-spin" />
+            )}
           </Button>
         </TooltipTrigger>
         <TooltipContent>
