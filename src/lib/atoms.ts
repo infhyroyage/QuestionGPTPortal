@@ -243,7 +243,7 @@ export const fetchTranslationExplanationAtom = atom(
       return;
     }
 
-    // [GET] /en2jaにアクセスして取得した翻訳文で更新
+    // [PUT] /en2jaにアクセスして取得した解説文の翻訳文で更新
     const res: PutEn2JaRes = await accessBackend<PutEn2JaRes, PutEn2JaReq>(
       "PUT",
       "/en2ja",
