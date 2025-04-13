@@ -1,3 +1,4 @@
+import LoadingCenter from "@/components/LoadingCenter";
 import TopBar from "@/components/TopBar";
 import { Button } from "@/components/ui/button";
 import useTestDetail from "@/hooks/useTestDetail";
@@ -5,7 +6,6 @@ import { accessBackend } from "@/lib/backend";
 import { basePath } from "@/lib/github";
 import { GetProgressesRes, Progress } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
-import { Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
@@ -88,42 +88,42 @@ export default function TestReadyPage() {
     testDetail && (
       <>
         <TopBar title="Question GPT Portal" />
-        <div className="pt-[52px] mx-4 flex items-center justify-center min-h-screen flex-col space-y-8">
-          <div className="flex flex-col items-center justify-center space-y-4">
-            <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-              {testDetail.courseName}
-            </h3>
-            <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-              {testDetail.testName}
-            </h4>
-          </div>
-          {!progresses ? (
-            <Button disabled size="lg">
-              <Loader2 className="animate-spin" />
-            </Button>
-          ) : progresses.length === testDetail.length ? (
-            <Button onClick={onClickResultButton} size="lg">
-              結果を見る
-            </Button>
-          ) : (
-            <>
-              {progresses.length > 0 && (
-                <Button onClick={onClickResumeButton} size="lg">
-                  {`${progresses.length + 1}問目から再開`}
-                </Button>
-              )}
-              <Button
-                onClick={onClickStartButton}
-                size="lg"
-                variant={progresses.length === 0 ? "default" : "destructive"}
-              >
-                {progresses.length === 0
-                  ? "1問目から開始"
-                  : "1問目から開始(回答履歴が削除されます)"}
+        {progresses ? (
+          <div className="pt-[52px] mx-4 flex items-center justify-center min-h-screen flex-col space-y-8">
+            <div className="flex flex-col items-center justify-center space-y-4">
+              <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
+                {testDetail.courseName}
+              </h3>
+              <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+                {testDetail.testName}
+              </h4>
+            </div>
+            {progresses.length === testDetail.length ? (
+              <Button onClick={onClickResultButton} size="lg">
+                結果を見る
               </Button>
-            </>
-          )}
-        </div>
+            ) : (
+              <>
+                {progresses.length > 0 && (
+                  <Button onClick={onClickResumeButton} size="lg">
+                    {`${progresses.length + 1}問目から再開`}
+                  </Button>
+                )}
+                <Button
+                  onClick={onClickStartButton}
+                  size="lg"
+                  variant={progresses.length === 0 ? "default" : "destructive"}
+                >
+                  {progresses.length === 0
+                    ? "1問目から開始"
+                    : "1問目から開始(回答履歴が削除されます)"}
+                </Button>
+              </>
+            )}
+          </div>
+        ) : (
+          <LoadingCenter />
+        )}
       </>
     )
   );
