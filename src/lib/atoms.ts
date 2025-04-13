@@ -343,8 +343,8 @@ export const saveProgressAtom = atom(
     if (
       !answerExplanation ||
       answerExplanation.isSavedProgress ||
-      !answerExplanation.isCorrect ||
-      !answerExplanation.correctIdxes
+      answerExplanation.isCorrect === undefined ||
+      answerExplanation.correctIdxes === undefined
     ) {
       return;
     }
