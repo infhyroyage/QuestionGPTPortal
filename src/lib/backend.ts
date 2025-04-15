@@ -22,17 +22,21 @@ async function callByAxios<T, D>(
   accessToken?: string,
   data?: D
 ): Promise<T> {
-  const headers: AxiosHeaders | undefined = accessToken
-    ? new AxiosHeaders({
-        "X-Access-Token": accessToken,
-      })
-    : undefined;
+  const headers = new AxiosHeaders();
+  // アクセストークンがある場合は設定
+  if (accessToken) {
+    headers.set("X-Access-Token", accessToken);
+  }
+  // ローカル環境の場合はユーザーIDを設定
+  if (import.meta.env.DEV) {
+    headers.set("X-User-Id", "local");
+  }
 
   // axios実行
-  let res;
+  let res: AxiosResponse<T, D>;
   switch (method) {
     case "GET":
-      res = await axios.get<T>(url, { headers });
+      res = await axios.get<T, AxiosResponse<T, D>>(url, { headers });
       break;
     case "POST":
       res = await axios.post<T, AxiosResponse<T, D>, D>(url, data, {
@@ -43,6 +47,9 @@ async function callByAxios<T, D>(
       res = await axios.put<T, AxiosResponse<T, D>, D>(url, data, {
         headers,
       });
+      break;
+    case "DELETE":
+      res = await axios.delete<T, AxiosResponse<T, D>>(url, { headers });
       break;
   }
   if (res.status !== 200) {
@@ -75,7 +82,7 @@ export async function accessBackend<T, D = never>(
 
   const url: string = `${apiUri}/api${path}`;
 
-  // localhost環境の場合は認証をスキップし、そのままバックエンドにアクセス
+  // ローカル環境の場合は認証をスキップし、そのままバックエンドにアクセス
   if (import.meta.env.DEV) {
     return await callByAxios<T, D>(method, url, undefined, data);
   }

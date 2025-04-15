@@ -1,8 +1,12 @@
+import LoadingCenter from "@/components/LoadingCenter";
 import TopBar from "@/components/TopBar";
 import { Button } from "@/components/ui/button";
 import useTestDetail from "@/hooks/useTestDetail";
+import { accessBackend } from "@/lib/backend";
 import { basePath } from "@/lib/github";
-import { Progress, ProgressTest } from "@/types/storage";
+import { GetProgressesRes, Progress } from "@/types/backend";
+import { useAccount, useMsal } from "@azure/msal-react";
+import { AxiosError } from "axios";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
@@ -11,10 +15,14 @@ import { useNavigate, useParams } from "react-router";
  * @returns テスト準備ページのコンポーネント
  */
 export default function TestReadyPage() {
-  const [historyNum, setHistoryNum] = useState<number>(0);
+  const [progresses, setProgresses] = useState<Progress[] | undefined>(
+    undefined
+  );
 
   const navigate = useNavigate();
   const { testId } = useParams();
+  const { instance, accounts } = useMsal();
+  const accountInfo = useAccount(accounts[0] || {});
 
   const testDetail = useTestDetail();
 
@@ -25,15 +33,32 @@ export default function TestReadyPage() {
     }
   }, [navigate, testDetail]);
 
-  // ローカルストレージに保存しているテストの回答履歴から、回答した問題数を取得
+  // 今まで回答した問題の回答履歴を取得
   useEffect(() => {
-    const progressStr: string | null = localStorage.getItem("progress");
-    if (testId && progressStr) {
-      const progress: Progress = JSON.parse(progressStr);
-      const progressTest: ProgressTest | undefined = progress[testId];
-      setHistoryNum(progressTest ? progressTest.histories.length : 0);
+    if (testDetail && testId && !progresses) {
+      (async () => {
+        try {
+          const res: GetProgressesRes = await accessBackend<GetProgressesRes>(
+            "GET",
+            `/tests/${testId}/progresses`,
+            instance,
+            accountInfo
+          );
+          setProgresses(res);
+        } catch (err) {
+          if (
+            err instanceof AxiosError &&
+            err.response &&
+            err.response.status === 404
+          ) {
+            setProgresses([]);
+          } else {
+            throw err;
+          }
+        }
+      })();
     }
-  }, [testId]);
+  }, [accountInfo, instance, progresses, testDetail, testId]);
 
   // テスト結果ページへ遷移
   const onClickResultButton = useCallback(() => {
@@ -42,61 +67,76 @@ export default function TestReadyPage() {
     }
   }, [navigate, testId]);
 
-  // 再開してテストページへ遷移
+  // 途中の問題のテストページへ遷移
   const onClickResumeButton = useCallback(() => {
-    if (testId) {
-      navigate(`${basePath}/tests/${testId}/questions/${historyNum + 1}`);
+    if (progresses && testId) {
+      navigate(
+        `${basePath}/tests/${testId}/questions/${progresses.length + 1}`
+      );
     }
-  }, [historyNum, navigate, testId]);
+  }, [navigate, progresses, testId]);
 
-  // ローカルストレージに保存しているテストの回答履歴を削除し、1問目のテストページへ遷移
+  // 最初の問題のテストページへ遷移
   const onClickStartButton = useCallback(() => {
     if (testId) {
-      const progressStr: string | null = localStorage.getItem("progress");
-      if (progressStr) {
-        const progress: Progress = JSON.parse(progressStr);
-        delete progress[testId];
-        localStorage.setItem("progress", JSON.stringify(progress));
+      // 今まで回答した問題の回答履歴がある場合は回答履歴を削除
+      if (progresses && progresses.length > 0) {
+        (async () => {
+          await accessBackend(
+            "DELETE",
+            `/tests/${testId}/progresses`,
+            instance,
+            accountInfo
+          );
+          navigate(`${basePath}/tests/${testId}/questions/1`);
+        })();
+      } else {
+        navigate(`${basePath}/tests/${testId}/questions/1`);
       }
-
-      navigate(`${basePath}/tests/${testId}/questions/1`);
     }
-  }, [navigate, testId]);
+  }, [accountInfo, instance, navigate, progresses, testId]);
 
   return (
     testId &&
     testDetail && (
       <>
         <TopBar title="Question GPT Portal" />
-        <div className="pt-[52px] mx-4 flex items-center justify-center min-h-screen flex-col space-y-8">
-          <div className="flex flex-col items-center justify-center space-y-4">
-            <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-              {testDetail.courseName}
-            </h3>
-            <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-              {testDetail.testName}
-            </h4>
+        {progresses ? (
+          <div className="pt-[52px] mx-4 flex items-center justify-center min-h-screen flex-col space-y-8">
+            <div className="flex flex-col items-center justify-center space-y-4">
+              <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
+                {testDetail.courseName}
+              </h3>
+              <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+                {testDetail.testName}
+              </h4>
+            </div>
+            {progresses.length === testDetail.length ? (
+              <Button onClick={onClickResultButton} size="lg">
+                結果を見る
+              </Button>
+            ) : (
+              <>
+                {progresses.length > 0 && (
+                  <Button onClick={onClickResumeButton} size="lg">
+                    {`${progresses.length + 1}問目から再開`}
+                  </Button>
+                )}
+                <Button
+                  onClick={onClickStartButton}
+                  size="lg"
+                  variant={progresses.length === 0 ? "default" : "destructive"}
+                >
+                  {progresses.length === 0
+                    ? "1問目から開始"
+                    : "1問目から開始(回答履歴が削除されます)"}
+                </Button>
+              </>
+            )}
           </div>
-          {historyNum === testDetail.length && (
-            <Button onClick={onClickResultButton} size="lg">
-              結果を見る
-            </Button>
-          )}
-          {historyNum !== testDetail.length && historyNum > 0 && (
-            <Button onClick={onClickResumeButton} size="lg">
-              {`${historyNum + 1}問目から再開`}
-            </Button>
-          )}
-          <Button
-            onClick={onClickStartButton}
-            size="lg"
-            variant={historyNum === 0 ? "default" : "destructive"}
-          >
-            {historyNum === 0
-              ? "1問目から開始"
-              : "1問目から開始(回答履歴が削除されます)"}
-          </Button>
-        </div>
+        ) : (
+          <LoadingCenter />
+        )}
       </>
     )
   );

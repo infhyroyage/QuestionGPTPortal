@@ -1,5 +1,5 @@
+import { Progress } from "@/types/backend";
 import { ReactNode } from "react";
-import { ProgressTestHistory } from "./storage";
 
 /**
  * ApplyMSALのProps
@@ -74,7 +74,7 @@ export type TestResultAccordionProps = {
   /**
    * テストの回答履歴
    */
-  histories: ProgressTestHistory[];
+  progresses: Progress[];
 };
 
 /**

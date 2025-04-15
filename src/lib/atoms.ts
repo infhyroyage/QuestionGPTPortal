@@ -13,11 +13,11 @@ import {
   GetQuestion,
   GetTests,
   PostAnswerRes,
+  PostProgressReq,
   PutEn2JaReq,
   PutEn2JaRes,
   Subject,
 } from "@/types/backend";
-import { Progress, ProgressTestHistory } from "@/types/storage";
 import { AccountInfo, IPublicClientApplication } from "@azure/msal-browser";
 import { AxiosError } from "axios";
 import { atom } from "jotai";
@@ -99,26 +99,26 @@ export const fetchAnswerExplanationAtom = atom(
       isSubmitting: true,
     });
 
-    let isCorrect: boolean;
     let correctIdxes: number[];
     let explanations: string[];
     let communityVotes: string[];
-    try {
-      if (isResubmit) {
-        // 回答・解説再生成の場合は、まず解説文に対する翻訳文を初期化してから、
-        // [POST] /tests/{testId}/answers/{questionNumber}にアクセス
-        set(translationExplanationAtom, undefined);
-        const postAnswerRes: PostAnswerRes = await accessBackend<PostAnswerRes>(
-          "POST",
-          `/tests/${testId}/answers/${questionNumber}`,
-          instance,
-          accountInfo
-        );
-        correctIdxes = postAnswerRes.correctIdxes;
-        explanations = postAnswerRes.explanations;
-        communityVotes = postAnswerRes.communityVotes;
-      } else {
-        // 回答・解説生成の場合は、[GET] /tests/{testId}/answers/{questionNumber}にアクセス
+    if (isResubmit) {
+      // 回答・解説再生成の場合、解説文に対する翻訳文を初期化してから、
+      // [POST] /tests/{testId}/answers/{questionNumber}にアクセス
+      set(translationExplanationAtom, undefined);
+      const postAnswerRes: PostAnswerRes = await accessBackend<PostAnswerRes>(
+        "POST",
+        `/tests/${testId}/answers/${questionNumber}`,
+        instance,
+        accountInfo
+      );
+      correctIdxes = postAnswerRes.correctIdxes;
+      explanations = postAnswerRes.explanations;
+      communityVotes = postAnswerRes.communityVotes;
+    } else {
+      try {
+        // 回答・解説再生成ではない場合、[GET] /tests/{testId}/answers/{questionNumber}にアクセスして事前に生成した回答・解説を取得
+        // もし取得できなかった(404)場合、[POST] /tests/{testId}/answers/{questionNumber}にアクセス
         const getAnswerRes: GetAnswer = await accessBackend<GetAnswer>(
           "GET",
           `/tests/${testId}/answers/${questionNumber}`,
@@ -128,109 +128,44 @@ export const fetchAnswerExplanationAtom = atom(
         correctIdxes = getAnswerRes.correctIdxes;
         explanations = getAnswerRes.explanations;
         communityVotes = getAnswerRes.communityVotes;
-      }
-
-      // アクセスして取得した正解・解説文で更新
-      const correctFlags: boolean[] = [
-        ...Array(questionSelector.choices.length),
-      ].map((_, idx: number) => correctIdxes.includes(idx));
-      isCorrect = selectedFlags.every(
-        (selectedFlag, idx) => selectedFlag === correctFlags[idx]
-      );
-      set(answerExplanationAtom, {
-        correctFlags,
-        explanations,
-        communityVotes,
-        isSubmitting: false,
-        isCorrect,
-      });
-    } catch (err) {
-      // 404エラーの場合は、[POST] /tests/{testId}/answers/{questionNumber}にアクセス
-      if (err instanceof AxiosError && err.response?.status === 404) {
-        const postAnswerRes: PostAnswerRes = await accessBackend<PostAnswerRes>(
-          "POST",
-          `/tests/${testId}/answers/${questionNumber}`,
-          instance,
-          accountInfo
-        );
-        correctIdxes = postAnswerRes.correctIdxes;
-        explanations = postAnswerRes.explanations;
-        communityVotes = postAnswerRes.communityVotes;
-
-        // アクセスして生成した正解・解説文で更新
-        const correctFlags: boolean[] = [
-          ...Array(questionSelector.choices.length),
-        ].map((_, idx: number) => correctIdxes.includes(idx));
-        isCorrect = selectedFlags.every(
-          (selectedFlag, idx) => selectedFlag === correctFlags[idx]
-        );
-        set(answerExplanationAtom, {
-          correctFlags,
-          explanations,
-          communityVotes,
-          isSubmitting: false,
-          isCorrect,
-        });
-      } else {
-        throw err;
-      }
-    }
-
-    // 回答履歴を作成
-    const translationSubjectChoice = get(translationSubjectChoiceAtom);
-    const history: ProgressTestHistory = {
-      isCorrect,
-      choices: questionSelector.choices.map((choice) => choice.sentence),
-      imgs: questionSelector.choices.map((choice) => choice.img),
-      translations:
-        translationSubjectChoice && translationSubjectChoice.choices,
-      selectedIdxes: questionSelector.choices.reduce<number[]>(
-        (prev: number[], choice: ChoiceAndSelect, idx: number) => {
-          if (choice.isSelected) {
-            prev.push(idx);
-          }
-          return prev;
-        },
-        []
-      ),
-      correctIdxes,
-    };
-
-    // テストの回答履歴をローカルストレージに保存
-    const progressStr: string | null = localStorage.getItem("progress");
-    if (progressStr) {
-      const progress: Progress = JSON.parse(progressStr);
-      if (progress[testId]) {
-        // 回答・解説生成したテストで実績あり
-        if (isResubmit) {
-          // 回答・解説再生成の場合は、末尾の回答履歴を更新
-          progress[testId].histories[progress[testId].histories.length - 1] =
-            history;
+      } catch (err) {
+        if (
+          err instanceof AxiosError &&
+          err.response &&
+          err.response.status === 404
+        ) {
+          const postAnswerRes: PostAnswerRes =
+            await accessBackend<PostAnswerRes>(
+              "POST",
+              `/tests/${testId}/answers/${questionNumber}`,
+              instance,
+              accountInfo
+            );
+          correctIdxes = postAnswerRes.correctIdxes;
+          explanations = postAnswerRes.explanations;
+          communityVotes = postAnswerRes.communityVotes;
         } else {
-          // 回答・解説生成の場合は、回答履歴を末尾に追加
-          progress[testId].histories.push(history);
+          throw err;
         }
-        localStorage.setItem("progress", JSON.stringify(progress));
-      } else {
-        // 回答・解説生成したテストとは別のテストで実績あり
-        progress[testId] = {
-          testLength: testDetail.length,
-          histories: [history],
-        };
-        localStorage.setItem("progress", JSON.stringify(progress));
       }
-    } else {
-      // 回答・解説生成の実績なし
-      localStorage.setItem(
-        "progress",
-        JSON.stringify({
-          [testId]: {
-            testLength: testDetail.length,
-            histories: [history],
-          },
-        })
-      );
     }
+
+    // 生成/取得した正解・解説文で更新
+    const correctFlags: boolean[] = [
+      ...Array(questionSelector.choices.length),
+    ].map((_, idx: number) => correctIdxes.includes(idx));
+    const isCorrect: boolean = selectedFlags.every(
+      (selectedFlag, idx) => selectedFlag === correctFlags[idx]
+    );
+    set(answerExplanationAtom, {
+      correctFlags,
+      explanations,
+      communityVotes,
+      isSubmitting: false,
+      isCorrect,
+      correctIdxes,
+      isSavedProgress: false,
+    });
   }
 );
 
@@ -312,7 +247,7 @@ export const fetchTranslationExplanationAtom = atom(
       return;
     }
 
-    // [GET] /en2jaにアクセスして取得した翻訳文で更新
+    // [PUT] /en2jaにアクセスして取得した解説文の翻訳文で更新
     const res: PutEn2JaRes = await accessBackend<PutEn2JaRes, PutEn2JaReq>(
       "PUT",
       "/en2ja",
@@ -387,6 +322,71 @@ export const resetAtomsForTestQuestionAtom = atom(null, (_, set) => {
   set(translationSubjectChoiceAtom, undefined);
   set(translationExplanationAtom, undefined);
 });
+
+/**
+ * 回答履歴を保存するatom(write only)
+ */
+export const saveProgressAtom = atom(
+  null,
+  async (
+    get,
+    set,
+    testId: string,
+    questionNumber: string,
+    instance: IPublicClientApplication,
+    accountInfo: AccountInfo | null
+  ) => {
+    // 問題文・選択肢がまだ存在しない場合は解答履歴を保存しない
+    const questionSelector = get(questionSelectorAtom);
+    if (!questionSelector) {
+      return;
+    }
+
+    // 回答・解説がまだ存在しない場合は解答履歴を保存しない
+    const answerExplanation = get(answerExplanationAtom);
+    if (
+      !answerExplanation ||
+      answerExplanation.isSavedProgress ||
+      answerExplanation.isCorrect === undefined ||
+      answerExplanation.correctIdxes === undefined
+    ) {
+      return;
+    }
+
+    // 回答履歴を作成
+    const progress: PostProgressReq = {
+      isCorrect: answerExplanation.isCorrect,
+      choiceSentences: questionSelector.choices.map(
+        (choice) => choice.sentence
+      ),
+      choiceImgs: questionSelector.choices.map((choice) => choice.img),
+      selectedIdxes: questionSelector.choices.reduce<number[]>(
+        (prev: number[], choice: ChoiceAndSelect, idx: number) => {
+          if (choice.isSelected) {
+            prev.push(idx);
+          }
+          return prev;
+        },
+        []
+      ),
+      correctIdxes: answerExplanation.correctIdxes,
+    };
+
+    // 回答履歴をバックエンドに保存
+    await accessBackend<void, PostProgressReq>(
+      "POST",
+      `/tests/${testId}/progresses/${questionNumber}`,
+      instance,
+      accountInfo,
+      progress
+    );
+
+    set(answerExplanationAtom, {
+      ...answerExplanation,
+      isSavedProgress: true,
+    });
+  }
+);
 
 /**
  * ダークモード化のフラグと、ダークモード切替え用のatom

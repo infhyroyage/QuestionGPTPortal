@@ -1,9 +1,10 @@
 import useTestDetail from "@/hooks/useTestDetail";
-import { fetchAnswerExplanationAtom } from "@/lib/atoms";
+import { fetchAnswerExplanationAtom, saveProgressAtom } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
-import { useAtom } from "jotai";
-import { ChevronRight } from "lucide-react";
-import { useCallback, useMemo } from "react";
+import { useAccount, useMsal } from "@azure/msal-react";
+import { useAtom, useSetAtom } from "jotai";
+import { ChevronRight, Loader2 } from "lucide-react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
 import { Button } from "./ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
@@ -14,29 +15,50 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
  */
 export default function NextQuestionButton() {
   const [answerExplanation] = useAtom(fetchAnswerExplanationAtom);
+  const saveProgress = useSetAtom(saveProgressAtom);
 
   const navigate = useNavigate();
   const { testId, questionNumber } = useParams();
+  const { instance, accounts } = useMsal();
+  const accountInfo = useAccount(accounts[0] || {});
 
   const testDetail = useTestDetail();
 
-  // 回答・解説を生成していない場合は、次問題遷移ボタンを非活性とする
+  // 回答履歴を保存していない場合は、次問題遷移ボタンを非活性とする
   const isDisabledOpenExplanationButton = useMemo<boolean>(
-    () => !answerExplanation || !answerExplanation.explanations,
+    () => !answerExplanation || !answerExplanation.isSavedProgress,
     [answerExplanation]
   );
+
+  // 回答・解説が生成済み、かつ回答履歴を保存していない場合は、回答履歴を保存する
+  useEffect(() => {
+    if (
+      testId &&
+      questionNumber &&
+      answerExplanation &&
+      !answerExplanation.isSubmitting &&
+      !answerExplanation.isSavedProgress
+    ) {
+      saveProgress(testId, questionNumber, instance, accountInfo);
+    }
+  }, [
+    accountInfo,
+    answerExplanation,
+    instance,
+    questionNumber,
+    saveProgress,
+    testId,
+  ]);
 
   // 次の問題かテスト結果ページへ遷移
   const onClick = useCallback(() => {
     if (testId && testDetail && questionNumber) {
       const parsedQuestionNumber: number = parseInt(questionNumber);
-      if (parsedQuestionNumber === testDetail.length) {
-        navigate(`${basePath}/tests/${testId}/result`);
-      } else {
-        navigate(
-          `${basePath}/tests/${testId}/questions/${parsedQuestionNumber + 1}`
-        );
-      }
+      navigate(
+        parsedQuestionNumber === testDetail.length
+          ? `${basePath}/tests/${testId}/result`
+          : `${basePath}/tests/${testId}/questions/${parsedQuestionNumber + 1}`
+      );
     }
   }, [navigate, questionNumber, testDetail, testId]);
 
@@ -50,7 +72,13 @@ export default function NextQuestionButton() {
             disabled={isDisabledOpenExplanationButton}
             onClick={onClick}
           >
-            <ChevronRight />
+            {answerExplanation &&
+            !answerExplanation.isSubmitting &&
+            !answerExplanation.isSavedProgress ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <ChevronRight />
+            )}
           </Button>
         </TooltipTrigger>
         <TooltipContent>

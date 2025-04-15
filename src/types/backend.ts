@@ -17,6 +17,27 @@ export type PostAnswerRes = {
 };
 
 /**
+ * [GET] /tests/{testId}/progresses のレスポンスボディの各要素の型
+ */
+export type Progress = {
+  isCorrect: boolean;
+  choiceSentences: string[];
+  choiceImgs: (string | null)[];
+  selectedIdxes: number[];
+  correctIdxes: number[];
+};
+
+/**
+ * [GET] /tests/{testId}/progresses のレスポンスボディの型
+ */
+export type GetProgressesRes = Progress[];
+
+/**
+ * [POST] /tests/{testId}/progresses/{questionNumber} のリクエストボディの型
+ */
+export type PostProgressReq = Progress;
+
+/**
  * [GET] /tests/{testId}/questions/{questionNumber} のレスポンスボディの問題文の型
  */
 export type Subject = {
@@ -59,7 +80,17 @@ export type GetTests = {
   [courseName: string]: Test[];
 };
 
+/**
+ * [PUT] /en2ja のリクエストボディの型
+ */
 export type PutEn2JaReq = string[];
+
+/**
+ * [PUT] /en2ja のレスポンスボディの型
+ */
 export type PutEn2JaRes = string[];
 
-export type Method = "GET" | "POST" | "PUT";
+/**
+ * バックエンドのメソッドの型
+ */
+export type Method = "DELETE" | "GET" | "POST" | "PUT";
