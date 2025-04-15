@@ -129,7 +129,11 @@ export const fetchAnswerExplanationAtom = atom(
         explanations = getAnswerRes.explanations;
         communityVotes = getAnswerRes.communityVotes;
       } catch (err) {
-        if (err instanceof AxiosError && err.response?.status === 404) {
+        if (
+          err instanceof AxiosError &&
+          err.response &&
+          err.response.status === 404
+        ) {
           const postAnswerRes: PostAnswerRes =
             await accessBackend<PostAnswerRes>(
               "POST",
