@@ -28,9 +28,24 @@ export type ChoiceAndSelect = Choice & { isSelected: boolean };
  */
 export type QuestionSelector =
   | {
+      /**
+       * 問題番号
+       */
       questionNumber: string;
+
+      /**
+       * 各問題文
+       */
       subjects: Subject[];
+
+      /**
+       * 各選択肢の文
+       */
       choices: ChoiceAndSelect[];
+
+      /**
+       * 回答が複数個の場合はtrue、回答が1個の場合はfalse
+       */
       isMultiplied: boolean;
     }
   | undefined;
@@ -39,9 +54,24 @@ export type QuestionSelector =
  * テスト詳細情報の要素の型
  */
 export type TestDetail = {
+  /**
+   * コース名
+   */
   courseName: string;
+
+  /**
+   * テストID
+   */
   testId: string;
+
+  /**
+   * テスト名
+   */
   testName: string;
+
+  /**
+   * テストの問題数
+   */
   length: number;
 };
 
@@ -55,6 +85,9 @@ export type TestDetails = TestDetail[] | undefined;
  */
 export type TranslationExplanation =
   | {
+      /**
+       * 各選択肢の正解/不正解の理由
+       */
       explanations: string[];
     }
   | undefined;
@@ -64,7 +97,14 @@ export type TranslationExplanation =
  */
 export type TranslationSubjectChoice =
   | {
+      /**
+       * 各問題文
+       */
       subjects: string[];
+
+      /**
+       * 各選択肢の文
+       */
       choices: string[];
     }
   | undefined;
