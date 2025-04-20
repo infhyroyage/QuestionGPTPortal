@@ -157,33 +157,33 @@ export default function TestResultAccordion({
     >
       {progresses.map((progress: Progress, i: number) => (
         <AccordionItem key={i} value={`${i}`}>
-          <AccordionTrigger className="px-4">
-            <div className="flex items-center">
-              <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-                {`${i + 1}問目`}
-              </h4>
-              <div className="ml-2">
-                <FavoriteButton
-                  isFavorite={favorites[i]}
-                  isLoading={isLoadingFavorites[i]}
-                  onFavoriteChange={(newIsFavorite: boolean) =>
-                    handleFavoriteChange(i, newIsFavorite)
-                  }
-                  onLoadingChange={(newIsLoading: boolean) =>
-                    handleLoadingChange(i, newIsLoading)
-                  }
-                  questionNumber={String(i + 1)}
-                />
-              </div>
+          <div className="flex items-center">
+            <div className="pl-4 flex items-center">
+              <FavoriteButton
+                isFavorite={favorites[i]}
+                isLoading={isLoadingFavorites[i]}
+                onFavoriteChange={(newIsFavorite: boolean) =>
+                  handleFavoriteChange(i, newIsFavorite)
+                }
+                onLoadingChange={(newIsLoading: boolean) =>
+                  handleLoadingChange(i, newIsLoading)
+                }
+                questionNumber={String(i + 1)}
+              />
             </div>
-            <span>
-              {progress.isCorrect ? (
-                <Check className="size-7 text-green-500" />
-              ) : (
-                <X className="size-7 text-red-500" />
-              )}
-            </span>
-          </AccordionTrigger>
+            <div className="flex-1">
+              <AccordionTrigger className="px-4">
+                <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+                  {`${i + 1}問目`}
+                </h4>
+                {progress.isCorrect ? (
+                  <Check className="size-7 text-green-500" />
+                ) : (
+                  <X className="size-7 text-red-500" />
+                )}
+              </AccordionTrigger>
+            </div>
+          </div>
           <TestResultAccordionContent
             progress={progress}
             progressIdx={i}
