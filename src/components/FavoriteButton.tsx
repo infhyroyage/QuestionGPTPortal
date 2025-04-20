@@ -19,8 +19,8 @@ export default function FavoriteButton({
   questionNumber,
 }: FavoriteButtonProps) {
   const { testId } = useParams();
-  const { instance } = useMsal();
-  const account = useAccount();
+  const { instance, accounts } = useMsal();
+  const accountInfo = useAccount(accounts[0] || {});
 
   const onClick = useCallback(async () => {
     if (testId) {
@@ -35,7 +35,7 @@ export default function FavoriteButton({
           "POST",
           `/tests/${testId}/favorites/${questionNumber}`,
           instance,
-          account,
+          accountInfo,
           req
         );
 
@@ -45,7 +45,7 @@ export default function FavoriteButton({
       }
     }
   }, [
-    account,
+    accountInfo,
     instance,
     isFavorite,
     onFavoriteChange,

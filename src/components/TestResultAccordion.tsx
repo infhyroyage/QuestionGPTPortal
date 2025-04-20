@@ -36,8 +36,8 @@ export default function TestResultAccordion({
     useState<boolean>(false);
 
   const { testId } = useParams();
-  const { instance } = useMsal();
-  const account = useAccount();
+  const { instance, accounts } = useMsal();
+  const accountInfo = useAccount(accounts[0] || {});
 
   const translationFailedToast = useTranslationFailedToast();
 
@@ -54,7 +54,7 @@ export default function TestResultAccordion({
               "GET",
               `/tests/${testId}/favorites`,
               instance,
-              account
+              accountInfo
             );
 
           // お気に入り情報を設定して更新
@@ -75,7 +75,7 @@ export default function TestResultAccordion({
         }
       })();
     }
-  }, [testId, instance, account, progresses.length]);
+  }, [accountInfo, instance, progresses.length, testId]);
 
   // i番目(0スタート)の問題のお気に入り切替ボタンのお気に入り状態変更時の動作
   const handleFavoriteChange = useCallback(
@@ -120,7 +120,7 @@ export default function TestResultAccordion({
             "PUT",
             "/en2ja",
             instance,
-            account,
+            accountInfo,
             progresses[parseInt(value)].choiceSentences
           );
 
@@ -139,7 +139,7 @@ export default function TestResultAccordion({
       setOpenValues(values);
     },
     [
-      account,
+      accountInfo,
       instance,
       isOccurredTranslationFailed,
       openValues,

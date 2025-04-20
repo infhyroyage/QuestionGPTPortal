@@ -16,8 +16,8 @@ import ReturnRootPageButton from "./ReturnRootPageButton";
 export default function TopBar({ title }: TopBarProps) {
   const location = useLocation();
   const { testId, questionNumber } = useParams();
-  const { instance } = useMsal();
-  const account = useAccount();
+  const { instance, accounts } = useMsal();
+  const accountInfo = useAccount(accounts[0] || {});
 
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -42,7 +42,7 @@ export default function TopBar({ title }: TopBarProps) {
             "GET",
             `/tests/${testId}/favorites/${questionNumber}`,
             instance,
-            account
+            accountInfo
           );
           setIsFavorite(response.isFavorite);
         } finally {
@@ -50,7 +50,7 @@ export default function TopBar({ title }: TopBarProps) {
         }
       })();
     }
-  }, [isTestQuestionPage, testId, questionNumber, instance, account]);
+  }, [accountInfo, instance, isTestQuestionPage, questionNumber, testId]);
 
   // お気に入り切替ボタンのお気に入り状態変更時の動作
   const onFavoriteChange = useCallback((newIsFavorite: boolean) => {
