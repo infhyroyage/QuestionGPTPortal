@@ -5,13 +5,8 @@ import { TestResultAccordionProps } from "@/types/props";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { Check, X } from "lucide-react";
 import { useCallback, useState } from "react";
-import SelectorButton from "./SelectorButton";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "./ui/accordion";
+import TestResultAccordionContent from "./TestResultAccordionContent";
+import { Accordion, AccordionItem, AccordionTrigger } from "./ui/accordion";
 
 /**
  * テスト結果アコーディオンのコンポーネント
@@ -102,46 +97,11 @@ export default function TestResultAccordion({
               )}
             </span>
           </AccordionTrigger>
-          <AccordionContent>
-            <div className="mx-8 my-4 space-y-8">
-              <div className="space-y-4">
-                <p className="leading-7 [&:not(:first-child)]:mt-6">
-                  選択した選択肢
-                </p>
-                <div className="mx-4 space-y-4">
-                  {progress.selectedIdxes.map((j: number) => (
-                    <SelectorButton
-                      key={j}
-                      img={progress.choiceImgs[j]}
-                      sentence={progress.choiceSentences[j]}
-                      translation={
-                        translations[`${i}`] && translations[`${i}`][j]
-                      }
-                      variant="outline"
-                    />
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-4">
-                <p className="leading-7 [&:not(:first-child)]:mt-6">
-                  正解の選択肢
-                </p>
-                <div className="mx-4 space-y-4">
-                  {progress.correctIdxes.map((j: number) => (
-                    <SelectorButton
-                      key={j}
-                      img={progress.choiceImgs[j]}
-                      sentence={progress.choiceSentences[j]}
-                      translation={
-                        translations[`${i}`] && translations[`${i}`][j]
-                      }
-                      variant="outline"
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </AccordionContent>
+          <TestResultAccordionContent
+            progress={progress}
+            progressIdx={i}
+            translations={translations}
+          />
         </AccordionItem>
       ))}
     </Accordion>

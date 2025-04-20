@@ -78,6 +78,26 @@ export type TestResultAccordionProps = {
 };
 
 /**
+ * TestResultAccordionContentのProps
+ */
+export type TestResultAccordionContentProps = {
+  /**
+   * テストの回答履歴
+   */
+  progress: Progress;
+
+  /**
+   * テストの回答履歴のインデックス
+   */
+  progressIdx: number;
+
+  /**
+   * 選択肢の翻訳文
+   */
+  translations: { [key: string]: string[] };
+};
+
+/**
  * TopBarのProps
  */
 export type TopBarProps = {
