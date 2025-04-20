@@ -39,6 +39,41 @@ export type PostAnswerRes = {
 };
 
 /**
+ * [GET] /tests/{testId}/favorites のレスポンスボディの各要素の型
+ */
+export type Favorite = {
+  /**
+   * 問題番号
+   */
+  questionNumber: number;
+
+  /**
+   * お気に入りの場合はtrue、そうでない場合はfalse
+   */
+  isFavorite: boolean;
+};
+
+/**
+ * [GET] /tests/{testId}/favorites のレスポンスボディの型
+ */
+export type GetFavoritesRes = Favorite[];
+
+/**
+ * [GET] /tests/{testId}/favorites/{questionNumber} のレスポンスボディの型
+ */
+export type GetFavoriteRes = {
+  /**
+   * お気に入りの場合はtrue、そうでない場合はfalse
+   */
+  isFavorite: boolean;
+};
+
+/**
+ * [POST] /tests/{testId}/favorites/{questionNumber} のリクエストボディの型
+ */
+export type PostFavoriteReq = GetFavoriteRes;
+
+/**
  * [GET] /tests/{testId}/progresses のレスポンスボディの各要素の型
  */
 export type Progress = {
