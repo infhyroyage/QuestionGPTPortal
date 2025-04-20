@@ -176,11 +176,13 @@ export default function TestResultAccordion({
                 <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
                   {`${i + 1}問目`}
                 </h4>
-                {progress.isCorrect ? (
-                  <Check className="size-7 text-green-500" />
-                ) : (
-                  <X className="size-7 text-red-500" />
-                )}
+                <div className="transform-none">
+                  {progress.isCorrect ? (
+                    <Check className="size-7 text-green-500" />
+                  ) : (
+                    <X className="size-7 text-red-500" />
+                  )}
+                </div>
               </AccordionTrigger>
             </div>
           </div>
