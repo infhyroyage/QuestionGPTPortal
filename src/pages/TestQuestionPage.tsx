@@ -46,17 +46,17 @@ export default function TestQuestionPage() {
     }
   }, [navigate, testDetail]);
 
-  // 問題番号が変更された場合は、前問題で取得したatomをすべて初期化
+  // 最初の問題開始時、および問題番号を変更した場合、
+  // 前問題の問題文・選択肢・回答・解説文・翻訳文のatomをすべて初期化
   useEffect(() => {
     if (
-      testId &&
       questionNumber &&
       questionSelector &&
       questionSelector.questionNumber !== questionNumber
     ) {
       resetAtomsForTestQuestion();
     }
-  }, [questionSelector, resetAtomsForTestQuestion, testId, questionNumber]);
+  }, [questionSelector, resetAtomsForTestQuestion, questionNumber]);
 
   // ページ遷移直後に、問題文・選択肢を1回だけ取得
   useEffect(() => {

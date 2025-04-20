@@ -2,10 +2,12 @@ import LoadingCenter from "@/components/LoadingCenter";
 import TestResultAccordion from "@/components/TestResultAccordion";
 import TopBar from "@/components/TopBar";
 import useTestDetail from "@/hooks/useTestDetail";
+import { resetAtomsForTestQuestionAtom } from "@/lib/atoms";
 import { accessBackend } from "@/lib/backend";
 import { basePath } from "@/lib/github";
 import { GetProgressesRes, Progress } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
+import { useSetAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
@@ -14,6 +16,8 @@ import { useNavigate, useParams } from "react-router";
  * @returns テスト結果ページのコンポーネント
  */
 export default function TestResultPage() {
+  const resetAtomsForTestQuestion = useSetAtom(resetAtomsForTestQuestionAtom);
+
   const [progresses, setProgresses] = useState<Progress[] | undefined>(
     undefined
   );
@@ -33,7 +37,7 @@ export default function TestResultPage() {
     }
   }, [navigate, testDetail]);
 
-  // 今まで回答した問題の回答履歴を取得
+  // 今まで回答した問題の回答履歴をバックエンドから取得
   useEffect(() => {
     if (testId && testDetail && !progresses) {
       (async () => {
@@ -48,13 +52,22 @@ export default function TestResultPage() {
     }
   }, [accountInfo, instance, progresses, testDetail, testId]);
 
-  // 今まで回答した問題の回答履歴を取得後、回答履歴を削除
+  // バックエンドから取得した今まで回答した問題の回答履歴の整合性が取れた場合、
+  // 前問題の問題文・選択肢・回答・解説文・翻訳文のatomをすべて初期化
+  useEffect(() => {
+    if (testDetail && progresses && testDetail.length === progresses.length) {
+      resetAtomsForTestQuestion();
+    }
+  }, [resetAtomsForTestQuestion, testDetail, progresses]);
+
+  // バックエンドから取得した今まで回答した問題の回答履歴の整合性が取れた場合、
+  // バックエンドからその回答履歴を削除
   useEffect(() => {
     if (
       testId &&
       testDetail &&
-      !!progresses &&
-      progresses.length > 0 &&
+      progresses &&
+      testDetail.length === progresses.length &&
       !isDeleted
     ) {
       (async () => {
