@@ -12,6 +12,38 @@ export type ApplyMSALProps = {
 };
 
 /**
+ * FavoriteButtonのProps
+ */
+export type FavoriteButtonProps = {
+  /**
+   * お気に入り状態
+   */
+  isFavorite: boolean;
+
+  /**
+   * ローディング状態
+   */
+  isLoading: boolean;
+
+  /**
+   * お気に入り切替ボタンのお気に入り状態変更時の動作
+   * @param newIsFavorite 新しいお気に入り状態
+   */
+  onFavoriteChange: (newIsFavorite: boolean) => void;
+
+  /**
+   * お気に入り切替ボタンのローディング状態変更時の動作
+   * @param newIsLoading 新しいローディング状態
+   */
+  onLoadingChange: (newIsLoading: boolean) => void;
+
+  /**
+   * 問題番号
+   */
+  questionNumber: string;
+};
+
+/**
  * ImageDialogのProps
  */
 export type ImageDialogProps = {

@@ -1,8 +1,9 @@
 import { accessBackend } from "@/lib/backend";
-import { GetFavoriteRes, PostFavoriteReq } from "@/types/backend";
-import { useMsal } from "@azure/msal-react";
+import { PostFavoriteReq } from "@/types/backend";
+import { FavoriteButtonProps } from "@/types/props";
+import { useAccount, useMsal } from "@azure/msal-react";
 import { Star } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { useParams } from "react-router";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
@@ -10,37 +11,23 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
  * お気に入り切替ボタンのコンポーネント
  * @returns お気に入り切替ボタンのコンポーネント
  */
-export default function FavoriteButton() {
-  const [isFavorite, setIsFavorite] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { testId, questionNumber } = useParams();
-  const { instance, accounts } = useMsal();
+export default function FavoriteButton({
+  isFavorite,
+  isLoading,
+  onFavoriteChange,
+  onLoadingChange,
+  questionNumber,
+}: FavoriteButtonProps) {
+  const { testId } = useParams();
+  const { instance } = useMsal();
+  const account = useAccount();
 
-  // 問題番号変更時にお気に入り状態を取得
-  useEffect(() => {
-    if (testId && questionNumber) {
-      (async () => {
-        try {
-          setIsLoading(true);
-          const response = await accessBackend<GetFavoriteRes>(
-            "GET",
-            `/tests/${testId}/favorites/${questionNumber}`,
-            instance,
-            accounts[0] || null
-          );
-          setIsFavorite(response.isFavorite);
-        } finally {
-          setIsLoading(false);
-        }
-      })();
-    }
-  }, [testId, questionNumber, instance, accounts]);
-
-  // お気に入り状態を切り替える
   const onClick = useCallback(async () => {
-    if (testId && questionNumber) {
+    if (testId) {
+      onLoadingChange(true);
+
       try {
-        setIsLoading(true);
+        // [POST] /tests/{testId}/favorites/{questionNumber}にアクセスして、切替後のお気に入り状態を更新
         const req: PostFavoriteReq = {
           isFavorite: !isFavorite,
         };
@@ -48,15 +35,24 @@ export default function FavoriteButton() {
           "POST",
           `/tests/${testId}/favorites/${questionNumber}`,
           instance,
-          accounts[0] || null,
+          account,
           req
         );
-        setIsFavorite(!isFavorite);
+
+        onFavoriteChange(!isFavorite);
       } finally {
-        setIsLoading(false);
+        onLoadingChange(false);
       }
     }
-  }, [accounts, instance, isFavorite, questionNumber, testId]);
+  }, [
+    account,
+    instance,
+    isFavorite,
+    onFavoriteChange,
+    onLoadingChange,
+    questionNumber,
+    testId,
+  ]);
 
   return (
     <Tooltip>

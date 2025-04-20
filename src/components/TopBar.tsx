@@ -1,6 +1,9 @@
+import { accessBackend } from "@/lib/backend";
 import { basePath } from "@/lib/github";
+import { GetFavoriteRes } from "@/types/backend";
 import { TopBarProps } from "@/types/props";
-import { useMemo } from "react";
+import { useAccount, useMsal } from "@azure/msal-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useParams } from "react-router";
 import DarkModeSwitchButton from "./DarkModeSwitchButton";
 import FavoriteButton from "./FavoriteButton";
@@ -13,6 +16,11 @@ import ReturnRootPageButton from "./ReturnRootPageButton";
 export default function TopBar({ title }: TopBarProps) {
   const location = useLocation();
   const { testId, questionNumber } = useParams();
+  const { instance } = useMsal();
+  const account = useAccount();
+
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // TestQuestionPageから表示する場合はtrue、それ以外で表示する場合はfalse
   const isTestQuestionPage = useMemo(
@@ -24,14 +32,50 @@ export default function TopBar({ title }: TopBarProps) {
     [location.pathname, questionNumber, testId]
   );
 
+  // 問題番号変更時にお気に入り状態を取得
+  useEffect(() => {
+    if (isTestQuestionPage && testId && questionNumber) {
+      (async () => {
+        try {
+          setIsLoading(true);
+          const response = await accessBackend<GetFavoriteRes>(
+            "GET",
+            `/tests/${testId}/favorites/${questionNumber}`,
+            instance,
+            account
+          );
+          setIsFavorite(response.isFavorite);
+        } finally {
+          setIsLoading(false);
+        }
+      })();
+    }
+  }, [isTestQuestionPage, testId, questionNumber, instance, account]);
+
+  // お気に入り切替ボタンのお気に入り状態変更時の動作
+  const onFavoriteChange = useCallback((newIsFavorite: boolean) => {
+    setIsFavorite(newIsFavorite);
+  }, []);
+
+  // お気に入り切替ボタンのローディング状態変更時の動作
+  const onLoadingChange = useCallback((newIsLoading: boolean) => {
+    setIsLoading(newIsLoading);
+  }, []);
+
   return (
     <div className="fixed top-0 left-0 right-0 h-[52px] p-3 bg-slate-200 dark:bg-slate-800 z-10">
       <div className="mx-3 flex items-center justify-between">
         <div className="flex items-center">
           <h1 className="text-lg font-bold">{title}</h1>
-          {isTestQuestionPage && (
+          {isTestQuestionPage && questionNumber && (
             <div className="ml-2 flex items-center justify-center">
-              <FavoriteButton />
+              <FavoriteButton
+                isFavorite={isFavorite}
+                isLoading={isLoading}
+                onFavoriteChange={onFavoriteChange}
+                onLoadingChange={onLoadingChange}
+                questionNumber={questionNumber}
+              />
             </div>
           )}
         </div>
