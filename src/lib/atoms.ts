@@ -19,7 +19,6 @@ import {
   Subject,
 } from "@/types/backend";
 import { AccountInfo, IPublicClientApplication } from "@azure/msal-browser";
-import { AxiosError } from "axios";
 import { atom } from "jotai";
 import { accessBackend } from "./backend";
 
@@ -116,37 +115,32 @@ export const fetchAnswerExplanationAtom = atom(
       explanations = postAnswerRes.explanations;
       communityVotes = postAnswerRes.communityVotes;
     } else {
-      try {
-        // 回答・解説再生成ではない場合、[GET] /tests/{testId}/answers/{questionNumber}にアクセスして事前に生成した回答・解説を取得
-        // もし取得できなかった(404)場合、[POST] /tests/{testId}/answers/{questionNumber}にアクセス
-        const getAnswerRes: GetAnswer = await accessBackend<GetAnswer>(
-          "GET",
+      // 回答・解説再生成ではない場合、[GET] /tests/{testId}/answers/{questionNumber}にアクセスして事前に生成した回答・解説を取得
+      // もし取得できなかった場合、[POST] /tests/{testId}/answers/{questionNumber}にアクセス
+      const getAnswerRes: GetAnswer = await accessBackend<GetAnswer>(
+        "GET",
+        `/tests/${testId}/answers/${questionNumber}`,
+        instance,
+        accountInfo
+      );
+      if (
+        getAnswerRes.correctIdxes &&
+        getAnswerRes.explanations &&
+        getAnswerRes.communityVotes
+      ) {
+        correctIdxes = getAnswerRes.correctIdxes;
+        explanations = getAnswerRes.explanations;
+        communityVotes = getAnswerRes.communityVotes;
+      } else {
+        const postAnswerRes: PostAnswerRes = await accessBackend<PostAnswerRes>(
+          "POST",
           `/tests/${testId}/answers/${questionNumber}`,
           instance,
           accountInfo
         );
-        correctIdxes = getAnswerRes.correctIdxes;
-        explanations = getAnswerRes.explanations;
-        communityVotes = getAnswerRes.communityVotes;
-      } catch (err) {
-        if (
-          err instanceof AxiosError &&
-          err.response &&
-          err.response.status === 404
-        ) {
-          const postAnswerRes: PostAnswerRes =
-            await accessBackend<PostAnswerRes>(
-              "POST",
-              `/tests/${testId}/answers/${questionNumber}`,
-              instance,
-              accountInfo
-            );
-          correctIdxes = postAnswerRes.correctIdxes;
-          explanations = postAnswerRes.explanations;
-          communityVotes = postAnswerRes.communityVotes;
-        } else {
-          throw err;
-        }
+        correctIdxes = postAnswerRes.correctIdxes;
+        explanations = postAnswerRes.explanations;
+        communityVotes = postAnswerRes.communityVotes;
       }
     }
 

@@ -6,7 +6,6 @@ import { accessBackend } from "@/lib/backend";
 import { basePath } from "@/lib/github";
 import { GetProgressesRes, Progress } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
-import { AxiosError } from "axios";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
@@ -37,25 +36,13 @@ export default function TestReadyPage() {
   useEffect(() => {
     if (testDetail && testId && !progresses) {
       (async () => {
-        try {
-          const res: GetProgressesRes = await accessBackend<GetProgressesRes>(
-            "GET",
-            `/tests/${testId}/progresses`,
-            instance,
-            accountInfo
-          );
-          setProgresses(res);
-        } catch (err) {
-          if (
-            err instanceof AxiosError &&
-            err.response &&
-            err.response.status === 404
-          ) {
-            setProgresses([]);
-          } else {
-            throw err;
-          }
-        }
+        const res: GetProgressesRes = await accessBackend<GetProgressesRes>(
+          "GET",
+          `/tests/${testId}/progresses`,
+          instance,
+          accountInfo
+        );
+        setProgresses(res);
       })();
     }
   }, [accountInfo, instance, progresses, testDetail, testId]);

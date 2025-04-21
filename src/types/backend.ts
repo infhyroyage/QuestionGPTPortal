@@ -5,17 +5,17 @@ export type GetAnswer = {
   /**
    * 正解の選択肢のインデックス
    */
-  correctIdxes: number[];
+  correctIdxes?: number[];
 
   /**
    * 各選択肢の正解/不正解の理由
    */
-  explanations: string[];
+  explanations?: string[];
 
   /**
    * コミュニティ回答割合
    */
-  communityVotes: string[];
+  communityVotes?: string[];
 };
 
 /**
