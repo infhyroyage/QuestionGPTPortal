@@ -98,7 +98,7 @@ export default function TestResultPage() {
                   100
               )}%)`}
             </h3>
-            <div className="mx-4 mt-4">
+            <div className="mt-4">
               <TestResultAccordion progresses={progresses} />
             </div>
           </div>
