@@ -100,6 +100,16 @@ export type SelectorButtonProps = {
 };
 
 /**
+ * TestReadyButtonsのProps
+ */
+export type TestReadyButtonsProps = {
+  /**
+   * テストの回答履歴
+   */
+  progresses: Progress[];
+};
+
+/**
  * TestResultAccordionのProps
  */
 export type TestResultAccordionProps = {
