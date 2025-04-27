@@ -96,7 +96,17 @@ export type Progress = {
 /**
  * [GET] /tests/{testId}/progresses のレスポンスボディの型
  */
-export type GetProgressesRes = Progress[];
+export type GetProgressesRes = {
+  /**
+   * テストを解く問題番号の順番
+   */
+  order: number[];
+
+  /**
+   * 問題番号の順番に対応する進捗項目
+   */
+  progresses: Progress[];
+};
 
 /**
  * [POST] /tests/{testId}/progresses/{questionNumber} のリクエストボディの型

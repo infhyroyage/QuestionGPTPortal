@@ -47,7 +47,7 @@ export default function TestResultPage() {
           instance,
           accountInfo
         );
-        setProgresses(res);
+        setProgresses(res.progresses);
       })();
     }
   }, [accountInfo, instance, progresses, testDetail, testId]);
