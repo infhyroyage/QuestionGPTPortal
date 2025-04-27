@@ -1,4 +1,9 @@
+import useTranslationFailedToast from "@/hooks/useTranslationFailedToast";
+import { translateSubjectsAndChoices } from "@/lib/translation";
+import { TranslationSubjectChoice } from "@/types/atoms";
 import { TestResultAccordionContentProps } from "@/types/props";
+import { useAccount, useMsal } from "@azure/msal-react";
+import { useEffect, useState } from "react";
 import SelectorButton from "./SelectorButton";
 import { AccordionContent } from "./ui/accordion";
 import { Skeleton } from "./ui/skeleton";
@@ -11,6 +16,45 @@ export default function TestResultAccordionContent({
   progress,
   getQuestion,
 }: TestResultAccordionContentProps) {
+  const [translation, setTranslation] =
+    useState<TranslationSubjectChoice>(undefined);
+  const [isOccurredTranslationFailed, setIsOccurredTranslationFailed] =
+    useState<boolean>(false);
+
+  const { instance, accounts } = useMsal();
+  const accountInfo = useAccount(accounts[0] || {});
+
+  const translationFailedToast = useTranslationFailedToast();
+
+  useEffect(() => {
+    if (getQuestion && !translation && !isOccurredTranslationFailed) {
+      (async () => {
+        try {
+          const translationSubjectChoice: TranslationSubjectChoice =
+            await translateSubjectsAndChoices(
+              getQuestion.subjects,
+              getQuestion.choices,
+              instance,
+              accountInfo
+            );
+          setTranslation(translationSubjectChoice);
+        } catch {
+          setIsOccurredTranslationFailed(true);
+          translationFailedToast("問題文・選択肢", () =>
+            setIsOccurredTranslationFailed(false)
+          );
+        }
+      })();
+    }
+  }, [
+    accountInfo,
+    getQuestion,
+    instance,
+    isOccurredTranslationFailed,
+    translationFailedToast,
+    translation,
+  ]);
+
   return (
     <AccordionContent>
       <div className="mx-8 my-4 space-y-8">
@@ -23,7 +67,7 @@ export default function TestResultAccordionContent({
                   key={j}
                   img={getQuestion.choices[j].img}
                   sentence={getQuestion.choices[j].sentence}
-                  // translation={} TODO: 翻訳文を追加
+                  translation={translation && translation.choices[j]}
                   variant="outline"
                 />
               ))
@@ -41,7 +85,7 @@ export default function TestResultAccordionContent({
                   key={j}
                   img={getQuestion.choices[j].img}
                   sentence={getQuestion.choices[j].sentence}
-                  // translation={} TODO: 翻訳文を追加
+                  translation={translation && translation.choices[j]}
                   variant="outline"
                 />
               ))
