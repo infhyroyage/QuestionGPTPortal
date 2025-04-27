@@ -2,7 +2,7 @@ import useTestDetail from "@/hooks/useTestDetail";
 import { fetchAnswerExplanationAtom, saveProgressAtom } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
 import { useAccount, useMsal } from "@azure/msal-react";
-import { useAtom, useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { ChevronRight, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
@@ -14,7 +14,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
  * @returns 次問題遷移ボタンのコンポーネント
  */
 export default function NextQuestionButton() {
-  const [answerExplanation] = useAtom(fetchAnswerExplanationAtom);
+  const answerExplanation = useAtomValue(fetchAnswerExplanationAtom);
   const saveProgress = useSetAtom(saveProgressAtom);
 
   const navigate = useNavigate();

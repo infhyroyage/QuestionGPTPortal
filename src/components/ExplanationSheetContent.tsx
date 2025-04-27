@@ -7,7 +7,7 @@ import {
 } from "@/lib/atoms";
 import { Choice } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { Fragment, useEffect, useState } from "react";
 import SelectorButton from "./SelectorButton";
 import { Badge } from "./ui/badge";
@@ -19,12 +19,14 @@ import { Skeleton } from "./ui/skeleton";
  * @returns 解説シートのコンテンツのコンポーネント
  */
 export default function ExplanationSheetContent() {
-  const [answerExplanation] = useAtom(fetchAnswerExplanationAtom);
-  const [questionSelector] = useAtom(fetchQuestionSelectorAtom);
+  const answerExplanation = useAtomValue(fetchAnswerExplanationAtom);
+  const questionSelector = useAtomValue(fetchQuestionSelectorAtom);
   const [translationExplanation, fetchTranslationExplanation] = useAtom(
     fetchTranslationExplanationAtom
   );
-  const [translationSubjectChoice] = useAtom(fetchTranslationSubjectChoiceAtom);
+  const translationSubjectChoice = useAtomValue(
+    fetchTranslationSubjectChoiceAtom
+  );
   const [isOccurredTranslationFailed, setIsOccurredTranslationFailed] =
     useState<boolean>(false);
 

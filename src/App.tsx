@@ -1,6 +1,6 @@
 import ApplyMSAL from "@/components/ApplyMSAL";
 import { toggleDarkModeAtom } from "@/lib/atoms";
-import { useAtom } from "jotai";
+import { useAtomValue } from "jotai";
 import { useEffect } from "react";
 import { BrowserRouter, Route, Routes } from "react-router";
 import { Toaster } from "./components/ui/toaster";
@@ -17,7 +17,7 @@ import TestResultPage from "./pages/TestResultPage";
  * @returns アプリケーションのエントリーポイント
  */
 export default function App() {
-  const [isDarkMode] = useAtom(toggleDarkModeAtom);
+  const isDarkMode = useAtomValue(toggleDarkModeAtom);
 
   // htmlタグにダークモード反映
   useEffect(() => {

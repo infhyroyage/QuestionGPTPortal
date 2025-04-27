@@ -1,7 +1,7 @@
 import { fetchTestDetailsAtom } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
 import { TestDetail } from "@/types/atoms";
-import { useAtom } from "jotai";
+import { useAtomValue } from "jotai";
 import { ScrollText } from "lucide-react";
 import { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router";
@@ -18,7 +18,7 @@ import { Button } from "./ui/button";
  * @returns 全テストのアコーディオンのコンポーネント
  */
 export default function TestListAccordion() {
-  const [testDetails] = useAtom(fetchTestDetailsAtom);
+  const testDetails = useAtomValue(fetchTestDetailsAtom);
 
   const navigate = useNavigate();
 

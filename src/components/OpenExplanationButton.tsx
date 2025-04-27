@@ -1,5 +1,5 @@
 import { fetchAnswerExplanationAtom } from "@/lib/atoms";
-import { useAtom } from "jotai";
+import { useAtomValue } from "jotai";
 import { Info } from "lucide-react";
 import { useMemo } from "react";
 import ExplanationSheetContent from "./ExplanationSheetContent";
@@ -19,7 +19,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
  * @returns 解説表示ボタンのコンポーネント
  */
 export default function OpenExplanationButton() {
-  const [answerExplanation] = useAtom(fetchAnswerExplanationAtom);
+  const answerExplanation = useAtomValue(fetchAnswerExplanationAtom);
 
   // 回答・解説を生成していない場合は、解説表示ボタンを非活性とする
   const isDisabledOpenExplanationButton = useMemo<boolean>(

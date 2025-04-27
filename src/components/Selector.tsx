@@ -5,7 +5,7 @@ import {
   toggleSelectedChoiceAtom,
 } from "@/lib/atoms";
 import { Choice } from "@/types/backend";
-import { useAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useMemo } from "react";
 import SelectorButton from "./SelectorButton";
 import { Skeleton } from "./ui/skeleton";
@@ -15,10 +15,12 @@ import { Skeleton } from "./ui/skeleton";
  * @returns テストページの下半分の選択肢のコンポーネント
  */
 export default function Selector() {
-  const [answerExplanation] = useAtom(fetchAnswerExplanationAtom);
-  const [questionSelector] = useAtom(fetchQuestionSelectorAtom);
-  const [, toggleSelectedChoice] = useAtom(toggleSelectedChoiceAtom);
-  const [translationSubjectChoice] = useAtom(fetchTranslationSubjectChoiceAtom);
+  const answerExplanation = useAtomValue(fetchAnswerExplanationAtom);
+  const questionSelector = useAtomValue(fetchQuestionSelectorAtom);
+  const toggleSelectedChoice = useSetAtom(toggleSelectedChoiceAtom);
+  const translationSubjectChoice = useAtomValue(
+    fetchTranslationSubjectChoiceAtom
+  );
 
   // 回答・解説が生成中の場合は、選択肢をすべて非活性とする
   const isDisabledSelectorButtons = useMemo<boolean>(

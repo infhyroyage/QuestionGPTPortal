@@ -5,7 +5,7 @@ import {
   fetchQuestionSelectorAtom,
 } from "@/lib/atoms";
 import { useAccount, useMsal } from "@azure/msal-react";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { Check, Loader2, SendHorizontal, X } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useParams } from "react-router";
@@ -19,7 +19,7 @@ export default function SubmitButton() {
   const [answerExplanation, fetchAnswerExplanation] = useAtom(
     fetchAnswerExplanationAtom
   );
-  const [questionSelector] = useAtom(fetchQuestionSelectorAtom);
+  const questionSelector = useAtomValue(fetchQuestionSelectorAtom);
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
 

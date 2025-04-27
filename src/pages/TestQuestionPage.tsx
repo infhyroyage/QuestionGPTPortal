@@ -15,7 +15,7 @@ import {
 } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
 import { useAccount, useMsal } from "@azure/msal-react";
-import { useAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
@@ -27,7 +27,7 @@ export default function TestQuestionPage() {
   const [questionSelector, fetchQuestionSelector] = useAtom(
     fetchQuestionSelectorAtom
   );
-  const [, resetAtomsForTestQuestion] = useAtom(resetAtomsForTestQuestionAtom);
+  const resetAtomsForTestQuestion = useSetAtom(resetAtomsForTestQuestionAtom);
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
 

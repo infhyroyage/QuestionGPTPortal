@@ -5,7 +5,7 @@ import {
 } from "@/lib/atoms";
 import { Subject } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
 import ImageDialog from "./ImageDialog";
 import { Skeleton } from "./ui/skeleton";
@@ -15,7 +15,7 @@ import { Skeleton } from "./ui/skeleton";
  * @returns テストページの上半分の問題文のコンポーネント
  */
 export default function QuestionSubjects() {
-  const [questionSelector] = useAtom(fetchQuestionSelectorAtom);
+  const questionSelector = useAtomValue(fetchQuestionSelectorAtom);
   const [translationSubjectChoice, fetchTranslationSubjectChoice] = useAtom(
     fetchTranslationSubjectChoiceAtom
   );

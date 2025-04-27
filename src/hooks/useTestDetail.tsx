@@ -1,6 +1,6 @@
 import { fetchTestDetailsAtom } from "@/lib/atoms";
 import { TestDetail } from "@/types/atoms";
-import { useAtom } from "jotai";
+import { useAtomValue } from "jotai";
 import { useMemo } from "react";
 import { useParams } from "react-router";
 
@@ -9,7 +9,7 @@ import { useParams } from "react-router";
  * @returns {TestDetail | undefined} testIdで指定されたテスト詳細情報(存在しない場合はundefined)
  */
 export default function useTestDetail(): TestDetail | undefined {
-  const [testDetails] = useAtom(fetchTestDetailsAtom);
+  const testDetails = useAtomValue(fetchTestDetailsAtom);
 
   const { testId } = useParams();
 
