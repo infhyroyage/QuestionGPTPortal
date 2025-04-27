@@ -16,11 +16,11 @@ import {
   PostProgressReq,
   PutEn2JaReq,
   PutEn2JaRes,
-  Subject,
 } from "@/types/backend";
 import { AccountInfo, IPublicClientApplication } from "@azure/msal-browser";
 import { atom } from "jotai";
 import { accessBackend } from "./backend";
+import { translateSubjectsAndChoices } from "./translation";
 
 /**
  * 正解・解説文を管理するatom
@@ -271,39 +271,15 @@ export const fetchTranslationSubjectChoiceAtom = atom(
       return;
     }
 
-    // 問題文、選択肢それぞれに対して[PUT] /en2jpにアクセスせず、
-    // 問題文→選択肢の順で連結した1つの配列を用いて、翻訳を1回にまとめて行うよう整形する
-    const data: PutEn2JaReq = [
-      ...question.subjects
-        .filter(
-          (subject: Subject) =>
-            !subject.isEscapedTranslation && !subject.isIndicatedImg
-        )
-        .map((subject: Subject) => subject.sentence),
-      ...question.choices
-        .filter((choice: Choice) => !choice.isEscapedTranslation)
-        .map((choice: Choice) => choice.sentence),
-    ];
-
-    // [PUT] /en2jpにアクセスして問題文・選択肢の翻訳文を取得
-    const res: PutEn2JaRes = await accessBackend<PutEn2JaRes, PutEn2JaReq>(
-      "PUT",
-      "/en2ja",
-      instance,
-      accountInfo,
-      data
-    );
-
-    // 取得した翻訳文を問題文、選択肢に対応させるように更新
-    const subjects: string[] = question.subjects.map((subject: Subject) =>
-      subject.isEscapedTranslation || subject.isIndicatedImg
-        ? subject.sentence
-        : (res.shift() as string)
-    );
-    const choices: string[] = question.choices.map((choice: Choice) =>
-      choice.isEscapedTranslation ? choice.sentence : (res.shift() as string)
-    );
-    set(translationSubjectChoiceAtom, { subjects, choices });
+    // 問題文・選択肢を翻訳
+    const translationSubjectChoice: TranslationSubjectChoice =
+      await translateSubjectsAndChoices(
+        question.subjects,
+        question.choices,
+        instance,
+        accountInfo
+      );
+    set(translationSubjectChoiceAtom, translationSubjectChoice);
   }
 );
 

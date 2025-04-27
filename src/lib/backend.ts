@@ -63,7 +63,7 @@ async function callByAxios<T, D>(
  * MSAL経由で認証を行い、バックエンドにアクセスする
  * @param {Method} method HTTPメソッドタイプ
  * @param {string} path パス
- * @param {IPublicClientApplication} msalInstance MSALインスタンス
+ * @param {IPublicClientApplication} instance MSALインスタンス
  * @param {AccountInfo | null} accountInfo ログイン済のアカウント情報
  * @param {D | undefined} data リクエストデータ
  * @returns {Promise<T>} レスポンス
@@ -71,7 +71,7 @@ async function callByAxios<T, D>(
 export async function accessBackend<T, D = never>(
   method: Method,
   path: string,
-  msalInstance: IPublicClientApplication,
+  instance: IPublicClientApplication,
   accountInfo: AccountInfo | null,
   data?: D
 ): Promise<T> {
@@ -89,20 +89,17 @@ export async function accessBackend<T, D = never>(
 
   try {
     // バックエンドにアクセスするためのアクセストークンを取得してから、バックエンドにアクセス
-    const msalRes: AuthenticationResult = await msalInstance.acquireTokenSilent(
-      {
-        scopes: backendAccessScopes.accessAsUser,
-        account: accountInfo || undefined,
-      }
-    );
+    const msalRes: AuthenticationResult = await instance.acquireTokenSilent({
+      scopes: backendAccessScopes.accessAsUser,
+      account: accountInfo || undefined,
+    });
     return await callByAxios<T, D>(method, url, msalRes.accessToken, data);
   } catch (err) {
     // アクセストークン取得エラーの場合は、ポップアップで認証してからバックエンドにアクセス
     if (err instanceof InteractionRequiredAuthError) {
-      const msalRes: AuthenticationResult =
-        await msalInstance.acquireTokenPopup({
-          scopes: backendAccessScopes.accessAsUser,
-        });
+      const msalRes: AuthenticationResult = await instance.acquireTokenPopup({
+        scopes: backendAccessScopes.accessAsUser,
+      });
       return await callByAxios<T, D>(method, url, msalRes.accessToken, data);
     } else {
       throw err;

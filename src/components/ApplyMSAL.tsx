@@ -9,13 +9,13 @@ import LoadingCenter from "./LoadingCenter";
  * @returns MSALを適用した子コンポーネント(ローカル環境の場合は適用せず、子コンポーネントをそのまま返す)
  */
 export default function ApplyMSAL({ children }: ApplyMSALProps) {
-  const msalInstance = new PublicClientApplication(config);
+  const instance = new PublicClientApplication(config);
 
   // ローカル環境の場合はMSALを使用しない
   return import.meta.env.DEV ? (
     <>{children}</>
   ) : (
-    <MsalProvider instance={msalInstance}>
+    <MsalProvider instance={instance}>
       <MsalAuthenticationTemplate
         interactionType={InteractionType.Redirect}
         authenticationRequest={loginScope}
