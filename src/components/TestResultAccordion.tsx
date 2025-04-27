@@ -96,25 +96,28 @@ export default function TestResultAccordion({
         // 問題文・選択肢を取得する前に、アコーディオンを開いておく
         setOpenValues(values);
 
-        // [GET] /tests/{testId}/questions/{questionNumber}にアクセスして問題文・選択肢を取得
+        // 今まで一度も問題文・選択肢を取得していない場合のみ、
+        // [GET] /tests/{testId}/questions/{questionNumber}にアクセスして取得
         const newOpenValues: string[] = values.filter(
           (value) => !openValues.includes(value)
         );
         for (const value of newOpenValues) {
-          const res: GetQuestion = await accessBackend<GetQuestion>(
-            "GET",
-            `/tests/${testId}/questions/${parseInt(value) + 1}`,
-            instance,
-            accountInfo
-          );
-          setGetQuestions((prev) => ({
-            ...prev,
-            [value]: res,
-          }));
+          if (!getQuestions[value]) {
+            const res: GetQuestion = await accessBackend<GetQuestion>(
+              "GET",
+              `/tests/${testId}/questions/${parseInt(value) + 1}`,
+              instance,
+              accountInfo
+            );
+            setGetQuestions((prev) => ({
+              ...prev,
+              [value]: res,
+            }));
+          }
         }
       }
     },
-    [accountInfo, instance, openValues, testId]
+    [accountInfo, getQuestions, instance, openValues, testId]
   );
 
   return (
