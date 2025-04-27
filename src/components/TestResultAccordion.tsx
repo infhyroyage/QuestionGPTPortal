@@ -1,11 +1,5 @@
-import useTranslationFailedToast from "@/hooks/useTranslationFailedToast";
 import { accessBackend } from "@/lib/backend";
-import {
-  GetFavoritesRes,
-  Progress,
-  PutEn2JaReq,
-  PutEn2JaRes,
-} from "@/types/backend";
+import { GetFavoritesRes, GetQuestion, Progress } from "@/types/backend";
 import { TestResultAccordionProps } from "@/types/props";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { Check, X } from "lucide-react";
@@ -29,17 +23,13 @@ export default function TestResultAccordion({
   const [isLoadingFavorites, setIsLoadingFavorites] = useState<boolean[]>(
     new Array(progresses.length).fill(false)
   );
-  const [translations, setTranslations] = useState<{ [key: string]: string[] }>(
-    {}
-  );
-  const [isOccurredTranslationFailed, setIsOccurredTranslationFailed] =
-    useState<boolean>(false);
+  const [getQuestions, setGetQuestions] = useState<{
+    [key: string]: GetQuestion;
+  }>({});
 
   const { testId } = useParams();
   const { instance, accounts } = useMsal();
   const accountInfo = useAccount(accounts[0] || {});
-
-  const translationFailedToast = useTranslationFailedToast();
 
   // すべての問題番号のお気に入り状態を取得
   useEffect(() => {
@@ -99,54 +89,32 @@ export default function TestResultAccordion({
     []
   );
 
-  // 新しく開かれたアコーディオンに対応する選択肢を、翻訳していない場合のみ翻訳
+  // 新しく開かれたアコーディオンのみに対応する問題文・選択肢を取得
   const handleValueChange = useCallback(
     async (values: string[]) => {
-      const newOpenValues = values.filter(
-        (value) => !openValues.includes(value)
-      );
-      for (const value of newOpenValues) {
-        // 新しく開かれたアコーディオンに対して、以下の場合は翻訳をスキップ
-        // 1. 翻訳文が取得済みの場合
-        // 2. 翻訳に失敗した場合
-        if (translations[value] || isOccurredTranslationFailed) continue;
+      if (testId) {
+        // 問題文・選択肢を取得する前に、アコーディオンを開いておく
+        setOpenValues(values);
 
-        // [PUT] /en2jaにアクセスして取得した選択肢の翻訳文で更新
-        try {
-          const translatedTexts: PutEn2JaRes = await accessBackend<
-            PutEn2JaRes,
-            PutEn2JaReq
-          >(
-            "PUT",
-            "/en2ja",
+        // [GET] /tests/{testId}/questions/{questionNumber}にアクセスして問題文・選択肢を取得
+        const newOpenValues: string[] = values.filter(
+          (value) => !openValues.includes(value)
+        );
+        for (const value of newOpenValues) {
+          const res: GetQuestion = await accessBackend<GetQuestion>(
+            "GET",
+            `/tests/${testId}/questions/${parseInt(value) + 1}`,
             instance,
-            accountInfo,
-            progresses[parseInt(value)].choiceSentences
+            accountInfo
           );
-
-          setTranslations((prev) => ({
+          setGetQuestions((prev) => ({
             ...prev,
-            [value]: translatedTexts,
+            [value]: res,
           }));
-        } catch {
-          setIsOccurredTranslationFailed(true);
-          translationFailedToast("選択肢", () =>
-            setIsOccurredTranslationFailed(false)
-          );
         }
       }
-
-      setOpenValues(values);
     },
-    [
-      accountInfo,
-      instance,
-      isOccurredTranslationFailed,
-      openValues,
-      progresses,
-      translationFailedToast,
-      translations,
-    ]
+    [accountInfo, instance, openValues, testId]
   );
 
   return (
@@ -188,8 +156,7 @@ export default function TestResultAccordion({
           </div>
           <TestResultAccordionContent
             progress={progress}
-            progressIdx={i}
-            translations={translations}
+            getQuestion={getQuestions[`${i}`]}
           />
         </AccordionItem>
       ))}

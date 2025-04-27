@@ -83,16 +83,6 @@ export type Progress = {
   isCorrect: boolean;
 
   /**
-   * 選択肢の文
-   */
-  choiceSentences: string[];
-
-  /**
-   * 選択肢の文に続く画像URL(画像がない場合はnull)
-   */
-  choiceImgs: (string | null)[];
-
-  /**
    * 選択した選択肢のインデックス
    */
   selectedIdxes: number[];

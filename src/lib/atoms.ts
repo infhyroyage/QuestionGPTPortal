@@ -350,10 +350,6 @@ export const saveProgressAtom = atom(
     // 回答履歴を作成
     const progress: PostProgressReq = {
       isCorrect: answerExplanation.isCorrect,
-      choiceSentences: questionSelector.choices.map(
-        (choice) => choice.sentence
-      ),
-      choiceImgs: questionSelector.choices.map((choice) => choice.img),
       selectedIdxes: questionSelector.choices.reduce<number[]>(
         (prev: number[], choice: ChoiceAndSelect, idx: number) => {
           if (choice.isSelected) {

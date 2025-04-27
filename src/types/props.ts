@@ -1,4 +1,4 @@
-import { Progress } from "@/types/backend";
+import { GetQuestion, Progress } from "@/types/backend";
 import { ReactNode } from "react";
 
 /**
@@ -119,14 +119,9 @@ export type TestResultAccordionContentProps = {
   progress: Progress;
 
   /**
-   * テストの回答履歴のインデックス
+   * 問題文・選択肢
    */
-  progressIdx: number;
-
-  /**
-   * 選択肢の翻訳文
-   */
-  translations: { [key: string]: string[] };
+  getQuestion?: GetQuestion;
 };
 
 /**
