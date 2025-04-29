@@ -1,7 +1,9 @@
+import { fetchProgressesAtom } from "@/lib/atoms";
 import { accessBackend } from "@/lib/backend";
-import { GetFavoritesRes, GetQuestion, Progress } from "@/types/backend";
-import { TestResultAccordionProps } from "@/types/props";
+import { History } from "@/types/atoms";
+import { GetFavoritesRes, GetQuestion } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
+import { useAtomValue } from "jotai";
 import { Check, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router";
@@ -13,16 +15,11 @@ import { Accordion, AccordionItem, AccordionTrigger } from "./ui/accordion";
  * テスト結果アコーディオンのコンポーネント
  * @returns テスト結果アコーディオンのコンポーネント
  */
-export default function TestResultAccordion({
-  progresses,
-}: TestResultAccordionProps) {
+export default function TestResultAccordion() {
+  const { histories, order } = useAtomValue(fetchProgressesAtom);
   const [openValues, setOpenValues] = useState<string[]>([]);
-  const [favorites, setFavorites] = useState<boolean[]>(
-    new Array(progresses.length).fill(false)
-  );
-  const [isLoadingFavorites, setIsLoadingFavorites] = useState<boolean[]>(
-    new Array(progresses.length).fill(false)
-  );
+  const [favorites, setFavorites] = useState<boolean[]>([]);
+  const [isLoadingFavorites, setIsLoadingFavorites] = useState<boolean[]>([]);
   const [getQuestions, setGetQuestions] = useState<{
     [key: string]: GetQuestion;
   }>({});
@@ -33,10 +30,10 @@ export default function TestResultAccordion({
 
   // すべての問題番号のお気に入り状態を取得
   useEffect(() => {
-    if (testId) {
+    if (testId && histories && order) {
       (async () => {
         try {
-          setIsLoadingFavorites(new Array(progresses.length).fill(true));
+          setIsLoadingFavorites(new Array(histories.length).fill(true));
 
           // [GET] /tests/{testId}/favoritesにアクセスしてお気に入り情報を取得
           const response: GetFavoritesRes =
@@ -48,31 +45,36 @@ export default function TestResultAccordion({
             );
 
           // お気に入り情報を設定して更新
-          const newFavorites: boolean[] = new Array(progresses.length).fill(
+          const newFavorites: boolean[] = new Array(histories.length).fill(
             false
           );
           for (const item of response) {
             if (
               item.questionNumber > 0 &&
-              item.questionNumber <= progresses.length
+              item.questionNumber <= histories.length
             ) {
-              newFavorites[item.questionNumber - 1] = item.isFavorite;
+              const favoriteIdx = order.findIndex(
+                (order: number) => order === item.questionNumber
+              );
+              if (favoriteIdx !== -1) {
+                newFavorites[favoriteIdx] = item.isFavorite;
+              }
             }
           }
           setFavorites(newFavorites);
         } finally {
-          setIsLoadingFavorites(new Array(progresses.length).fill(false));
+          setIsLoadingFavorites(new Array(histories.length).fill(false));
         }
       })();
     }
-  }, [accountInfo, instance, progresses.length, testId]);
+  }, [accountInfo, histories, instance, order, testId]);
 
   // i番目(0スタート)の問題のお気に入り切替ボタンのお気に入り状態変更時の動作
   const handleFavoriteChange = useCallback(
-    (i: number, newIsFavorite: boolean) =>
+    (favoriteIdx: number, newIsFavorite: boolean) =>
       setFavorites((prev) => {
         const newFavorites = [...prev];
-        newFavorites[i] = newIsFavorite;
+        newFavorites[favoriteIdx] = newIsFavorite;
         return newFavorites;
       }),
     []
@@ -80,10 +82,10 @@ export default function TestResultAccordion({
 
   // i番目(0スタート)の問題のお気に入り切替ボタンのローディング状態変更時の動作
   const handleLoadingChange = useCallback(
-    (i: number, newIsLoading: boolean) =>
+    (favoriteIdx: number, newIsLoading: boolean) =>
       setIsLoadingFavorites((prev) => {
         const newIsLoadingFavorites = [...prev];
-        newIsLoadingFavorites[i] = newIsLoading;
+        newIsLoadingFavorites[favoriteIdx] = newIsLoading;
         return newIsLoadingFavorites;
       }),
     []
@@ -121,48 +123,51 @@ export default function TestResultAccordion({
   );
 
   return (
-    <Accordion
-      type="multiple"
-      value={openValues}
-      onValueChange={handleValueChange}
-    >
-      {progresses.map((progress: Progress, i: number) => (
-        <AccordionItem key={i} value={`${i}`}>
-          <div className="flex items-center">
-            <div className="pl-4 flex items-center">
-              <FavoriteButton
-                isFavorite={favorites[i]}
-                isLoading={isLoadingFavorites[i]}
-                onFavoriteChange={(newIsFavorite: boolean) =>
-                  handleFavoriteChange(i, newIsFavorite)
-                }
-                onLoadingChange={(newIsLoading: boolean) =>
-                  handleLoadingChange(i, newIsLoading)
-                }
-                questionNumber={String(i + 1)}
-              />
+    histories &&
+    order && (
+      <Accordion
+        type="multiple"
+        value={openValues}
+        onValueChange={handleValueChange}
+      >
+        {histories.map((history: History, historyIdx: number) => (
+          <AccordionItem key={historyIdx} value={`${historyIdx}`}>
+            <div className="flex items-center">
+              <div className="pl-4 flex items-center">
+                <FavoriteButton
+                  isFavorite={favorites[historyIdx]}
+                  isLoading={isLoadingFavorites[historyIdx]}
+                  onFavoriteChange={(newIsFavorite: boolean) =>
+                    handleFavoriteChange(historyIdx, newIsFavorite)
+                  }
+                  onLoadingChange={(newIsLoading: boolean) =>
+                    handleLoadingChange(historyIdx, newIsLoading)
+                  }
+                  questionNumber={String(order[historyIdx])}
+                />
+              </div>
+              <div className="flex-1">
+                <AccordionTrigger className="px-4">
+                  <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+                    {`${historyIdx + 1}問目`}
+                  </h4>
+                  <div className="transform-none">
+                    {history.isCorrect ? (
+                      <Check className="size-7 text-green-500" />
+                    ) : (
+                      <X className="size-7 text-red-500" />
+                    )}
+                  </div>
+                </AccordionTrigger>
+              </div>
             </div>
-            <div className="flex-1">
-              <AccordionTrigger className="px-4">
-                <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-                  {`${i + 1}問目`}
-                </h4>
-                <div className="transform-none">
-                  {progress.isCorrect ? (
-                    <Check className="size-7 text-green-500" />
-                  ) : (
-                    <X className="size-7 text-red-500" />
-                  )}
-                </div>
-              </AccordionTrigger>
-            </div>
-          </div>
-          <TestResultAccordionContent
-            progress={progress}
-            getQuestion={getQuestions[`${i}`]}
-          />
-        </AccordionItem>
-      ))}
-    </Accordion>
+            <TestResultAccordionContent
+              getQuestion={getQuestions[`${historyIdx}`]}
+              history={history}
+            />
+          </AccordionItem>
+        ))}
+      </Accordion>
+    )
   );
 }

@@ -399,6 +399,8 @@ export const resetProgressesAtom = atom(
     );
 
     set(orderAtom, order);
+
+    return order[0];
   }
 );
 
@@ -458,6 +460,13 @@ export const saveProgressAtom = atom(
       accountInfo,
       progress
     );
+
+    // 回答履歴が保存済みであることを記録
+    set(answerExplanationAtom, {
+      ...answerExplanation,
+      isSavedProgress: true,
+    });
+
     set(
       historiesAtom,
       res.map((progress) => ({
@@ -466,12 +475,6 @@ export const saveProgressAtom = atom(
         correctIdxes: progress.correctIdxes,
       }))
     );
-
-    // 回答履歴が保存済みであることを記録
-    set(answerExplanationAtom, {
-      ...answerExplanation,
-      isSavedProgress: true,
-    });
   }
 );
 

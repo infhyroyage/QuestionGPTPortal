@@ -1,11 +1,12 @@
 import LoadingCenter from "@/components/LoadingCenter";
 import TestReadyButtons from "@/components/TestReadyButtons";
 import TopBar from "@/components/TopBar";
+import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import useTestDetail from "@/hooks/useTestDetail";
-import { accessBackend } from "@/lib/backend";
+import { fetchProgressesAtom } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
-import { GetProgressesRes, Progress } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
+import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
@@ -14,15 +15,16 @@ import { useNavigate, useParams } from "react-router";
  * @returns テスト準備ページのコンポーネント
  */
 export default function TestReadyPage() {
-  const [progresses, setProgresses] = useState<Progress[] | undefined>(
-    undefined
-  );
+  const [{ histories }, fetchProgresses] = useAtom(fetchProgressesAtom);
+  const [isOccurredSystemError, setIsOccurredSystemError] =
+    useState<boolean>(false);
 
   const navigate = useNavigate();
   const { testId } = useParams();
   const { instance, accounts } = useMsal();
   const accountInfo = useAccount(accounts[0] || {});
 
+  const systemErrorToast = useSystemErrorToast();
   const testDetail = useTestDetail();
 
   // テスト詳細情報を習得していない場合はトップページにリダイレクト
@@ -32,20 +34,28 @@ export default function TestReadyPage() {
     }
   }, [navigate, testDetail]);
 
-  // 今まで回答した問題の回答履歴を取得
+  // 今まで回答した問題の回答履歴とテストを解く問題番号の順番を取得
   useEffect(() => {
-    if (testDetail && testId && !progresses) {
+    if (testDetail && testId && !histories && !isOccurredSystemError) {
       (async () => {
-        const res: GetProgressesRes = await accessBackend<GetProgressesRes>(
-          "GET",
-          `/tests/${testId}/progresses`,
-          instance,
-          accountInfo
-        );
-        setProgresses(res.progresses);
+        try {
+          await fetchProgresses(testId, instance, accountInfo);
+        } catch (e) {
+          setIsOccurredSystemError(true);
+          systemErrorToast(e);
+        }
       })();
     }
-  }, [accountInfo, instance, progresses, testDetail, testId]);
+  }, [
+    accountInfo,
+    fetchProgresses,
+    histories,
+    instance,
+    isOccurredSystemError,
+    systemErrorToast,
+    testDetail,
+    testId,
+  ]);
 
   return (
     testId &&
@@ -61,11 +71,7 @@ export default function TestReadyPage() {
               {testDetail.testName}
             </h4>
           </div>
-          {progresses ? (
-            <TestReadyButtons progresses={progresses} />
-          ) : (
-            <LoadingCenter />
-          )}
+          {histories ? <TestReadyButtons /> : <LoadingCenter />}
         </div>
       </>
     )

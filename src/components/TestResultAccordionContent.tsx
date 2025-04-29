@@ -13,8 +13,8 @@ import { Skeleton } from "./ui/skeleton";
  * @returns テスト結果アコーディオンのコンテンツのコンポーネント
  */
 export default function TestResultAccordionContent({
-  progress,
   getQuestion,
+  history,
 }: TestResultAccordionContentProps) {
   const [translation, setTranslation] =
     useState<TranslationSubjectChoice>(undefined);
@@ -55,6 +55,7 @@ export default function TestResultAccordionContent({
     translation,
   ]);
 
+  // TODO: 問題文も表示する
   return (
     <AccordionContent>
       <div className="mx-8 my-4 space-y-8">
@@ -62,7 +63,7 @@ export default function TestResultAccordionContent({
           <p className="leading-7 [&:not(:first-child)]:mt-6">選択した選択肢</p>
           <div className="mx-4 space-y-4">
             {getQuestion ? (
-              progress.selectedIdxes.map((j: number) => (
+              history.selectedIdxes.map((j: number) => (
                 <SelectorButton
                   key={j}
                   img={getQuestion.choices[j].img}
@@ -80,7 +81,7 @@ export default function TestResultAccordionContent({
           <p className="leading-7 [&:not(:first-child)]:mt-6">正解の選択肢</p>
           <div className="mx-4 space-y-4">
             {getQuestion ? (
-              progress.correctIdxes.map((j: number) => (
+              history.correctIdxes.map((j: number) => (
                 <SelectorButton
                   key={j}
                   img={getQuestion.choices[j].img}

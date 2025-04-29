@@ -1,5 +1,9 @@
 import useTestDetail from "@/hooks/useTestDetail";
-import { fetchAnswerExplanationAtom, saveProgressAtom } from "@/lib/atoms";
+import {
+  fetchAnswerExplanationAtom,
+  fetchProgressesAtom,
+  saveProgressAtom,
+} from "@/lib/atoms";
 import { basePath } from "@/lib/github";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtomValue, useSetAtom } from "jotai";
@@ -15,6 +19,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
  */
 export default function NextQuestionButton() {
   const answerExplanation = useAtomValue(fetchAnswerExplanationAtom);
+  const { histories, order } = useAtomValue(fetchProgressesAtom);
   const saveProgress = useSetAtom(saveProgressAtom);
 
   const navigate = useNavigate();
@@ -39,7 +44,9 @@ export default function NextQuestionButton() {
       !answerExplanation.isSubmitting &&
       !answerExplanation.isSavedProgress
     ) {
-      saveProgress(testId, questionNumber, instance, accountInfo);
+      (async () => {
+        await saveProgress(testId, questionNumber, instance, accountInfo);
+      })();
     }
   }, [
     accountInfo,
@@ -52,15 +59,14 @@ export default function NextQuestionButton() {
 
   // 次の問題かテスト結果ページへ遷移
   const onClick = useCallback(() => {
-    if (testId && testDetail && questionNumber) {
-      const parsedQuestionNumber: number = parseInt(questionNumber);
+    if (testId && histories && order && testDetail) {
       navigate(
-        parsedQuestionNumber === testDetail.length
+        histories.length === testDetail.length
           ? `${basePath}/tests/${testId}/result`
-          : `${basePath}/tests/${testId}/questions/${parsedQuestionNumber + 1}`
+          : `${basePath}/tests/${testId}/questions/${order[histories.length]}`
       );
     }
-  }, [navigate, questionNumber, testDetail, testId]);
+  }, [histories, navigate, order, testDetail, testId]);
 
   return (
     testDetail &&

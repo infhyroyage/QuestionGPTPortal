@@ -10,12 +10,14 @@ import {
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import useTestDetail from "@/hooks/useTestDetail";
 import {
+  fetchAnswerExplanationAtom,
+  fetchProgressesAtom,
   fetchQuestionSelectorAtom,
   resetAtomsForTestQuestionAtom,
 } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
 import { useAccount, useMsal } from "@azure/msal-react";
-import { useAtom, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
@@ -24,6 +26,8 @@ import { useNavigate, useParams } from "react-router";
  * @returns テストページのコンポーネント
  */
 export default function TestQuestionPage() {
+  const answerExplanation = useAtomValue(fetchAnswerExplanationAtom);
+  const { histories } = useAtomValue(fetchProgressesAtom);
   const [questionSelector, fetchQuestionSelector] = useAtom(
     fetchQuestionSelectorAtom
   );
@@ -93,9 +97,16 @@ export default function TestQuestionPage() {
 
   return (
     testId &&
+    histories &&
     testDetail && (
       <>
-        <TopBar title={`${questionNumber}問目 (全${testDetail.length}問)`} />
+        <TopBar
+          title={`${
+            answerExplanation && answerExplanation.isSavedProgress
+              ? histories.length
+              : histories.length + 1
+          }問目 (全${testDetail.length}問)`}
+        />
         <ResizablePanelGroup
           direction="vertical"
           className="pt-[52px] min-h-screen w-full"

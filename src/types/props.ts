@@ -1,5 +1,6 @@
-import { GetQuestion, Progress } from "@/types/backend";
+import { GetQuestion } from "@/types/backend";
 import { ReactNode } from "react";
+import { History } from "./atoms";
 
 /**
  * ApplyMSALのProps
@@ -100,38 +101,18 @@ export type SelectorButtonProps = {
 };
 
 /**
- * TestReadyButtonsのProps
- */
-export type TestReadyButtonsProps = {
-  /**
-   * テストの回答履歴
-   */
-  progresses: Progress[];
-};
-
-/**
- * TestResultAccordionのProps
- */
-export type TestResultAccordionProps = {
-  /**
-   * テストの回答履歴
-   */
-  progresses: Progress[];
-};
-
-/**
  * TestResultAccordionContentのProps
  */
 export type TestResultAccordionContentProps = {
   /**
-   * テストの回答履歴
-   */
-  progress: Progress;
-
-  /**
    * 問題文・選択肢
    */
   getQuestion?: GetQuestion;
+
+  /**
+   * 回答履歴
+   */
+  history: History;
 };
 
 /**
