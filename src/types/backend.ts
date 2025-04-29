@@ -74,6 +74,16 @@ export type GetFavoriteRes = {
 export type PostFavoriteReq = GetFavoriteRes;
 
 /**
+ * [POST] /tests/{testId}/progresses のリクエストボディの型
+ */
+export type PostProgressesReq = {
+  /**
+   * テストを解く問題番号の順番
+   */
+  order: number[];
+};
+
+/**
  * [GET] /tests/{testId}/progresses のレスポンスボディの各要素の型
  */
 export type Progress = {
@@ -112,6 +122,11 @@ export type GetProgressesRes = {
  * [POST] /tests/{testId}/progresses/{questionNumber} のリクエストボディの型
  */
 export type PostProgressReq = Progress;
+
+/**
+ * [POST] /tests/{testId}/progresses/{questionNumber} のレスポンスボディの型
+ */
+export type PostProgressRes = Progress[];
 
 /**
  * [GET] /tests/{testId}/questions/{questionNumber} のレスポンスボディの問題文の型

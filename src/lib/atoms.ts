@@ -1,6 +1,8 @@
 import {
   AnswerExplanation,
   ChoiceAndSelect,
+  Histories,
+  Order,
   QuestionSelector,
   TestDetail,
   TestDetails,
@@ -10,10 +12,13 @@ import {
 import {
   Choice,
   GetAnswer,
+  GetProgressesRes,
   GetQuestion,
   GetTests,
   PostAnswerRes,
+  PostProgressesReq,
   PostProgressReq,
+  PostProgressRes,
   PutEn2JaReq,
   PutEn2JaRes,
 } from "@/types/backend";
@@ -32,6 +37,16 @@ const answerExplanationAtom = atom<AnswerExplanation>(undefined);
  * toggleDarkModeAtomで隠蔽するためexportしない
  */
 const isDarkModeAtom = atom<boolean>(true);
+
+/**
+ * 回答履歴を管理するatom
+ */
+const historiesAtom = atom<Histories>(undefined);
+
+/**
+ * テストを解く問題番号の順番を管理するatom
+ */
+const orderAtom = atom<Order>(undefined);
 
 /**
  * 問題文・選択肢を管理するatom
@@ -68,11 +83,11 @@ export const fetchAnswerExplanationAtom = atom(
     isResubmit: boolean = false
   ) => {
     // テスト詳細情報がまだ存在しない場合は何も取得・更新しない
-    const testDetails = get(testDetailsAtom);
+    const testDetails: TestDetails = get(testDetailsAtom);
     if (!testDetails) {
       return;
     }
-    const testDetail = testDetails.find(
+    const testDetail: TestDetail | undefined = testDetails.find(
       (testDetail) => testDetail.testId === testId
     );
     if (!testDetail) {
@@ -80,7 +95,7 @@ export const fetchAnswerExplanationAtom = atom(
     }
 
     // 問題文・選択肢がまだ存在しない場合は何も取得・更新しない
-    const questionSelector = get(questionSelectorAtom);
+    const questionSelector: QuestionSelector = get(questionSelectorAtom);
     if (!questionSelector) {
       return;
     }
@@ -164,6 +179,41 @@ export const fetchAnswerExplanationAtom = atom(
 );
 
 /**
+ * 回答履歴とテストを解く問題番号の順番を取得するatom
+ */
+export const fetchHistoriesAndOrderAtom = atom(
+  (get) => ({
+    histories: get(historiesAtom),
+    order: get(orderAtom),
+  }),
+  async (
+    _,
+    set,
+    testId: string,
+    instance: IPublicClientApplication,
+    accountInfo: AccountInfo | null
+  ) => {
+    // [GET] /tests/{testId}/progressesにアクセスして取得した進捗項目から
+    // 回答履歴とテストを解く問題番号の順番を組み立てて更新
+    const res: GetProgressesRes = await accessBackend<GetProgressesRes>(
+      "GET",
+      `/tests/${testId}/progresses`,
+      instance,
+      accountInfo
+    );
+    set(
+      historiesAtom,
+      res.progresses.map((progress) => ({
+        isCorrect: progress.isCorrect,
+        selectedIdxes: progress.selectedIdxes,
+        correctIdxes: progress.correctIdxes,
+      }))
+    );
+    set(orderAtom, res.order);
+  }
+);
+
+/**
  * 問題文・選択肢を取得するatom
  */
 export const fetchQuestionSelectorAtom = atom(
@@ -236,7 +286,7 @@ export const fetchTranslationExplanationAtom = atom(
     accountInfo: AccountInfo | null
   ) => {
     // 翻訳対象の解説文がまだ存在しない場合は何も翻訳しない
-    const answerExplanation = get(answerExplanationAtom);
+    const answerExplanation: AnswerExplanation = get(answerExplanationAtom);
     if (!answerExplanation || !answerExplanation.explanations) {
       return;
     }
@@ -266,16 +316,16 @@ export const fetchTranslationSubjectChoiceAtom = atom(
     accountInfo: AccountInfo | null
   ) => {
     // 翻訳対象の問題文・選択肢がまだ存在しない場合は何も翻訳しない
-    const question = get(questionSelectorAtom);
-    if (!question) {
+    const questionSelector: QuestionSelector = get(questionSelectorAtom);
+    if (!questionSelector) {
       return;
     }
 
     // 問題文・選択肢を翻訳
     const translationSubjectChoice: TranslationSubjectChoice =
       await translateSubjectsAndChoices(
-        question.subjects,
-        question.choices,
+        questionSelector.subjects,
+        questionSelector.choices,
         instance,
         accountInfo
       );
@@ -294,6 +344,49 @@ export const resetAtomsForTestQuestionAtom = atom(null, (_, set) => {
 });
 
 /**
+ * テストを解く問題番号の順番を保存するatom(write only)
+ */
+export const saveOrderAtom = atom(
+  null,
+  async (
+    get,
+    set,
+    testId: string,
+    instance: IPublicClientApplication,
+    accountInfo: AccountInfo | null
+  ) => {
+    // テスト詳細情報がまだ存在しない場合は何も取得・更新しない
+    const testDetails: TestDetails = get(testDetailsAtom);
+    if (!testDetails) {
+      return;
+    }
+    const testDetail: TestDetail | undefined = testDetails.find(
+      (testDetail) => testDetail.testId === testId
+    );
+    if (!testDetail) {
+      return;
+    }
+
+    // テストを解く問題番号の順番の生成
+    const order: Order = Array.from(
+      { length: testDetail.length },
+      (_, idx) => idx + 1
+    );
+
+    // [POST] /tests/{testId}/progressesにアクセスしてテストを解く問題番号の順番を保存
+    await accessBackend<void, PostProgressesReq>(
+      "POST",
+      `/tests/${testId}/progresses`,
+      instance,
+      accountInfo,
+      { order }
+    );
+
+    set(orderAtom, order);
+  }
+);
+
+/**
  * 回答履歴を保存するatom(write only)
  */
 export const saveProgressAtom = atom(
@@ -306,14 +399,14 @@ export const saveProgressAtom = atom(
     instance: IPublicClientApplication,
     accountInfo: AccountInfo | null
   ) => {
-    // 問題文・選択肢がまだ存在しない場合は解答履歴を保存しない
-    const questionSelector = get(questionSelectorAtom);
+    // 問題文・選択肢がまだ存在しない場合は回答履歴を保存しない
+    const questionSelector: QuestionSelector = get(questionSelectorAtom);
     if (!questionSelector) {
       return;
     }
 
-    // 回答・解説がまだ存在しない場合は解答履歴を保存しない
-    const answerExplanation = get(answerExplanationAtom);
+    // 回答・解説がまだ存在しない場合は回答履歴を保存しない
+    const answerExplanation: AnswerExplanation = get(answerExplanationAtom);
     if (
       !answerExplanation ||
       answerExplanation.isSavedProgress ||
@@ -338,15 +431,27 @@ export const saveProgressAtom = atom(
       correctIdxes: answerExplanation.correctIdxes,
     };
 
-    // 回答履歴をバックエンドに保存
-    await accessBackend<void, PostProgressReq>(
+    // 回答履歴を保存
+    const res: PostProgressRes = await accessBackend<
+      PostProgressRes,
+      PostProgressReq
+    >(
       "POST",
       `/tests/${testId}/progresses/${questionNumber}`,
       instance,
       accountInfo,
       progress
     );
+    set(
+      historiesAtom,
+      res.map((progress) => ({
+        isCorrect: progress.isCorrect,
+        selectedIdxes: progress.selectedIdxes,
+        correctIdxes: progress.correctIdxes,
+      }))
+    );
 
+    // 回答履歴が保存済みであることを記録
     set(answerExplanationAtom, {
       ...answerExplanation,
       isSavedProgress: true,
@@ -370,7 +475,7 @@ export const toggleDarkModeAtom = atom(
  */
 export const toggleSelectedChoiceAtom = atom(null, (get, set, idx: number) => {
   // まだ選択肢を取得していない場合は何もしない
-  const questionSelector = get(questionSelectorAtom);
+  const questionSelector: QuestionSelector = get(questionSelectorAtom);
   if (!questionSelector) return;
 
   // 複数個の回答が存在する場合はidx番目のみ選択状態を反転し、
