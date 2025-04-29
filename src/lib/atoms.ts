@@ -181,7 +181,7 @@ export const fetchAnswerExplanationAtom = atom(
 /**
  * 回答履歴とテストを解く問題番号の順番を取得するatom
  */
-export const fetchHistoriesAndOrderAtom = atom(
+export const fetchProgressesAtom = atom(
   (get) => ({
     histories: get(historiesAtom),
     order: get(orderAtom),
@@ -344,9 +344,9 @@ export const resetAtomsForTestQuestionAtom = atom(null, (_, set) => {
 });
 
 /**
- * テストを解く問題番号の順番を保存するatom(write only)
+ * 回答履歴とテストを解く問題番号の順番を初期化するatom(write only)
  */
-export const saveOrderAtom = atom(
+export const resetProgressesAtom = atom(
   null,
   async (
     get,
@@ -365,6 +365,22 @@ export const saveOrderAtom = atom(
     );
     if (!testDetail) {
       return;
+    }
+
+    // 回答履歴を取得していない場合は何も初期化しない
+    const histories: Histories = get(historiesAtom);
+    if (!histories) {
+      return;
+    }
+
+    // バックエンドに回答履歴が保存している場合は[DELETE] /tests/{testId}/progressesにアクセスして回答履歴を削除
+    if (histories.length > 0) {
+      await accessBackend(
+        "DELETE",
+        `/tests/${testId}/progresses`,
+        instance,
+        accountInfo
+      );
     }
 
     // テストを解く問題番号の順番の生成
