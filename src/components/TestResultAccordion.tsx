@@ -1,7 +1,8 @@
+import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import { fetchProgressesAtom } from "@/lib/atoms";
 import { accessBackend } from "@/lib/backend";
 import { History } from "@/types/atoms";
-import { GetFavoritesRes, GetQuestion } from "@/types/backend";
+import { Favorite, GetFavoritesRes, GetQuestion } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtomValue } from "jotai";
 import { Check, X } from "lucide-react";
@@ -23,51 +24,61 @@ export default function TestResultAccordion() {
   const [getQuestions, setGetQuestions] = useState<{
     [key: string]: GetQuestion;
   }>({});
+  const [isOccurredSystemError, setIsOccurredSystemError] =
+    useState<boolean>(false);
 
   const { testId } = useParams();
   const { instance, accounts } = useMsal();
   const accountInfo = useAccount(accounts[0] || {});
 
+  const systemErrorToast = useSystemErrorToast();
+
   // すべての問題番号のお気に入り状態を取得
   useEffect(() => {
-    if (testId && histories && order) {
+    if (testId && histories && order && !isOccurredSystemError) {
       (async () => {
         try {
           setIsLoadingFavorites(new Array(histories.length).fill(true));
 
           // [GET] /tests/{testId}/favoritesにアクセスしてお気に入り情報を取得
-          const response: GetFavoritesRes =
-            await accessBackend<GetFavoritesRes>(
-              "GET",
-              `/tests/${testId}/favorites`,
-              instance,
-              accountInfo
-            );
+          const res: GetFavoritesRes = await accessBackend<GetFavoritesRes>(
+            "GET",
+            `/tests/${testId}/favorites`,
+            instance,
+            accountInfo
+          );
 
           // お気に入り情報を設定して更新
-          const newFavorites: boolean[] = new Array(histories.length).fill(
-            false
-          );
-          for (const item of response) {
-            if (
-              item.questionNumber > 0 &&
-              item.questionNumber <= histories.length
-            ) {
-              const favoriteIdx = order.findIndex(
-                (order: number) => order === item.questionNumber
-              );
-              if (favoriteIdx !== -1) {
-                newFavorites[favoriteIdx] = item.isFavorite;
+          setFavorites(
+            res.reduce((prev: boolean[], favorite: Favorite) => {
+              if (favorite.isFavorite) {
+                const favoriteIdx = order.findIndex(
+                  (order: number) => order === favorite.questionNumber
+                );
+                if (favoriteIdx !== -1) {
+                  prev[favoriteIdx] = true;
+                }
               }
-            }
-          }
-          setFavorites(newFavorites);
+              return prev;
+            }, new Array(histories.length).fill(false))
+          );
+        } catch (e) {
+          setIsOccurredSystemError(true);
+          systemErrorToast(e);
         } finally {
           setIsLoadingFavorites(new Array(histories.length).fill(false));
         }
       })();
     }
-  }, [accountInfo, histories, instance, order, testId]);
+  }, [
+    accountInfo,
+    histories,
+    instance,
+    isOccurredSystemError,
+    order,
+    systemErrorToast,
+    testId,
+  ]);
 
   // i番目(0スタート)の問題のお気に入り切替ボタンのお気に入り状態変更時の動作
   const handleFavoriteChange = useCallback(
