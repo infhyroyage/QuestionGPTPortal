@@ -356,15 +356,13 @@ export const initializeProgressesAtom = atom(
       return;
     }
 
-    // バックエンドに回答履歴が保存している場合は[DELETE] /tests/{testId}/progressesにアクセスして回答履歴を削除
-    if (histories.length > 0) {
-      await accessBackend(
-        "DELETE",
-        `/tests/${testId}/progresses`,
-        instance,
-        accountInfo
-      );
-    }
+    // [DELETE] /tests/{testId}/progressesにアクセスして回答履歴とテストを解く問題番号の順番を削除
+    await accessBackend(
+      "DELETE",
+      `/tests/${testId}/progresses`,
+      instance,
+      accountInfo
+    );
 
     // テストを解く問題番号の順番の生成
     const order: Order = Array.from(

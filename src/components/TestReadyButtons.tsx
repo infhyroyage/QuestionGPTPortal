@@ -45,27 +45,21 @@ export default function TestReadyButtons() {
   // 最初の問題のテストページへ遷移
   const onClickStartButton = useCallback(() => {
     if (testId && !isOccurredSystemError) {
-      // 回答履歴とテストを解く問題番号の順番を初期化していない場合は
-      // [POST] /tests/{testId}/progressesにアクセスしてから初期化しておき、
-      // 最初の問題番号のテストページへ遷移
-      if (order && order.length > 0) {
-        navigate(`${basePath}/tests/${testId}/questions/${order[0]}`);
-      } else {
-        (async () => {
-          try {
-            const initialQuestionNumber: number | undefined =
-              await initializeProgresses(testId, instance, accountInfo);
-            if (initialQuestionNumber) {
-              navigate(
-                `${basePath}/tests/${testId}/questions/${initialQuestionNumber}`
-              );
-            }
-          } catch (e) {
-            setIsOccurredSystemError(true);
-            systemErrorToast(e);
+      // 回答履歴とテストを解く問題番号の順番を初期化し、最初の問題番号のテストページへ遷移
+      (async () => {
+        try {
+          const initialQuestionNumber: number | undefined =
+            await initializeProgresses(testId, instance, accountInfo);
+          if (initialQuestionNumber) {
+            navigate(
+              `${basePath}/tests/${testId}/questions/${initialQuestionNumber}`
+            );
           }
-        })();
-      }
+        } catch (e) {
+          setIsOccurredSystemError(true);
+          systemErrorToast(e);
+        }
+      })();
     }
   }, [
     accountInfo,
@@ -73,7 +67,6 @@ export default function TestReadyButtons() {
     instance,
     isOccurredSystemError,
     navigate,
-    order,
     systemErrorToast,
     testId,
   ]);
