@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import useTestDetail from "@/hooks/useTestDetail";
-import { fetchProgressesAtom, resetProgressesAtom } from "@/lib/atoms";
+import { fetchProgressesAtom, initializeProgressesAtom } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtomValue, useSetAtom } from "jotai";
@@ -14,7 +14,7 @@ import { useNavigate, useParams } from "react-router";
  */
 export default function TestReadyButtons() {
   const { histories, order } = useAtomValue(fetchProgressesAtom);
-  const resetProgresses = useSetAtom(resetProgressesAtom);
+  const initializeProgresses = useSetAtom(initializeProgressesAtom);
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
 
@@ -48,13 +48,13 @@ export default function TestReadyButtons() {
       // 回答履歴とテストを解く問題番号の順番を初期化していない場合は
       // [POST] /tests/{testId}/progressesにアクセスしてから初期化しておき、
       // 最初の問題番号のテストページへ遷移
-      if (order) {
+      if (order && order.length > 0) {
         navigate(`${basePath}/tests/${testId}/questions/${order[0]}`);
       } else {
         (async () => {
           try {
             const initialQuestionNumber: number | undefined =
-              await resetProgresses(testId, instance, accountInfo);
+              await initializeProgresses(testId, instance, accountInfo);
             if (initialQuestionNumber) {
               navigate(
                 `${basePath}/tests/${testId}/questions/${initialQuestionNumber}`
@@ -69,11 +69,11 @@ export default function TestReadyButtons() {
     }
   }, [
     accountInfo,
+    initializeProgresses,
     instance,
     isOccurredSystemError,
     navigate,
     order,
-    resetProgresses,
     systemErrorToast,
     testId,
   ]);

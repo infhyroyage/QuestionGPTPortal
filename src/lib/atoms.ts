@@ -201,14 +201,7 @@ export const fetchProgressesAtom = atom(
       instance,
       accountInfo
     );
-    set(
-      historiesAtom,
-      res.progresses.map((progress) => ({
-        isCorrect: progress.isCorrect,
-        selectedIdxes: progress.selectedIdxes,
-        correctIdxes: progress.correctIdxes,
-      }))
-    );
+    set(historiesAtom, res.progresses);
     set(orderAtom, res.order);
   }
 );
@@ -334,19 +327,9 @@ export const fetchTranslationSubjectChoiceAtom = atom(
 );
 
 /**
- * TestQuestionPageのレンダリングで必要なatomをすべて初期値に戻すatom(write only)
- */
-export const resetAtomsForTestQuestionAtom = atom(null, (_, set) => {
-  set(answerExplanationAtom, undefined);
-  set(questionSelectorAtom, undefined);
-  set(translationSubjectChoiceAtom, undefined);
-  set(translationExplanationAtom, undefined);
-});
-
-/**
  * 回答履歴とテストを解く問題番号の順番を初期化し、初期化後の最初の問題番号を返すatom(write only)
  */
-export const resetProgressesAtom = atom(
+export const initializeProgressesAtom = atom(
   null,
   async (
     get,
@@ -403,6 +386,16 @@ export const resetProgressesAtom = atom(
     return order[0];
   }
 );
+
+/**
+ * TestQuestionPageのレンダリングで必要なatomをすべて初期値に戻すatom(write only)
+ */
+export const resetAtomsForTestQuestionAtom = atom(null, (_, set) => {
+  set(answerExplanationAtom, undefined);
+  set(questionSelectorAtom, undefined);
+  set(translationSubjectChoiceAtom, undefined);
+  set(translationExplanationAtom, undefined);
+});
 
 /**
  * 回答履歴を保存するatom(write only)
