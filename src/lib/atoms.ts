@@ -335,9 +335,9 @@ export const initializeProgressesAtom = atom(
     get,
     set,
     testId: string,
-    favoriteQuestionNumbers: number[],
     instance: IPublicClientApplication,
-    accountInfo: AccountInfo | null
+    accountInfo: AccountInfo | null,
+    favoriteQuestionNumbers?: number[]
   ) => {
     // テスト詳細情報がまだ存在しない場合は何も取得・更新しない
     const testDetails: TestDetails = get(testDetailsAtom);
@@ -368,7 +368,7 @@ export const initializeProgressesAtom = atom(
     // お気に入り登録した問題のみテストを解く場合はその問題番号の順番を、
     // それ以外の場合は1問目からすべての問題番号の順番を生成
     const order: Order =
-      favoriteQuestionNumbers.length > 0
+      favoriteQuestionNumbers && favoriteQuestionNumbers.length > 0
         ? favoriteQuestionNumbers
         : Array.from({ length: testDetail.length }, (_, idx) => idx + 1);
 

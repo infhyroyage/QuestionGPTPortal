@@ -43,12 +43,14 @@ export default function TestReadyButtons() {
             accountInfo
           );
           setFavoriteQuestionNumbers(
-            res.reduce((prev: number[], favorite: Favorite) => {
-              if (favorite.isFavorite) {
-                prev.push(favorite.questionNumber);
-              }
-              return prev;
-            }, [])
+            res
+              .reduce((prev: number[], favorite: Favorite) => {
+                if (favorite.isFavorite) {
+                  prev.push(favorite.questionNumber);
+                }
+                return prev;
+              }, [])
+              .sort((a, b) => a - b) // 問題番号の昇順にソート
           );
         } catch (e) {
           setIsOccurredSystemError(true);
@@ -81,40 +83,43 @@ export default function TestReadyButtons() {
     }
   }, [histories, navigate, order, testId]);
 
-  // 最初の問題のテストページへ遷移
-  const onClickStartButton = useCallback(() => {
-    if (testId && !isOccurredSystemError && favoriteQuestionNumbers) {
-      // 回答履歴とテストを解く問題番号の順番を初期化し、最初の問題番号のテストページへ遷移
-      (async () => {
-        try {
-          const initialQuestionNumber: number | undefined =
-            await initializeProgresses(
-              testId,
-              favoriteQuestionNumbers,
-              instance,
-              accountInfo
-            );
-          if (initialQuestionNumber) {
-            navigate(
-              `${basePath}/tests/${testId}/questions/${initialQuestionNumber}`
-            );
+  // 開始ボタンを押下した際の最初の問題のテストページへ遷移する動作
+  const handleClickStartButton = useCallback(
+    (isFavorite: boolean) => {
+      if (testId && !isOccurredSystemError) {
+        // 回答履歴とテストを解く問題番号の順番を初期化し、最初の問題番号のテストページへ遷移
+        (async () => {
+          try {
+            const initialQuestionNumber: number | undefined =
+              await initializeProgresses(
+                testId,
+                instance,
+                accountInfo,
+                isFavorite ? favoriteQuestionNumbers : undefined
+              );
+            if (initialQuestionNumber) {
+              navigate(
+                `${basePath}/tests/${testId}/questions/${initialQuestionNumber}`
+              );
+            }
+          } catch (e) {
+            setIsOccurredSystemError(true);
+            systemErrorToast(e);
           }
-        } catch (e) {
-          setIsOccurredSystemError(true);
-          systemErrorToast(e);
-        }
-      })();
-    }
-  }, [
-    accountInfo,
-    favoriteQuestionNumbers,
-    initializeProgresses,
-    instance,
-    isOccurredSystemError,
-    navigate,
-    systemErrorToast,
-    testId,
-  ]);
+        })();
+      }
+    },
+    [
+      accountInfo,
+      favoriteQuestionNumbers,
+      initializeProgresses,
+      instance,
+      isOccurredSystemError,
+      navigate,
+      systemErrorToast,
+      testId,
+    ]
+  );
 
   return testDetail && histories && histories.length === testDetail.length ? (
     <Button onClick={onClickResultButton} size="lg">
@@ -128,7 +133,7 @@ export default function TestReadyButtons() {
         </Button>
       )}
       <Button
-        onClick={onClickStartButton}
+        onClick={() => handleClickStartButton(false)}
         size="lg"
         variant={histories && histories.length > 0 ? "destructive" : "default"}
       >
@@ -138,7 +143,7 @@ export default function TestReadyButtons() {
       </Button>
       {favoriteQuestionNumbers && favoriteQuestionNumbers.length > 0 && (
         <Button
-          onClick={onClickStartButton}
+          onClick={() => handleClickStartButton(true)}
           size="lg"
           variant={
             histories && histories.length > 0 ? "destructive" : "default"
