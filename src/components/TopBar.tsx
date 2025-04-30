@@ -15,7 +15,7 @@ import ReturnRootPageButton from "./ReturnRootPageButton";
  * @returns トップバーのコンポーネント
  */
 export default function TopBar({ title }: TopBarProps) {
-  const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  const [isFavorite, setIsFavorite] = useState<boolean | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
@@ -40,9 +40,10 @@ export default function TopBar({ title }: TopBarProps) {
   // 問題番号変更時にお気に入り状態を取得
   useEffect(() => {
     if (
-      isTestQuestionPage &&
       testId &&
       questionNumber &&
+      isTestQuestionPage &&
+      isFavorite === undefined &&
       !isOccurredSystemError
     ) {
       (async () => {
@@ -66,6 +67,7 @@ export default function TopBar({ title }: TopBarProps) {
   }, [
     accountInfo,
     instance,
+    isFavorite,
     isTestQuestionPage,
     questionNumber,
     testId,
@@ -91,7 +93,7 @@ export default function TopBar({ title }: TopBarProps) {
           {isTestQuestionPage && questionNumber && (
             <div className="ml-2 flex items-center justify-center">
               <FavoriteButton
-                isFavorite={isFavorite}
+                isFavorite={isFavorite || false}
                 isLoading={isLoading}
                 onFavoriteChange={onFavoriteChange}
                 onLoadingChange={onLoadingChange}

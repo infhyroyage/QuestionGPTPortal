@@ -19,7 +19,7 @@ import { Accordion, AccordionItem, AccordionTrigger } from "./ui/accordion";
 export default function TestResultAccordion() {
   const { histories, order } = useAtomValue(fetchProgressesAtom);
   const [openValues, setOpenValues] = useState<string[]>([]);
-  const [favorites, setFavorites] = useState<boolean[]>([]);
+  const [favorites, setFavorites] = useState<boolean[] | undefined>(undefined);
   const [isLoadingFavorites, setIsLoadingFavorites] = useState<boolean[]>([]);
   const [getQuestions, setGetQuestions] = useState<{
     [key: string]: GetQuestion;
@@ -35,7 +35,13 @@ export default function TestResultAccordion() {
 
   // すべての問題番号のお気に入り状態を取得
   useEffect(() => {
-    if (testId && histories && order && !isOccurredSystemError) {
+    if (
+      testId &&
+      histories &&
+      order &&
+      favorites === undefined &&
+      !isOccurredSystemError
+    ) {
       (async () => {
         try {
           setIsLoadingFavorites(new Array(histories.length).fill(true));
@@ -72,6 +78,7 @@ export default function TestResultAccordion() {
     }
   }, [
     accountInfo,
+    favorites,
     histories,
     instance,
     isOccurredSystemError,
@@ -84,6 +91,9 @@ export default function TestResultAccordion() {
   const handleFavoriteChange = useCallback(
     (favoriteIdx: number, newIsFavorite: boolean) =>
       setFavorites((prev) => {
+        if (!prev) {
+          return undefined;
+        }
         const newFavorites = [...prev];
         newFavorites[favoriteIdx] = newIsFavorite;
         return newFavorites;
@@ -146,7 +156,7 @@ export default function TestResultAccordion() {
             <div className="flex items-center">
               <div className="pl-4 flex items-center">
                 <FavoriteButton
-                  isFavorite={favorites[historyIdx]}
+                  isFavorite={!!favorites && favorites[historyIdx]}
                   isLoading={isLoadingFavorites[historyIdx]}
                   onFavoriteChange={(newIsFavorite: boolean) =>
                     handleFavoriteChange(historyIdx, newIsFavorite)
