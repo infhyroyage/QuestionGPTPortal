@@ -2,10 +2,12 @@ import { Button } from "@/components/ui/button";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import useTestDetail from "@/hooks/useTestDetail";
 import { fetchProgressesAtom, initializeProgressesAtom } from "@/lib/atoms";
+import { accessBackend } from "@/lib/backend";
 import { basePath } from "@/lib/github";
+import { Favorite, GetFavoritesRes } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
 /**
@@ -15,6 +17,9 @@ import { useNavigate, useParams } from "react-router";
 export default function TestReadyButtons() {
   const { histories, order } = useAtomValue(fetchProgressesAtom);
   const initializeProgresses = useSetAtom(initializeProgressesAtom);
+  const [favoriteQuestionNumbers, setFavoriteQuestionNumbers] = useState<
+    number[] | undefined
+  >(undefined);
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
 
@@ -25,6 +30,40 @@ export default function TestReadyButtons() {
 
   const systemErrorToast = useSystemErrorToast();
   const testDetail = useTestDetail();
+
+  // すべての問題番号のお気に入り状態を取得
+  useEffect(() => {
+    if (testId && !favoriteQuestionNumbers && !isOccurredSystemError) {
+      (async () => {
+        try {
+          const res: GetFavoritesRes = await accessBackend<GetFavoritesRes>(
+            "GET",
+            `/tests/${testId}/favorites`,
+            instance,
+            accountInfo
+          );
+          setFavoriteQuestionNumbers(
+            res.reduce((prev: number[], favorite: Favorite) => {
+              if (favorite.isFavorite) {
+                prev.push(favorite.questionNumber);
+              }
+              return prev;
+            }, [])
+          );
+        } catch (e) {
+          setIsOccurredSystemError(true);
+          systemErrorToast(e);
+        }
+      })();
+    }
+  }, [
+    accountInfo,
+    favoriteQuestionNumbers,
+    instance,
+    isOccurredSystemError,
+    systemErrorToast,
+    testId,
+  ]);
 
   // テスト結果ページへ遷移
   const onClickResultButton = useCallback(() => {
@@ -44,12 +83,17 @@ export default function TestReadyButtons() {
 
   // 最初の問題のテストページへ遷移
   const onClickStartButton = useCallback(() => {
-    if (testId && !isOccurredSystemError) {
+    if (testId && !isOccurredSystemError && favoriteQuestionNumbers) {
       // 回答履歴とテストを解く問題番号の順番を初期化し、最初の問題番号のテストページへ遷移
       (async () => {
         try {
           const initialQuestionNumber: number | undefined =
-            await initializeProgresses(testId, instance, accountInfo);
+            await initializeProgresses(
+              testId,
+              favoriteQuestionNumbers,
+              instance,
+              accountInfo
+            );
           if (initialQuestionNumber) {
             navigate(
               `${basePath}/tests/${testId}/questions/${initialQuestionNumber}`
@@ -63,6 +107,7 @@ export default function TestReadyButtons() {
     }
   }, [
     accountInfo,
+    favoriteQuestionNumbers,
     initializeProgresses,
     instance,
     isOccurredSystemError,
@@ -79,7 +124,7 @@ export default function TestReadyButtons() {
     <>
       {histories && histories.length > 0 && (
         <Button onClick={onClickResumeButton} size="lg">
-          {`${histories.length + 1}問目から再開`}
+          {`途中の${histories.length + 1}問目から再開`}
         </Button>
       )}
       <Button
@@ -87,10 +132,23 @@ export default function TestReadyButtons() {
         size="lg"
         variant={histories && histories.length > 0 ? "destructive" : "default"}
       >
-        {`1問目から開始${
+        {`すべての問題を1問目から開始${
           histories && histories.length > 0 ? "(回答履歴が削除されます)" : ""
         }`}
       </Button>
+      {favoriteQuestionNumbers && favoriteQuestionNumbers.length > 0 && (
+        <Button
+          onClick={onClickStartButton}
+          size="lg"
+          variant={
+            histories && histories.length > 0 ? "destructive" : "default"
+          }
+        >
+          {`お気に入り登録した問題のみ開始${
+            histories && histories.length > 0 ? "(回答履歴が削除されます)" : ""
+          }`}
+        </Button>
+      )}
     </>
   );
 }

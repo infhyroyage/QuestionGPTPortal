@@ -335,6 +335,7 @@ export const initializeProgressesAtom = atom(
     get,
     set,
     testId: string,
+    favoriteQuestionNumbers: number[],
     instance: IPublicClientApplication,
     accountInfo: AccountInfo | null
   ) => {
@@ -364,11 +365,12 @@ export const initializeProgressesAtom = atom(
       accountInfo
     );
 
-    // テストを解く問題番号の順番の生成
-    const order: Order = Array.from(
-      { length: testDetail.length },
-      (_, idx) => idx + 1
-    );
+    // お気に入り登録した問題のみテストを解く場合はその問題番号の順番を、
+    // それ以外の場合は1問目からすべての問題番号の順番を生成
+    const order: Order =
+      favoriteQuestionNumbers.length > 0
+        ? favoriteQuestionNumbers
+        : Array.from({ length: testDetail.length }, (_, idx) => idx + 1);
 
     // [POST] /tests/{testId}/progressesにアクセスしてテストを解く問題番号の順番を保存
     await accessBackend<void, PostProgressesReq>(
