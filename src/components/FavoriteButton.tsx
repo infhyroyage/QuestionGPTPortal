@@ -1,9 +1,10 @@
+import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import { accessBackend } from "@/lib/backend";
 import { PostFavoriteReq } from "@/types/backend";
 import { FavoriteButtonProps } from "@/types/props";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { Star } from "lucide-react";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useParams } from "react-router";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
@@ -18,12 +19,17 @@ export default function FavoriteButton({
   onLoadingChange,
   questionNumber,
 }: FavoriteButtonProps) {
+  const [isOccurredSystemError, setIsOccurredSystemError] =
+    useState<boolean>(false);
+
   const { testId } = useParams();
   const { instance, accounts } = useMsal();
   const accountInfo = useAccount(accounts[0] || {});
 
+  const systemErrorToast = useSystemErrorToast();
+
   const onClick = useCallback(async () => {
-    if (testId) {
+    if (testId && !isOccurredSystemError) {
       onLoadingChange(true);
 
       try {
@@ -40,6 +46,9 @@ export default function FavoriteButton({
         );
 
         onFavoriteChange(!isFavorite);
+      } catch (e) {
+        setIsOccurredSystemError(true);
+        systemErrorToast(e);
       } finally {
         onLoadingChange(false);
       }
@@ -52,6 +61,8 @@ export default function FavoriteButton({
     onLoadingChange,
     questionNumber,
     testId,
+    isOccurredSystemError,
+    systemErrorToast,
   ]);
 
   return (

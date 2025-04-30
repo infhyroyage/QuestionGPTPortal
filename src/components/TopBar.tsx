@@ -1,3 +1,4 @@
+import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import { accessBackend } from "@/lib/backend";
 import { basePath } from "@/lib/github";
 import { GetFavoriteRes } from "@/types/backend";
@@ -14,13 +15,17 @@ import ReturnRootPageButton from "./ReturnRootPageButton";
  * @returns トップバーのコンポーネント
  */
 export default function TopBar({ title }: TopBarProps) {
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isOccurredSystemError, setIsOccurredSystemError] =
+    useState<boolean>(false);
+
   const location = useLocation();
   const { testId, questionNumber } = useParams();
   const { instance, accounts } = useMsal();
   const accountInfo = useAccount(accounts[0] || {});
 
-  const [isFavorite, setIsFavorite] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const systemErrorToast = useSystemErrorToast();
 
   // TestQuestionPageから表示する場合はtrue、それ以外で表示する場合はfalse
   const isTestQuestionPage = useMemo(
@@ -34,7 +39,12 @@ export default function TopBar({ title }: TopBarProps) {
 
   // 問題番号変更時にお気に入り状態を取得
   useEffect(() => {
-    if (isTestQuestionPage && testId && questionNumber) {
+    if (
+      isTestQuestionPage &&
+      testId &&
+      questionNumber &&
+      !isOccurredSystemError
+    ) {
       (async () => {
         try {
           setIsLoading(true);
@@ -45,12 +55,23 @@ export default function TopBar({ title }: TopBarProps) {
             accountInfo
           );
           setIsFavorite(response.isFavorite);
+        } catch (e) {
+          setIsOccurredSystemError(true);
+          systemErrorToast(e);
         } finally {
           setIsLoading(false);
         }
       })();
     }
-  }, [accountInfo, instance, isTestQuestionPage, questionNumber, testId]);
+  }, [
+    accountInfo,
+    instance,
+    isTestQuestionPage,
+    questionNumber,
+    testId,
+    isOccurredSystemError,
+    systemErrorToast,
+  ]);
 
   // お気に入り切替ボタンのお気に入り状態変更時の動作
   const onFavoriteChange = useCallback((newIsFavorite: boolean) => {
