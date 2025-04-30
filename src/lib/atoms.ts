@@ -69,30 +69,6 @@ const translationExplanationAtom = atom<TranslationExplanation>(undefined);
 const translationSubjectChoiceAtom = atom<TranslationSubjectChoice>(undefined);
 
 /**
- * 回答履歴とテストを解く問題番号の順番を削除するatom(write only)
- */
-export const deleteProgressesAtom = atom(
-  null,
-  async (
-    _,
-    set,
-    testId: string,
-    instance: IPublicClientApplication,
-    accountInfo: AccountInfo | null
-  ) => {
-    // [DELETE] /tests/{testId}/progressesにアクセスして回答履歴を削除
-    await accessBackend(
-      "DELETE",
-      `/tests/${testId}/progresses`,
-      instance,
-      accountInfo
-    );
-
-    set(orderAtom, undefined);
-  }
-);
-
-/**
  * 正解・解説文を取得するatom
  */
 export const fetchAnswerExplanationAtom = atom(

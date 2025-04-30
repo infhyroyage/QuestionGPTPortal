@@ -4,10 +4,10 @@ import TopBar from "@/components/TopBar";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import useTestDetail from "@/hooks/useTestDetail";
 import {
-  deleteProgressesAtom,
   fetchProgressesAtom,
   resetAtomsForTestQuestionAtom,
 } from "@/lib/atoms";
+import { accessBackend } from "@/lib/backend";
 import { basePath } from "@/lib/github";
 import { History } from "@/types/atoms";
 import { useAccount, useMsal } from "@azure/msal-react";
@@ -21,7 +21,6 @@ import { useNavigate, useParams } from "react-router";
  */
 export default function TestResultPage() {
   const { histories } = useAtomValue(fetchProgressesAtom);
-  const deleteProgresses = useSetAtom(deleteProgressesAtom);
   const resetAtomsForTestQuestion = useSetAtom(resetAtomsForTestQuestionAtom);
   const [isFinishedDelete, setIsFinishedDelete] = useState<boolean>(false);
 
@@ -60,7 +59,12 @@ export default function TestResultPage() {
     ) {
       (async () => {
         try {
-          await deleteProgresses(testId, instance, accountInfo);
+          await accessBackend(
+            "DELETE",
+            `/tests/${testId}/progresses`,
+            instance,
+            accountInfo
+          );
         } catch (e) {
           systemErrorToast(e);
         } finally {
@@ -70,7 +74,6 @@ export default function TestResultPage() {
     }
   }, [
     accountInfo,
-    deleteProgresses,
     histories,
     instance,
     isFinishedDelete,
