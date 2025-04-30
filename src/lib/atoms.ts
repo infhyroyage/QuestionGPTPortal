@@ -388,6 +388,18 @@ export const initializeProgressesAtom = atom(
 );
 
 /**
+ * TestReadyPage/TestQuestionPage/TestResultPageのレンダリングで必要なatomをすべて初期値に戻すatom(write only)
+ */
+export const resetAtomsForAllTestPagesAtom = atom(null, (_, set) => {
+  set(answerExplanationAtom, undefined);
+  set(historiesAtom, undefined);
+  set(orderAtom, undefined);
+  set(questionSelectorAtom, undefined);
+  set(translationSubjectChoiceAtom, undefined);
+  set(translationExplanationAtom, undefined);
+});
+
+/**
  * TestQuestionPageのレンダリングで必要なatomをすべて初期値に戻すatom(write only)
  */
 export const resetAtomsForTestQuestionAtom = atom(null, (_, set) => {

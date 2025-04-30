@@ -2,9 +2,12 @@ import TestListAccordion from "@/components/TestListAccordion";
 import TopBar from "@/components/TopBar";
 import { Skeleton } from "@/components/ui/skeleton";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
-import { fetchTestDetailsAtom } from "@/lib/atoms";
+import {
+  fetchTestDetailsAtom,
+  resetAtomsForAllTestPagesAtom,
+} from "@/lib/atoms";
 import { useAccount, useMsal } from "@azure/msal-react";
-import { useAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import { TriangleAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -14,6 +17,7 @@ import { useEffect, useState } from "react";
  */
 export default function RootPage() {
   const [testDetails, fetchTestDetails] = useAtom(fetchTestDetailsAtom);
+  const resetAtomsForAllTestPages = useSetAtom(resetAtomsForAllTestPagesAtom);
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
 
@@ -42,6 +46,12 @@ export default function RootPage() {
     systemErrorToast,
     testDetails,
   ]);
+
+  // トップページをレンダリングするたびに、
+  // TestReadyPage/TestQuestionPage/TestResultPageのレンダリングで必要なatomをすべて初期値に戻す
+  useEffect(() => {
+    resetAtomsForAllTestPages();
+  }, [resetAtomsForAllTestPages]);
 
   return (
     <>
