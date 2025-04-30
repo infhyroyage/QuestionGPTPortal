@@ -379,6 +379,7 @@ export const initializeProgressesAtom = atom(
       { order }
     );
 
+    set(historiesAtom, []);
     set(orderAtom, order);
 
     return order[0];
