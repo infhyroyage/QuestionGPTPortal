@@ -27,7 +27,7 @@ import { useNavigate, useNavigationType, useParams } from "react-router";
  */
 export default function TestQuestionPage() {
   const answerExplanation = useAtomValue(fetchAnswerExplanationAtom);
-  const { histories } = useAtomValue(fetchProgressesAtom);
+  const { histories, order } = useAtomValue(fetchProgressesAtom);
   const [questionSelector, fetchQuestionSelector] = useAtom(
     fetchQuestionSelectorAtom
   );
@@ -99,6 +99,7 @@ export default function TestQuestionPage() {
   return (
     testId &&
     histories &&
+    order &&
     testDetail && (
       <>
         <TopBar
@@ -106,7 +107,7 @@ export default function TestQuestionPage() {
             answerExplanation && answerExplanation.isSavedProgress
               ? histories.length
               : histories.length + 1
-          }問目 (全${testDetail.length}問)`}
+          }問目 (全${order.length}問)`}
         />
         <ResizablePanelGroup
           direction="vertical"

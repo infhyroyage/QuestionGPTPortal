@@ -3,15 +3,12 @@ import TestResultAccordion from "@/components/TestResultAccordion";
 import TopBar from "@/components/TopBar";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import useTestDetail from "@/hooks/useTestDetail";
-import {
-  fetchProgressesAtom,
-  resetAtomsForTestQuestionAtom,
-} from "@/lib/atoms";
+import { fetchProgressesAtom } from "@/lib/atoms";
 import { accessBackend } from "@/lib/backend";
 import { basePath } from "@/lib/github";
 import { History } from "@/types/atoms";
 import { useAccount, useMsal } from "@azure/msal-react";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
 import { useNavigate, useNavigationType, useParams } from "react-router";
 
@@ -20,8 +17,7 @@ import { useNavigate, useNavigationType, useParams } from "react-router";
  * @returns テスト結果ページのコンポーネント
  */
 export default function TestResultPage() {
-  const { histories } = useAtomValue(fetchProgressesAtom);
-  const resetAtomsForTestQuestion = useSetAtom(resetAtomsForTestQuestionAtom);
+  const { histories, order } = useAtomValue(fetchProgressesAtom);
   const [isFinishedDelete, setIsFinishedDelete] = useState<boolean>(false);
 
   const navigate = useNavigate();
@@ -41,21 +37,13 @@ export default function TestResultPage() {
   }, [navigate, testDetail, navigationType]);
 
   // バックエンドから取得した今まで回答した問題の回答履歴の整合性が取れた場合、
-  // 前問題の問題文・選択肢・回答・解説文・翻訳文のatomをすべて初期化
-  useEffect(() => {
-    if (testDetail && histories && histories.length === testDetail.length) {
-      resetAtomsForTestQuestion();
-    }
-  }, [histories, resetAtomsForTestQuestion, testDetail]);
-
-  // バックエンドから取得した今まで回答した問題の回答履歴の整合性が取れた場合、
   // バックエンドからその回答履歴を削除
   useEffect(() => {
     if (
       testId &&
-      testDetail &&
       histories &&
-      testDetail.length === histories.length &&
+      order &&
+      histories.length === order.length &&
       !isFinishedDelete
     ) {
       (async () => {
@@ -78,20 +66,20 @@ export default function TestResultPage() {
     histories,
     instance,
     isFinishedDelete,
+    order,
     systemErrorToast,
-    testDetail,
     testId,
   ]);
 
   return (
     testId &&
-    testDetail && (
+    order && (
       <>
         <TopBar title="Question GPT Portal" />
         {histories && histories.length > 0 && isFinishedDelete ? (
           <div className="pt-[52px] px-4">
             <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight my-6">
-              {`全${testDetail.length}問中${
+              {`全${order.length}問中${
                 histories.filter((history: History) => history.isCorrect).length
               }問正解 (正答率${Math.round(
                 (histories.filter((history: History) => history.isCorrect)

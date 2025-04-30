@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
-import useTestDetail from "@/hooks/useTestDetail";
 import { fetchProgressesAtom, initializeProgressesAtom } from "@/lib/atoms";
 import { accessBackend } from "@/lib/backend";
 import { basePath } from "@/lib/github";
@@ -29,7 +28,6 @@ export default function TestReadyButtons() {
   const accountInfo = useAccount(accounts[0] || {});
 
   const systemErrorToast = useSystemErrorToast();
-  const testDetail = useTestDetail();
 
   // すべての問題番号のお気に入り状態を取得
   useEffect(() => {
@@ -121,7 +119,11 @@ export default function TestReadyButtons() {
     ]
   );
 
-  return testDetail && histories && histories.length === testDetail.length ? (
+  return histories &&
+    order &&
+    histories.length > 0 &&
+    order.length > 0 &&
+    histories.length === order.length ? (
     <Button onClick={onClickResultButton} size="lg">
       結果を見る
     </Button>

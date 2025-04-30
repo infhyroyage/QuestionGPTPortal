@@ -1,4 +1,3 @@
-import useTestDetail from "@/hooks/useTestDetail";
 import {
   fetchAnswerExplanationAtom,
   fetchProgressesAtom,
@@ -26,8 +25,6 @@ export default function NextQuestionButton() {
   const { testId, questionNumber } = useParams();
   const { instance, accounts } = useMsal();
   const accountInfo = useAccount(accounts[0] || {});
-
-  const testDetail = useTestDetail();
 
   // 回答履歴を保存していない場合は、次問題遷移ボタンを非活性とする
   const isDisabledOpenExplanationButton = useMemo<boolean>(
@@ -59,18 +56,18 @@ export default function NextQuestionButton() {
 
   // 次の問題かテスト結果ページへ遷移
   const onClick = useCallback(() => {
-    if (testId && histories && order && testDetail) {
+    if (testId && histories && order) {
       navigate(
-        histories.length === testDetail.length
+        histories.length === order.length
           ? `${basePath}/tests/${testId}/result`
           : `${basePath}/tests/${testId}/questions/${order[histories.length]}`
       );
     }
-  }, [histories, navigate, order, testDetail, testId]);
+  }, [histories, navigate, order, testId]);
 
   return (
-    testDetail &&
-    questionNumber && (
+    histories &&
+    order && (
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
@@ -88,9 +85,7 @@ export default function NextQuestionButton() {
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          {parseInt(questionNumber) === testDetail.length
-            ? "テスト結果へ"
-            : "次の問題へ"}
+          {histories.length === order.length ? "テスト結果へ" : "次の問題へ"}
         </TooltipContent>
       </Tooltip>
     )
