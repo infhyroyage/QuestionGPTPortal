@@ -344,7 +344,7 @@ export const resetAtomsForTestQuestionAtom = atom(null, (_, set) => {
 });
 
 /**
- * 回答履歴とテストを解く問題番号の順番を初期化するatom(write only)
+ * 回答履歴とテストを解く問題番号の順番を初期化し、初期化後の最初の問題番号を返すatom(write only)
  */
 export const resetProgressesAtom = atom(
   null,

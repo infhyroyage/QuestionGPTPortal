@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
+import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import useTestDetail from "@/hooks/useTestDetail";
 import { fetchProgressesAtom, resetProgressesAtom } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
 /**
@@ -14,12 +15,15 @@ import { useNavigate, useParams } from "react-router";
 export default function TestReadyButtons() {
   const { histories, order } = useAtomValue(fetchProgressesAtom);
   const resetProgresses = useSetAtom(resetProgressesAtom);
+  const [isOccurredSystemError, setIsOccurredSystemError] =
+    useState<boolean>(false);
 
   const navigate = useNavigate();
   const { testId } = useParams();
   const { instance, accounts } = useMsal();
   const accountInfo = useAccount(accounts[0] || {});
 
+  const systemErrorToast = useSystemErrorToast();
   const testDetail = useTestDetail();
 
   // テスト結果ページへ遷移
@@ -40,23 +44,39 @@ export default function TestReadyButtons() {
 
   // 最初の問題のテストページへ遷移
   const onClickStartButton = useCallback(() => {
-    if (testId && order) {
-      (async () => {
-        // 今まで回答した問題の回答履歴とテストを解く問題番号の順番を初期化できた場合、
-        // 最初の問題番号のテストページへ遷移
-        const initialQuestionNumber: number | undefined = await resetProgresses(
-          testId,
-          instance,
-          accountInfo
-        );
-        if (initialQuestionNumber) {
-          navigate(
-            `${basePath}/tests/${testId}/questions/${initialQuestionNumber}`
-          );
-        }
-      })();
+    if (testId && !isOccurredSystemError) {
+      // 回答履歴とテストを解く問題番号の順番を初期化していない場合は
+      // [POST] /tests/{testId}/progressesにアクセスしてから初期化しておき、
+      // 最初の問題番号のテストページへ遷移
+      if (order) {
+        navigate(`${basePath}/tests/${testId}/questions/${order[0]}`);
+      } else {
+        (async () => {
+          try {
+            const initialQuestionNumber: number | undefined =
+              await resetProgresses(testId, instance, accountInfo);
+            if (initialQuestionNumber) {
+              navigate(
+                `${basePath}/tests/${testId}/questions/${initialQuestionNumber}`
+              );
+            }
+          } catch (e) {
+            setIsOccurredSystemError(true);
+            systemErrorToast(e);
+          }
+        })();
+      }
     }
-  }, [accountInfo, resetProgresses, instance, navigate, order, testId]);
+  }, [
+    accountInfo,
+    instance,
+    isOccurredSystemError,
+    navigate,
+    order,
+    resetProgresses,
+    systemErrorToast,
+    testId,
+  ]);
 
   return testDetail && histories && histories.length === testDetail.length ? (
     <Button onClick={onClickResultButton} size="lg">
