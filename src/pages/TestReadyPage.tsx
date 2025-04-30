@@ -8,7 +8,7 @@ import { basePath } from "@/lib/github";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useNavigationType, useParams } from "react-router";
 
 /**
  * テスト準備ページのコンポーネント
@@ -20,6 +20,7 @@ export default function TestReadyPage() {
     useState<boolean>(false);
 
   const navigate = useNavigate();
+  const navigationType = useNavigationType();
   const { testId } = useParams();
   const { instance, accounts } = useMsal();
   const accountInfo = useAccount(accounts[0] || {});
@@ -27,12 +28,12 @@ export default function TestReadyPage() {
   const systemErrorToast = useSystemErrorToast();
   const testDetail = useTestDetail();
 
-  // テスト詳細情報を習得していない場合はトップページにリダイレクト
+  // テスト詳細情報が取得できていない、またはブラウザバックした場合はトップページにリダイレクト
   useEffect(() => {
-    if (!testDetail) {
+    if (!testDetail || navigationType === "POP") {
       navigate(`${basePath}/`);
     }
-  }, [navigate, testDetail]);
+  }, [navigate, testDetail, navigationType]);
 
   // 今まで回答した問題の回答履歴とテストを解く問題番号の順番を取得
   useEffect(() => {

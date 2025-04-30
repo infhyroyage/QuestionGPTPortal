@@ -13,7 +13,7 @@ import { History } from "@/types/atoms";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useNavigationType, useParams } from "react-router";
 
 /**
  * テスト結果ページのコンポーネント
@@ -25,6 +25,7 @@ export default function TestResultPage() {
   const [isFinishedDelete, setIsFinishedDelete] = useState<boolean>(false);
 
   const navigate = useNavigate();
+  const navigationType = useNavigationType();
   const { testId } = useParams();
   const { instance, accounts } = useMsal();
   const accountInfo = useAccount(accounts[0] || {});
@@ -32,12 +33,12 @@ export default function TestResultPage() {
   const systemErrorToast = useSystemErrorToast();
   const testDetail = useTestDetail();
 
-  // テスト詳細情報を習得していない場合はトップページにリダイレクト
+  // テスト詳細情報が取得できていない、またはブラウザバックした場合はトップページにリダイレクト
   useEffect(() => {
-    if (!testDetail) {
+    if (!testDetail || navigationType === "POP") {
       navigate(`${basePath}/`);
     }
-  }, [navigate, testDetail]);
+  }, [navigate, testDetail, navigationType]);
 
   // バックエンドから取得した今まで回答した問題の回答履歴の整合性が取れた場合、
   // 前問題の問題文・選択肢・回答・解説文・翻訳文のatomをすべて初期化

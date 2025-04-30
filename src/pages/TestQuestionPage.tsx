@@ -19,7 +19,7 @@ import { basePath } from "@/lib/github";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useNavigationType, useParams } from "react-router";
 
 /**
  * テストページのコンポーネント
@@ -36,6 +36,7 @@ export default function TestQuestionPage() {
     useState<boolean>(false);
 
   const navigate = useNavigate();
+  const navigationType = useNavigationType();
   const { testId, questionNumber } = useParams();
   const { instance, accounts } = useMsal();
   const accountInfo = useAccount(accounts[0] || {});
@@ -43,12 +44,12 @@ export default function TestQuestionPage() {
   const systemErrorToast = useSystemErrorToast();
   const testDetail = useTestDetail();
 
-  // テスト詳細情報を習得していない場合はトップページにリダイレクト
+  // テスト詳細情報が取得できていない、またはブラウザバックした場合はトップページにリダイレクト
   useEffect(() => {
-    if (!testDetail) {
+    if (!testDetail || navigationType === "POP") {
       navigate(`${basePath}/`);
     }
-  }, [navigate, testDetail]);
+  }, [navigate, testDetail, navigationType]);
 
   // 最初の問題開始時、および問題番号を変更した場合、
   // 前問題の問題文・選択肢・回答・解説文・翻訳文のatomをすべて初期化
