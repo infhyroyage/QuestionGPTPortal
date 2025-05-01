@@ -18,7 +18,7 @@ import { Accordion, AccordionItem, AccordionTrigger } from "./ui/accordion";
  */
 export default function TestResultAccordion() {
   const { histories, order } = useAtomValue(fetchProgressesAtom);
-  const [openValues, setOpenValues] = useState<string[]>([]);
+  const [openHistoryIdxes, setOpenHistoryIdxes] = useState<string[]>([]);
   const [favorites, setFavorites] = useState<boolean[] | undefined>(undefined);
   const [getQuestions, setGetQuestions] = useState<{
     [key: string]: GetQuestion;
@@ -98,33 +98,35 @@ export default function TestResultAccordion() {
 
   // 新しく開かれたアコーディオンのみに対応する問題文・選択肢を取得
   const handleValueChange = useCallback(
-    async (values: string[]) => {
-      if (testId) {
+    async (historyIdxes: string[]) => {
+      if (testId && order) {
         // 問題文・選択肢を取得する前に、アコーディオンを開いておく
-        setOpenValues(values);
+        setOpenHistoryIdxes(historyIdxes);
 
         // 今まで一度も問題文・選択肢を取得していない場合のみ、
         // [GET] /tests/{testId}/questions/{questionNumber}にアクセスして取得
-        const newOpenValues: string[] = values.filter(
-          (value) => !openValues.includes(value)
+        const newOpenHistoryIdxes: string[] = historyIdxes.filter(
+          (historyIdx: string) => !openHistoryIdxes.includes(historyIdx)
         );
-        for (const value of newOpenValues) {
-          if (!getQuestions[value]) {
+        for (const newOpenHistoryIdx of newOpenHistoryIdxes) {
+          if (!getQuestions[newOpenHistoryIdx]) {
             const res: GetQuestion = await accessBackend<GetQuestion>(
               "GET",
-              `/tests/${testId}/questions/${parseInt(value) + 1}`,
+              `/tests/${testId}/questions/${
+                order[parseInt(newOpenHistoryIdx)]
+              }`,
               instance,
               accountInfo
             );
             setGetQuestions((prev) => ({
               ...prev,
-              [value]: res,
+              [newOpenHistoryIdx]: res,
             }));
           }
         }
       }
     },
-    [accountInfo, getQuestions, instance, openValues, testId]
+    [accountInfo, getQuestions, instance, openHistoryIdxes, order, testId]
   );
 
   return (
@@ -132,7 +134,7 @@ export default function TestResultAccordion() {
     order && (
       <Accordion
         type="multiple"
-        value={openValues}
+        value={openHistoryIdxes}
         onValueChange={handleValueChange}
       >
         {histories.map((history: History, historyIdx: number) => (
