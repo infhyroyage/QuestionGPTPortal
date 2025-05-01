@@ -3,8 +3,10 @@ import TestReadyButtons from "@/components/TestReadyButtons";
 import TopBar from "@/components/TopBar";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import { fetchProgressesAtom, fetchTestDetailsAtom } from "@/lib/atoms";
+import { accessBackend } from "@/lib/backend";
 import { basePath } from "@/lib/github";
 import { TestDetail } from "@/types/atoms";
+import { Favorite, GetFavoritesRes } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom, useAtomValue } from "jotai";
 import { useEffect, useMemo, useState } from "react";
@@ -17,6 +19,9 @@ import { useNavigate, useNavigationType, useParams } from "react-router";
 export default function TestReadyPage() {
   const [{ histories }, fetchProgresses] = useAtom(fetchProgressesAtom);
   const testDetails = useAtomValue(fetchTestDetailsAtom);
+  const [favoriteQuestionNumbers, setFavoriteQuestionNumbers] = useState<
+    number[] | undefined
+  >(undefined);
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
 
@@ -27,6 +32,8 @@ export default function TestReadyPage() {
   const accountInfo = useAccount(accounts[0] || {});
 
   const systemErrorToast = useSystemErrorToast();
+
+  // テスト詳細情報を取得
   const testDetail = useMemo<TestDetail | undefined>(
     () =>
       testDetails &&
@@ -66,6 +73,42 @@ export default function TestReadyPage() {
     testId,
   ]);
 
+  // すべての問題番号のお気に入り状態を取得
+  useEffect(() => {
+    if (testId && !favoriteQuestionNumbers && !isOccurredSystemError) {
+      (async () => {
+        try {
+          const res: GetFavoritesRes = await accessBackend<GetFavoritesRes>(
+            "GET",
+            `/tests/${testId}/favorites`,
+            instance,
+            accountInfo
+          );
+          setFavoriteQuestionNumbers(
+            res
+              .reduce((prev: number[], favorite: Favorite) => {
+                if (favorite.isFavorite) {
+                  prev.push(favorite.questionNumber);
+                }
+                return prev;
+              }, [])
+              .sort((a, b) => a - b) // 問題番号の昇順にソート
+          );
+        } catch (e) {
+          setIsOccurredSystemError(true);
+          systemErrorToast(e);
+        }
+      })();
+    }
+  }, [
+    accountInfo,
+    favoriteQuestionNumbers,
+    instance,
+    isOccurredSystemError,
+    systemErrorToast,
+    testId,
+  ]);
+
   return (
     testId &&
     testDetail && (
@@ -80,7 +123,13 @@ export default function TestReadyPage() {
               {testDetail.testName}
             </h4>
           </div>
-          {histories ? <TestReadyButtons /> : <LoadingCenter />}
+          {histories && favoriteQuestionNumbers ? (
+            <TestReadyButtons
+              favoriteQuestionNumbers={favoriteQuestionNumbers}
+            />
+          ) : (
+            <LoadingCenter />
+          )}
         </div>
       </>
     )

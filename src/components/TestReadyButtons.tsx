@@ -1,24 +1,22 @@
 import { Button } from "@/components/ui/button";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import { fetchProgressesAtom, initializeProgressesAtom } from "@/lib/atoms";
-import { accessBackend } from "@/lib/backend";
 import { basePath } from "@/lib/github";
-import { Favorite, GetFavoritesRes } from "@/types/backend";
+import { TestReadyButtonsProps } from "@/types/props";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
 /**
  * テスト準備ページのボタンのコンポーネント
  * @returns テスト準備ページのボタンのコンポーネント
  */
-export default function TestReadyButtons() {
+export default function TestReadyButtons({
+  favoriteQuestionNumbers,
+}: TestReadyButtonsProps) {
   const { histories, order } = useAtomValue(fetchProgressesAtom);
   const initializeProgresses = useSetAtom(initializeProgressesAtom);
-  const [favoriteQuestionNumbers, setFavoriteQuestionNumbers] = useState<
-    number[] | undefined
-  >(undefined);
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
 
@@ -28,42 +26,6 @@ export default function TestReadyButtons() {
   const accountInfo = useAccount(accounts[0] || {});
 
   const systemErrorToast = useSystemErrorToast();
-
-  // すべての問題番号のお気に入り状態を取得
-  useEffect(() => {
-    if (testId && !favoriteQuestionNumbers && !isOccurredSystemError) {
-      (async () => {
-        try {
-          const res: GetFavoritesRes = await accessBackend<GetFavoritesRes>(
-            "GET",
-            `/tests/${testId}/favorites`,
-            instance,
-            accountInfo
-          );
-          setFavoriteQuestionNumbers(
-            res
-              .reduce((prev: number[], favorite: Favorite) => {
-                if (favorite.isFavorite) {
-                  prev.push(favorite.questionNumber);
-                }
-                return prev;
-              }, [])
-              .sort((a, b) => a - b) // 問題番号の昇順にソート
-          );
-        } catch (e) {
-          setIsOccurredSystemError(true);
-          systemErrorToast(e);
-        }
-      })();
-    }
-  }, [
-    accountInfo,
-    favoriteQuestionNumbers,
-    instance,
-    isOccurredSystemError,
-    systemErrorToast,
-    testId,
-  ]);
 
   // テスト結果ページへ遷移
   const onClickResultButton = useCallback(() => {

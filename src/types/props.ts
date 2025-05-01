@@ -101,6 +101,16 @@ export type SelectorButtonProps = {
 };
 
 /**
+ * TestReadyButtonsのProps
+ */
+export type TestReadyButtonsProps = {
+  /**
+   * お気に入り問題番号
+   */
+  favoriteQuestionNumbers: number[];
+};
+
+/**
  * TestResultAccordionContentのProps
  */
 export type TestResultAccordionContentProps = {
