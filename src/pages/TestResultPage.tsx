@@ -2,7 +2,6 @@ import LoadingCenter from "@/components/LoadingCenter";
 import TestResultAccordion from "@/components/TestResultAccordion";
 import TopBar from "@/components/TopBar";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
-import useTestDetail from "@/hooks/useTestDetail";
 import { fetchProgressesAtom } from "@/lib/atoms";
 import { accessBackend } from "@/lib/backend";
 import { basePath } from "@/lib/github";
@@ -27,22 +26,29 @@ export default function TestResultPage() {
   const accountInfo = useAccount(accounts[0] || {});
 
   const systemErrorToast = useSystemErrorToast();
-  const testDetail = useTestDetail();
 
-  // テスト詳細情報が取得できていない、またはブラウザバックした場合はトップページにリダイレクト
+  //回答履歴とテストを解く問題番号の順番の整合性が取れない、またはブラウザバックした場合はトップページにリダイレクト
   useEffect(() => {
-    if (!testDetail || navigationType === "POP") {
+    if (
+      !order ||
+      !histories ||
+      order.length === 0 ||
+      histories.length === 0 ||
+      histories.length !== order.length ||
+      navigationType === "POP"
+    ) {
       navigate(`${basePath}/`);
     }
-  }, [navigate, testDetail, navigationType]);
+  }, [histories, navigate, navigationType, order]);
 
-  // バックエンドから取得した今まで回答した問題の回答履歴の整合性が取れた場合、
-  // バックエンドからその回答履歴を削除
+  // 回答履歴とテストを解く問題番号の順番の整合性が取れた場合、バックエンドからその回答履歴を削除
   useEffect(() => {
     if (
       testId &&
       histories &&
       order &&
+      histories.length > 0 &&
+      order.length > 0 &&
       histories.length === order.length &&
       !isFinishedDelete
     ) {

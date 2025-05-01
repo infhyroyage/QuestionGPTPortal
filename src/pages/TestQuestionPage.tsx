@@ -8,7 +8,6 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
-import useTestDetail from "@/hooks/useTestDetail";
 import {
   fetchAnswerExplanationAtom,
   fetchProgressesAtom,
@@ -42,14 +41,18 @@ export default function TestQuestionPage() {
   const accountInfo = useAccount(accounts[0] || {});
 
   const systemErrorToast = useSystemErrorToast();
-  const testDetail = useTestDetail();
 
-  // テスト詳細情報が取得できていない、またはブラウザバックした場合はトップページにリダイレクト
+  // 回答履歴とテストを解く問題番号の順番の整合性が取れない、またはブラウザバックした場合はトップページにリダイレクト
   useEffect(() => {
-    if (!testDetail || navigationType === "POP") {
+    if (
+      !histories ||
+      !order ||
+      order.length === 0 ||
+      navigationType === "POP"
+    ) {
       navigate(`${basePath}/`);
     }
-  }, [navigate, testDetail, navigationType]);
+  }, [histories, navigate, navigationType, order]);
 
   // 最初の問題開始時、および問題番号を変更した場合、
   // 前問題の問題文・選択肢・回答・解説文・翻訳文のatomをすべて初期化
@@ -99,8 +102,7 @@ export default function TestQuestionPage() {
   return (
     testId &&
     histories &&
-    order &&
-    testDetail && (
+    order && (
       <>
         <TopBar
           title={`${

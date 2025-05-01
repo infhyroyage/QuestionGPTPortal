@@ -2,12 +2,12 @@ import LoadingCenter from "@/components/LoadingCenter";
 import TestReadyButtons from "@/components/TestReadyButtons";
 import TopBar from "@/components/TopBar";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
-import useTestDetail from "@/hooks/useTestDetail";
-import { fetchProgressesAtom } from "@/lib/atoms";
+import { fetchProgressesAtom, fetchTestDetailsAtom } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
+import { TestDetail } from "@/types/atoms";
 import { useAccount, useMsal } from "@azure/msal-react";
-import { useAtom } from "jotai";
-import { useEffect, useState } from "react";
+import { useAtom, useAtomValue } from "jotai";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useNavigationType, useParams } from "react-router";
 
 /**
@@ -16,6 +16,7 @@ import { useNavigate, useNavigationType, useParams } from "react-router";
  */
 export default function TestReadyPage() {
   const [{ histories }, fetchProgresses] = useAtom(fetchProgressesAtom);
+  const testDetails = useAtomValue(fetchTestDetailsAtom);
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
 
@@ -26,7 +27,14 @@ export default function TestReadyPage() {
   const accountInfo = useAccount(accounts[0] || {});
 
   const systemErrorToast = useSystemErrorToast();
-  const testDetail = useTestDetail();
+  const testDetail = useMemo<TestDetail | undefined>(
+    () =>
+      testDetails &&
+      testDetails.find(
+        (testDetail: TestDetail) => testDetail.testId === testId
+      ),
+    [testDetails, testId]
+  );
 
   // テスト詳細情報が取得できていない、またはブラウザバックした場合はトップページにリダイレクト
   useEffect(() => {
