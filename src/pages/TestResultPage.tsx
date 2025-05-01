@@ -1,4 +1,3 @@
-import LoadingCenter from "@/components/LoadingCenter";
 import TestResultAccordion from "@/components/TestResultAccordion";
 import TopBar from "@/components/TopBar";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
@@ -8,6 +7,7 @@ import { basePath } from "@/lib/github";
 import { History } from "@/types/atoms";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtomValue } from "jotai";
+import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useNavigationType, useParams } from "react-router";
 
@@ -79,28 +79,31 @@ export default function TestResultPage() {
 
   return (
     testId &&
-    order && (
+    histories &&
+    histories.length > 0 &&
+    order &&
+    order.length > 0 && (
       <>
         <TopBar title="Question GPT Portal" />
-        {histories && histories.length > 0 && isFinishedDelete ? (
-          <div className="pt-[52px] px-4">
-            <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight my-6">
-              {`全${order.length}問中${
-                histories.filter((history: History) => history.isCorrect).length
-              }問正解 (正答率${Math.round(
-                (histories.filter((history: History) => history.isCorrect)
-                  .length /
-                  histories.length) *
-                  100
-              )}%)`}
-            </h3>
-            <div className="mt-4">
-              <TestResultAccordion />
+        <div className="pt-[52px] px-8 flex flex-col h-[calc(100vh-52px)]">
+          <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight my-6">
+            {`全${order.length}問中${
+              histories.filter((history: History) => history.isCorrect).length
+            }問正解 (正答率${Math.round(
+              (histories.filter((history: History) => history.isCorrect)
+                .length /
+                histories.length) *
+                100
+            )}%)`}
+          </h3>
+          {isFinishedDelete ? (
+            <TestResultAccordion />
+          ) : (
+            <div className="flex-1 flex items-center justify-center">
+              <Loader2 size={150} className="animate-spin" />
             </div>
-          </div>
-        ) : (
-          <LoadingCenter />
-        )}
+          )}
+        </div>
       </>
     )
   );

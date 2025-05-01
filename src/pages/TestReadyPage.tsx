@@ -1,4 +1,3 @@
-import LoadingCenter from "@/components/LoadingCenter";
 import TestReadyButtons from "@/components/TestReadyButtons";
 import TopBar from "@/components/TopBar";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
@@ -9,6 +8,7 @@ import { TestDetail } from "@/types/atoms";
 import { Favorite, GetFavoritesRes } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom, useAtomValue } from "jotai";
+import { Loader2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useNavigationType, useParams } from "react-router";
 
@@ -114,22 +114,22 @@ export default function TestReadyPage() {
     testDetail && (
       <>
         <TopBar title="Question GPT Portal" />
-        <div className="pt-[52px] mx-4 flex items-center justify-center min-h-screen flex-col space-y-8">
-          <div className="flex flex-col items-center justify-center space-y-4">
-            <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-              {testDetail.courseName}
-            </h3>
-            <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-              {testDetail.testName}
-            </h4>
+        <div className="pt-[52px] px-8 flex flex-col h-[calc(100vh-52px)]">
+          <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight my-6">
+            {testDetail.courseName}
+          </h3>
+          <h4 className="scroll-m-20 text-xl font-semibold tracking-tight my-6">
+            {testDetail.testName}
+          </h4>
+          <div className="flex-1 flex items-center justify-center">
+            {histories && favoriteQuestionNumbers ? (
+              <TestReadyButtons
+                favoriteQuestionNumbers={favoriteQuestionNumbers}
+              />
+            ) : (
+              <Loader2 size={150} className="animate-spin" />
+            )}
           </div>
-          {histories && favoriteQuestionNumbers ? (
-            <TestReadyButtons
-              favoriteQuestionNumbers={favoriteQuestionNumbers}
-            />
-          ) : (
-            <LoadingCenter />
-          )}
         </div>
       </>
     )

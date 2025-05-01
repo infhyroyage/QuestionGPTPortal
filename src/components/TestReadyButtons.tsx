@@ -90,7 +90,7 @@ export default function TestReadyButtons({
       結果を見る
     </Button>
   ) : (
-    <>
+    <div className="flex flex-col space-y-8">
       {histories && histories.length > 0 && (
         <Button onClick={onClickResumeButton} size="lg">
           {`途中の${histories.length + 1}問目から再開`}
@@ -105,7 +105,7 @@ export default function TestReadyButtons({
           histories && histories.length > 0 ? "(回答履歴が削除されます)" : ""
         }`}
       </Button>
-      {favoriteQuestionNumbers && favoriteQuestionNumbers.length > 0 && (
+      {favoriteQuestionNumbers.length > 0 && (
         <Button
           onClick={() => handleClickStartButton(true)}
           size="lg"
@@ -118,6 +118,6 @@ export default function TestReadyButtons({
           }`}
         </Button>
       )}
-    </>
+    </div>
   );
 }

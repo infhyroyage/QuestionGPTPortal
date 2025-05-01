@@ -2,7 +2,7 @@ import { config, loginScope } from "@/lib/msal";
 import { ApplyMSALProps } from "@/types/props";
 import { InteractionType, PublicClientApplication } from "@azure/msal-browser";
 import { MsalAuthenticationTemplate, MsalProvider } from "@azure/msal-react";
-import LoadingCenter from "./LoadingCenter";
+import { Loader2 } from "lucide-react";
 
 /**
  * MSALを適用するコンポーネント
@@ -19,7 +19,11 @@ export default function ApplyMSAL({ children }: ApplyMSALProps) {
       <MsalAuthenticationTemplate
         interactionType={InteractionType.Redirect}
         authenticationRequest={loginScope}
-        loadingComponent={LoadingCenter}
+        loadingComponent={() => (
+          <div className="flex items-center justify-center min-h-screen">
+            <Loader2 size={150} className="animate-spin" />
+          </div>
+        )}
       >
         <>{children}</>
       </MsalAuthenticationTemplate>
