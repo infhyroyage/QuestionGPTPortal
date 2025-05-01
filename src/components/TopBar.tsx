@@ -16,7 +16,6 @@ import ReturnRootPageButton from "./ReturnRootPageButton";
  */
 export default function TopBar({ title }: TopBarProps) {
   const [isFavorite, setIsFavorite] = useState<boolean | undefined>(undefined);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
 
@@ -48,7 +47,6 @@ export default function TopBar({ title }: TopBarProps) {
     ) {
       (async () => {
         try {
-          setIsLoading(true);
           const response = await accessBackend<GetFavoriteRes>(
             "GET",
             `/tests/${testId}/favorites/${questionNumber}`,
@@ -59,8 +57,6 @@ export default function TopBar({ title }: TopBarProps) {
         } catch (e) {
           setIsOccurredSystemError(true);
           systemErrorToast(e);
-        } finally {
-          setIsLoading(false);
         }
       })();
     }
@@ -80,11 +76,6 @@ export default function TopBar({ title }: TopBarProps) {
     setIsFavorite(newIsFavorite);
   }, []);
 
-  // お気に入り切替ボタンのローディング状態変更時の動作
-  const onLoadingChange = useCallback((newIsLoading: boolean) => {
-    setIsLoading(newIsLoading);
-  }, []);
-
   return (
     <div className="fixed top-0 left-0 right-0 h-[52px] p-3 bg-slate-200 dark:bg-slate-800 z-10">
       <div className="mx-3 flex items-center justify-between">
@@ -94,9 +85,8 @@ export default function TopBar({ title }: TopBarProps) {
             <div className="ml-2 flex items-center justify-center">
               <FavoriteButton
                 isFavorite={isFavorite || false}
-                isLoading={isLoading}
+                isLoading={isFavorite === undefined}
                 onFavoriteChange={onFavoriteChange}
-                onLoadingChange={onLoadingChange}
                 questionNumber={questionNumber}
               />
             </div>

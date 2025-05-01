@@ -20,7 +20,6 @@ export default function TestResultAccordion() {
   const { histories, order } = useAtomValue(fetchProgressesAtom);
   const [openValues, setOpenValues] = useState<string[]>([]);
   const [favorites, setFavorites] = useState<boolean[] | undefined>(undefined);
-  const [isLoadingFavorites, setIsLoadingFavorites] = useState<boolean[]>([]);
   const [getQuestions, setGetQuestions] = useState<{
     [key: string]: GetQuestion;
   }>({});
@@ -44,8 +43,6 @@ export default function TestResultAccordion() {
     ) {
       (async () => {
         try {
-          setIsLoadingFavorites(new Array(histories.length).fill(true));
-
           // [GET] /tests/{testId}/favoritesにアクセスしてお気に入り情報を取得
           const res: GetFavoritesRes = await accessBackend<GetFavoritesRes>(
             "GET",
@@ -71,8 +68,6 @@ export default function TestResultAccordion() {
         } catch (e) {
           setIsOccurredSystemError(true);
           systemErrorToast(e);
-        } finally {
-          setIsLoadingFavorites(new Array(histories.length).fill(false));
         }
       })();
     }
@@ -97,17 +92,6 @@ export default function TestResultAccordion() {
         const newFavorites = [...prev];
         newFavorites[favoriteIdx] = newIsFavorite;
         return newFavorites;
-      }),
-    []
-  );
-
-  // i番目(0スタート)の問題のお気に入り切替ボタンのローディング状態変更時の動作
-  const handleLoadingChange = useCallback(
-    (favoriteIdx: number, newIsLoading: boolean) =>
-      setIsLoadingFavorites((prev) => {
-        const newIsLoadingFavorites = [...prev];
-        newIsLoadingFavorites[favoriteIdx] = newIsLoading;
-        return newIsLoadingFavorites;
       }),
     []
   );
@@ -157,12 +141,9 @@ export default function TestResultAccordion() {
               <div className="pl-4 flex items-center">
                 <FavoriteButton
                   isFavorite={!!favorites && favorites[historyIdx]}
-                  isLoading={isLoadingFavorites[historyIdx]}
+                  isLoading={favorites === undefined}
                   onFavoriteChange={(newIsFavorite: boolean) =>
                     handleFavoriteChange(historyIdx, newIsFavorite)
-                  }
-                  onLoadingChange={(newIsLoading: boolean) =>
-                    handleLoadingChange(historyIdx, newIsLoading)
                   }
                   questionNumber={String(order[historyIdx])}
                 />

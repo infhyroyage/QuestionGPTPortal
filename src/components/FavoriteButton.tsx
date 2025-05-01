@@ -16,7 +16,6 @@ export default function FavoriteButton({
   isFavorite,
   isLoading,
   onFavoriteChange,
-  onLoadingChange,
   questionNumber,
 }: FavoriteButtonProps) {
   const [isOccurredSystemError, setIsOccurredSystemError] =
@@ -30,8 +29,6 @@ export default function FavoriteButton({
 
   const onClick = useCallback(async () => {
     if (testId && !isOccurredSystemError) {
-      onLoadingChange(true);
-
       try {
         // [POST] /tests/{testId}/favorites/{questionNumber}にアクセスして、切替後のお気に入り状態を更新
         const req: PostFavoriteReq = {
@@ -49,8 +46,6 @@ export default function FavoriteButton({
       } catch (e) {
         setIsOccurredSystemError(true);
         systemErrorToast(e);
-      } finally {
-        onLoadingChange(false);
       }
     }
   }, [
@@ -58,7 +53,6 @@ export default function FavoriteButton({
     instance,
     isFavorite,
     onFavoriteChange,
-    onLoadingChange,
     questionNumber,
     testId,
     isOccurredSystemError,

@@ -33,12 +33,6 @@ export type FavoriteButtonProps = {
   onFavoriteChange: (newIsFavorite: boolean) => void;
 
   /**
-   * お気に入り切替ボタンのローディング状態変更時の動作
-   * @param newIsLoading 新しいローディング状態
-   */
-  onLoadingChange: (newIsLoading: boolean) => void;
-
-  /**
    * 問題番号
    */
   questionNumber: string;
