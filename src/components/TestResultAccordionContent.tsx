@@ -1,9 +1,11 @@
 import useTranslationFailedToast from "@/hooks/useTranslationFailedToast";
 import { translateSubjectsAndChoices } from "@/lib/translation";
 import { TranslationSubjectChoice } from "@/types/atoms";
+import { Subject } from "@/types/backend";
 import { TestResultAccordionContentProps } from "@/types/props";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useEffect, useState } from "react";
+import ImageDialog from "./ImageDialog";
 import SelectorButton from "./SelectorButton";
 import { AccordionContent } from "./ui/accordion";
 import { Skeleton } from "./ui/skeleton";
@@ -55,12 +57,53 @@ export default function TestResultAccordionContent({
     translation,
   ]);
 
-  // TODO: 問題文も表示する
   return (
     <AccordionContent>
       <div className="mx-8 my-4 space-y-8">
         <div className="space-y-4">
-          <p className="leading-7 [&:not(:first-child)]:mt-6">選択した選択肢</p>
+          <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+            問題文
+          </h4>
+          <div className="mx-4 space-y-4">
+            {getQuestion ? (
+              getQuestion.subjects.map((subject: Subject, idx: number) =>
+                subject.isIndicatedImg ? (
+                  <ImageDialog
+                    key={idx}
+                    img={subject.sentence}
+                    alt={subject.sentence}
+                  />
+                ) : (
+                  <div key={idx} className="space-y-1">
+                    <p className="leading-7">{subject.sentence}</p>
+                    {translation ? (
+                      <p className="text-sm text-muted-foreground">
+                        {translation.subjects[idx]}
+                      </p>
+                    ) : (
+                      <Skeleton className="h-5 w-full" />
+                    )}
+                  </div>
+                )
+              )
+            ) : (
+              <>
+                <div className="space-y-1">
+                  <Skeleton className="h-7 w-full" />
+                  <Skeleton className="h-5 w-full" />
+                </div>
+                <div className="space-y-1">
+                  <Skeleton className="h-7 w-full" />
+                  <Skeleton className="h-5 w-full" />
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+        <div className="space-y-4">
+          <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+            選択した選択肢
+          </h4>
           <div className="mx-4 space-y-4">
             {getQuestion ? (
               history.selectedIdxes.map((j: number) => (
@@ -78,7 +121,9 @@ export default function TestResultAccordionContent({
           </div>
         </div>
         <div className="space-y-4">
-          <p className="leading-7 [&:not(:first-child)]:mt-6">正解の選択肢</p>
+          <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+            正解の選択肢
+          </h4>
           <div className="mx-4 space-y-4">
             {getQuestion ? (
               history.correctIdxes.map((j: number) => (
