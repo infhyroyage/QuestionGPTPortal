@@ -1,4 +1,4 @@
-import { GetQuestion } from "@/types/backend";
+import { GetQuestion, Subject } from "@/types/backend";
 import { ReactNode } from "react";
 import { History } from "./atoms";
 
@@ -98,6 +98,21 @@ export type SelectorButtonProps = {
    * 選択肢のバリアント
    */
   variant: "default" | "outline";
+};
+
+/**
+ * SubjectDisplayのProps
+ */
+export type SubjectDisplayProps = {
+  /**
+   * 問題文
+   */
+  subjects?: Subject[];
+
+  /**
+   * 問題文の翻訳文
+   */
+  translation?: string[];
 };
 
 /**

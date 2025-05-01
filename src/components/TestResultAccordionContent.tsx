@@ -1,12 +1,11 @@
 import useTranslationFailedToast from "@/hooks/useTranslationFailedToast";
 import { translateSubjectsAndChoices } from "@/lib/translation";
 import { TranslationSubjectChoice } from "@/types/atoms";
-import { Subject } from "@/types/backend";
 import { TestResultAccordionContentProps } from "@/types/props";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useEffect, useState } from "react";
-import ImageDialog from "./ImageDialog";
 import SelectorButton from "./SelectorButton";
+import SubjectDisplay from "./SubjectDisplay";
 import { AccordionContent } from "./ui/accordion";
 import { Skeleton } from "./ui/skeleton";
 
@@ -64,40 +63,11 @@ export default function TestResultAccordionContent({
           <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
             問題文
           </h4>
-          <div className="mx-4 space-y-4">
-            {getQuestion ? (
-              getQuestion.subjects.map((subject: Subject, idx: number) =>
-                subject.isIndicatedImg ? (
-                  <ImageDialog
-                    key={idx}
-                    img={subject.sentence}
-                    alt={subject.sentence}
-                  />
-                ) : (
-                  <div key={idx} className="space-y-1">
-                    <p className="leading-7">{subject.sentence}</p>
-                    {translation ? (
-                      <p className="text-sm text-muted-foreground">
-                        {translation.subjects[idx]}
-                      </p>
-                    ) : (
-                      <Skeleton className="h-5 w-full" />
-                    )}
-                  </div>
-                )
-              )
-            ) : (
-              <>
-                <div className="space-y-1">
-                  <Skeleton className="h-7 w-full" />
-                  <Skeleton className="h-5 w-full" />
-                </div>
-                <div className="space-y-1">
-                  <Skeleton className="h-7 w-full" />
-                  <Skeleton className="h-5 w-full" />
-                </div>
-              </>
-            )}
+          <div className="mx-4">
+            <SubjectDisplay
+              subjects={getQuestion && getQuestion.subjects}
+              translation={translation && translation.subjects}
+            />
           </div>
         </div>
         <div className="space-y-4">

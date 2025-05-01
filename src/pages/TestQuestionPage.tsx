@@ -1,6 +1,6 @@
 import IconButtonsContainer from "@/components/IconButtonsContainer";
-import QuestionSubjects from "@/components/QuestionSubjects";
 import Selector from "@/components/Selector";
+import SubjectDisplay from "@/components/SubjectDisplay";
 import TopBar from "@/components/TopBar";
 import {
   ResizableHandle,
@@ -8,10 +8,12 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
+import useTranslationFailedToast from "@/hooks/useTranslationFailedToast";
 import {
   fetchAnswerExplanationAtom,
   fetchProgressesAtom,
   fetchQuestionSelectorAtom,
+  fetchTranslationSubjectChoiceAtom,
   resetAtomsForTestQuestionAtom,
 } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
@@ -30,7 +32,12 @@ export default function TestQuestionPage() {
   const [questionSelector, fetchQuestionSelector] = useAtom(
     fetchQuestionSelectorAtom
   );
+  const [translationSubjectChoice, fetchTranslationSubjectChoice] = useAtom(
+    fetchTranslationSubjectChoiceAtom
+  );
   const resetAtomsForTestQuestion = useSetAtom(resetAtomsForTestQuestionAtom);
+  const [isOccurredTranslationFailed, setIsOccurredTranslationFailed] =
+    useState<boolean>(false);
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
 
@@ -40,6 +47,7 @@ export default function TestQuestionPage() {
   const { instance, accounts } = useMsal();
   const accountInfo = useAccount(accounts[0] || {});
 
+  const translationFailedToast = useTranslationFailedToast();
   const systemErrorToast = useSystemErrorToast();
 
   // 回答履歴とテストを解く問題番号の順番の整合性が取れない、またはブラウザバックした場合はトップページにリダイレクト
@@ -99,6 +107,34 @@ export default function TestQuestionPage() {
     testId,
   ]);
 
+  // 問題文・選択肢の取得直後に、それらの翻訳文を1度だけ取得
+  useEffect(() => {
+    if (
+      questionSelector &&
+      !translationSubjectChoice &&
+      !isOccurredTranslationFailed
+    ) {
+      (async () => {
+        try {
+          await fetchTranslationSubjectChoice(instance, accountInfo);
+        } catch {
+          setIsOccurredTranslationFailed(true);
+          translationFailedToast("問題文・選択肢", () =>
+            setIsOccurredTranslationFailed(false)
+          );
+        }
+      })();
+    }
+  }, [
+    accountInfo,
+    fetchTranslationSubjectChoice,
+    instance,
+    isOccurredTranslationFailed,
+    questionSelector,
+    translationFailedToast,
+    translationSubjectChoice,
+  ]);
+
   return (
     testId &&
     histories &&
@@ -117,8 +153,14 @@ export default function TestQuestionPage() {
         >
           <ResizablePanel defaultSize={60}>
             <div className="relative h-full">
-              <div className="h-full min-h-0 overflow-y-auto">
-                <QuestionSubjects />
+              <div className="p-4 h-full min-h-0 overflow-y-auto">
+                <SubjectDisplay
+                  subjects={questionSelector && questionSelector.subjects}
+                  translation={
+                    translationSubjectChoice &&
+                    translationSubjectChoice.subjects
+                  }
+                />
               </div>
               <IconButtonsContainer />
             </div>
