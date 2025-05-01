@@ -36,12 +36,19 @@ export default function TopBar({ title }: TopBarProps) {
     [location.pathname, questionNumber, testId]
   );
 
+  // 問題番号変更時にお気に入り状態を初期化
+  useEffect(() => {
+    if (questionNumber) {
+      setIsFavorite(undefined);
+    }
+  }, [questionNumber]);
+
   // 問題番号変更時にお気に入り状態を取得
   useEffect(() => {
     if (
       testId &&
-      questionNumber &&
       isTestQuestionPage &&
+      questionNumber &&
       isFavorite === undefined &&
       !isOccurredSystemError
     ) {
