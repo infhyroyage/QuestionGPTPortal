@@ -69,7 +69,7 @@ export type SelectorButtonProps = {
   disabled?: boolean;
 
   /**
-   * 選択肢の画像
+   * 選択肢の画像(画像がない場合はnull)
    */
   img: string | null;
 
@@ -79,14 +79,14 @@ export type SelectorButtonProps = {
   onClick?: () => void;
 
   /**
-   * 選択肢のテキスト
+   * 選択肢のテキスト(画像URLのみの場合はnull)
    */
-  sentence: string;
+  sentence: string | null;
 
   /**
-   * 選択肢の翻訳文(翻訳文が存在しない場合はundefined)
+   * 選択肢の翻訳文(翻訳文が存在しない場合はnull)
    */
-  translation?: string;
+  translation: string | null;
 
   /**
    * 選択肢のバリアント

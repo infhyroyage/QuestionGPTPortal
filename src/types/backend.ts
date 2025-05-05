@@ -153,9 +153,9 @@ export type Subject = {
  */
 export type Choice = {
   /**
-   * 選択肢の文
+   * 選択肢の文(画像URLのみの場合はnull)
    */
-  sentence: string;
+  sentence: string | null;
 
   /**
    * 選択肢の文に続く画像URL(画像がない場合はnull)

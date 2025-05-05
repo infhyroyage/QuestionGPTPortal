@@ -81,7 +81,7 @@ export default function TestResultAccordionContent({
                   key={j}
                   img={getQuestion.choices[j].img}
                   sentence={getQuestion.choices[j].sentence}
-                  translation={translation && translation.choices[j]}
+                  translation={translation ? translation.choices[j] : null}
                   variant="outline"
                 />
               ))
@@ -101,7 +101,7 @@ export default function TestResultAccordionContent({
                   key={j}
                   img={getQuestion.choices[j].img}
                   sentence={getQuestion.choices[j].sentence}
-                  translation={translation && translation.choices[j]}
+                  translation={translation ? translation.choices[j] : null}
                   variant="outline"
                 />
               ))

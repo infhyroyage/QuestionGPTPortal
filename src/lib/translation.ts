@@ -20,15 +20,18 @@ export async function translateSubjectsAndChoices(
   // 問題文、選択肢それぞれに対して[PUT] /en2jpにアクセスせず、
   // 問題文→選択肢の順で連結した1つの配列を用いて、翻訳を1回にまとめて行うよう整形する
   const data: PutEn2JaReq = [
-    ...subjects
-      .filter(
-        (subject: Subject) =>
-          !subject.isEscapedTranslation && !subject.isIndicatedImg
-      )
-      .map((subject: Subject) => subject.sentence),
-    ...choices
-      .filter((choice: Choice) => !choice.isEscapedTranslation)
-      .map((choice: Choice) => choice.sentence),
+    ...subjects.reduce((prev: string[], subject: Subject) => {
+      if (!subject.isEscapedTranslation && !subject.isIndicatedImg) {
+        prev.push(subject.sentence);
+      }
+      return prev;
+    }, []),
+    ...choices.reduce((prev: string[], choice: Choice) => {
+      if (!choice.isEscapedTranslation && choice.sentence !== null) {
+        prev.push(choice.sentence);
+      }
+      return prev;
+    }, []),
   ];
 
   // [PUT] /en2jpにアクセスして問題文・選択肢の翻訳文を取得
@@ -46,8 +49,10 @@ export async function translateSubjectsAndChoices(
       ? subject.sentence
       : (res.shift() as string)
   );
-  const translatedChoices: string[] = choices.map((choice: Choice) =>
-    choice.isEscapedTranslation ? choice.sentence : (res.shift() as string)
+  const translatedChoices: (string | null)[] = choices.map((choice: Choice) =>
+    choice.isEscapedTranslation || choice.sentence === null
+      ? choice.sentence
+      : (res.shift() as string)
   );
 
   return { subjects: translatedSubjects, choices: translatedChoices };

@@ -96,8 +96,9 @@ export default function ExplanationSheetContent() {
                   img={choice.img}
                   sentence={choice.sentence}
                   translation={
-                    translationSubjectChoice &&
-                    translationSubjectChoice.choices[idx]
+                    translationSubjectChoice
+                      ? translationSubjectChoice.choices[idx]
+                      : null
                   }
                   variant="outline"
                 />

@@ -25,13 +25,17 @@ export default function SelectorButton({
       disabled={disabled}
       onClick={onClick}
     >
-      <p className="leading-7">{sentence}</p>
-      {translation ? (
-        <p className="text-sm text-muted-foreground">{translation}</p>
-      ) : (
-        <Skeleton className="h-5 w-full" />
+      {sentence && (
+        <>
+          <p className="leading-7">{sentence}</p>
+          {translation ? (
+            <p className="text-sm text-muted-foreground">{translation}</p>
+          ) : (
+            <Skeleton className="h-5 w-full" />
+          )}
+        </>
       )}
-      {img && <ImageDialog img={img} alt={sentence} />}
+      {img && <ImageDialog img={img} alt={img} />}
     </Button>
   );
 }

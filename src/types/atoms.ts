@@ -167,8 +167,8 @@ export type TranslationSubjectChoice =
       subjects: string[];
 
       /**
-       * 各選択肢の文
+       * 各選択肢の文(画像URLのみの場合はnull)
        */
-      choices: string[];
+      choices: (string | null)[];
     }
   | undefined;

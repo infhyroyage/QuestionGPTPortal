@@ -69,8 +69,9 @@ export default function Selector() {
               onClick={onClickSelectButton(idx)}
               sentence={choice.sentence}
               translation={
-                translationSubjectChoice &&
-                translationSubjectChoice.choices[idx]
+                translationSubjectChoice
+                  ? translationSubjectChoice.choices[idx]
+                  : null
               }
               variant={
                 questionSelector.choices[idx].isSelected &&
