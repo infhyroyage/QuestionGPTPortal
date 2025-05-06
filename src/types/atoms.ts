@@ -6,6 +6,12 @@ import { Choice, Subject } from "./backend";
 export type AnswerExplanation =
   | {
       /**
+       * 正解・解説文が生成中の場合はtrue、
+       * 正解・解説文が生成済みの場合はfalse
+       */
+      isSubmitting: boolean;
+
+      /**
        * 正解・解説文が生成済みかつ正解の場合はtrue、
        * 正解・解説文が生成済みかつ不正解の場合はfalse
        * 正解・解説文が生成中の場合はundefined
@@ -17,18 +23,6 @@ export type AnswerExplanation =
        * 正解・解説文が生成中の場合はundefined
        */
       explanations?: string[];
-
-      /**
-       * 正解・解説文が生成済みの場合はコミュニティ回答割合、
-       * 正解・解説文が生成中の場合はundefined
-       */
-      communityVotes?: string[];
-
-      /**
-       * 正解・解説文が生成中の場合はtrue、
-       * 正解・解説文が生成済みの場合はfalse
-       */
-      isSubmitting: boolean;
 
       /**
        * 正解・解説文が生成済みかつ正解の場合はtrue、
@@ -49,6 +43,11 @@ export type AnswerExplanation =
        * 正解・解説文が生成中の場合はundefined
        */
       isSavedProgress?: boolean;
+
+      /**
+       * コミュニティ回答割合
+       */
+      communityVotes?: string[];
     }
   | undefined;
 

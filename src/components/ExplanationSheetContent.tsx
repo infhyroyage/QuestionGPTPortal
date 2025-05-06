@@ -66,18 +66,22 @@ export default function ExplanationSheetContent() {
   return (
     questionSelector &&
     answerExplanation &&
-    answerExplanation.communityVotes && (
+    !answerExplanation.isSubmitting && (
       <>
-        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight my-4">
-          コミュニティ回答割合
-        </h4>
-        <div className="flex space-x-4">
-          {answerExplanation.communityVotes.map(
-            (communityVote: string, idx: number) => (
-              <Badge key={idx}>{communityVote}</Badge>
-            )
-          )}
-        </div>
+        {answerExplanation.communityVotes && (
+          <>
+            <h4 className="scroll-m-20 text-xl font-semibold tracking-tight my-4">
+              コミュニティ回答割合
+            </h4>
+            <div className="flex space-x-4">
+              {answerExplanation.communityVotes.map(
+                (communityVote: string, idx: number) => (
+                  <Badge key={idx}>{communityVote}</Badge>
+                )
+              )}
+            </div>
+          </>
+        )}
         <h4 className="scroll-m-20 text-xl font-semibold tracking-tight mt-16 mb-4">
           選択肢と解説
         </h4>

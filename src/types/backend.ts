@@ -35,7 +35,7 @@ export type PostAnswerRes = {
   /**
    * コミュニティ回答割合
    */
-  communityVotes: string[];
+  communityVotes?: string[];
 };
 
 /**

@@ -115,7 +115,7 @@ export const fetchAnswerExplanationAtom = atom(
 
     let correctIdxes: number[];
     let explanations: string[];
-    let communityVotes: string[];
+    let communityVotes: string[] | undefined;
     if (isResubmit) {
       // 回答・解説再生成の場合、解説文に対する翻訳文を初期化してから、
       // [POST] /tests/{testId}/answers/{questionNumber}にアクセス
