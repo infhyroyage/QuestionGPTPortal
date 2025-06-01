@@ -97,6 +97,7 @@ export default function ExplanationSheetContent() {
                       ? "border-green-500 bg-green-50 dark:bg-green-950 hover:bg-green-100 dark:hover:bg-green-900"
                       : "border-red-500 bg-red-50 dark:bg-red-950 hover:bg-red-100 dark:hover:bg-red-900"
                   }
+                  idx={idx}
                   img={choice.img}
                   sentence={choice.sentence}
                   translation={

@@ -1,4 +1,5 @@
 import { SelectorButtonProps } from "@/types/props";
+import { useMemo } from "react";
 import ImageDialog from "./ImageDialog";
 import { Button } from "./ui/button";
 import { Skeleton } from "./ui/skeleton";
@@ -10,32 +11,47 @@ import { Skeleton } from "./ui/skeleton";
 export default function SelectorButton({
   className,
   disabled,
+  idx,
   img,
   onClick,
   sentence,
   translation,
   variant,
 }: SelectorButtonProps) {
+  // アルファベット表示用の選択肢のインデックスをアルファベットに変換(0->A, 1->B, ...、表示しない場合はnull)
+  const alphabet: string | null = useMemo(() => {
+    return idx !== undefined ? String.fromCharCode(65 + idx) : null;
+  }, [idx]);
+
   return (
     <Button
       variant={variant}
-      className={`flex flex-col py-4 pl-4 w-full h-full space-y-1 whitespace-normal text-left items-start${
+      className={`relative flex flex-col py-4 pl-4 w-full h-full space-y-1 whitespace-normal text-left items-start${
         className ? ` ${className}` : ""
       }`}
       disabled={disabled}
       onClick={onClick}
     >
-      {sentence && (
-        <>
-          <p className="leading-7">{sentence}</p>
-          {translation ? (
-            <p className="text-sm text-muted-foreground">{translation}</p>
-          ) : (
-            <Skeleton className="h-5 w-full" />
-          )}
-        </>
+      {alphabet && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <span className="text-8xl font-bold text-muted-foreground/25 select-none">
+            {alphabet}
+          </span>
+        </div>
       )}
-      {img && <ImageDialog img={img} alt={img} />}
+      <div className="relative z-10 flex flex-col space-y-1 w-full">
+        {sentence && (
+          <>
+            <p className="leading-7">{sentence}</p>
+            {translation ? (
+              <p className="text-sm text-muted-foreground">{translation}</p>
+            ) : (
+              <Skeleton className="h-5 w-full" />
+            )}
+          </>
+        )}
+        {img && <ImageDialog img={img} alt={img} />}
+      </div>
     </Button>
   );
 }

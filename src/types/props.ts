@@ -69,6 +69,11 @@ export type SelectorButtonProps = {
   disabled?: boolean;
 
   /**
+   * アルファベット表示用の選択肢のインデックス(0の場合はA、1の場合はB、...、表示しない場合はundefined)
+   */
+  idx?: number;
+
+  /**
    * 選択肢の画像(画像がない場合はnull)
    */
   img: string | null;

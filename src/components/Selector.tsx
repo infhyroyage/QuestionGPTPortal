@@ -65,6 +65,7 @@ export default function Selector() {
                   : ""
               }
               disabled={isDisabledSelectorButtons}
+              idx={idx}
               img={choice.img}
               onClick={onClickSelectButton(idx)}
               sentence={choice.sentence}
