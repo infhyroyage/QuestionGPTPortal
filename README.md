@@ -10,10 +10,6 @@
 
 [Swagger UI](https://infhyroyage.github.io/QuestionGPTTranslator/) 参照。
 
-## ディレクトリ構成
-
-[directorystructure.md](directorystructure.md) 参照。
-
 ## 技術スタック
 
 [technologystack.md](technologystack.md) 参照。
