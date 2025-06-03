@@ -81,7 +81,7 @@ export default function FavoriteButton({
           />
         </button>
       </TooltipTrigger>
-      <TooltipContent>
+      <TooltipContent side="bottom" align="center">
         {isFavorite ? "お気に入り解除" : "お気に入り登録"}
       </TooltipContent>
     </Tooltip>

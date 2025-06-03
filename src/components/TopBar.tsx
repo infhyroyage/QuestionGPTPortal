@@ -99,9 +99,11 @@ export default function TopBar({ title }: TopBarProps) {
             </div>
           )}
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 min-w-fit">
           {location.pathname !== `${basePath}/` && <ReturnRootPageButton />}
-          <DarkModeSwitchButton />
+          <div className="flex-shrink-0">
+            <DarkModeSwitchButton />
+          </div>
         </div>
       </div>
     </div>

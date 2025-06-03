@@ -69,7 +69,9 @@ export default function ResubmitButton() {
           <RefreshCcw />
         </Button>
       </TooltipTrigger>
-      <TooltipContent>回答・解説再生成</TooltipContent>
+      <TooltipContent side="bottom" align="center">
+        回答・解説再生成
+      </TooltipContent>
     </Tooltip>
   );
 }

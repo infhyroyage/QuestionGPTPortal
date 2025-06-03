@@ -84,7 +84,7 @@ export default function NextQuestionButton() {
             )}
           </Button>
         </TooltipTrigger>
-        <TooltipContent>
+        <TooltipContent side="bottom" align="center">
           {histories.length === order.length ? "テスト結果へ" : "次の問題へ"}
         </TooltipContent>
       </Tooltip>

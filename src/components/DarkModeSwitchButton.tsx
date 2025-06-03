@@ -26,7 +26,7 @@ export default function DarkModeSwitchButton() {
           )}
         </Button>
       </TooltipTrigger>
-      <TooltipContent>
+      <TooltipContent side="bottom" align="center">
         {isDarkMode ? "ダークモード" : "ライトモード"}
       </TooltipContent>
     </Tooltip>

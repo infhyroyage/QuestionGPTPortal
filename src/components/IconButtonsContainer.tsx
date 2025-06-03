@@ -23,15 +23,23 @@ export default function IconButtonsContainer() {
 
   return (
     <div
-      className={`space-x-4 absolute right-4 transition-all duration-300 ease-in-out ${
+      className={`flex items-center space-x-4 absolute right-4 transition-all duration-300 ease-in-out ${
         isHidden ? "translate-y-20 opacity-0" : "bottom-4 opacity-100"
       }
       `}
     >
-      <SubmitButton />
-      <ResubmitButton />
-      <OpenExplanationButton />
-      <NextQuestionButton />
+      <div className="flex-shrink-0">
+        <SubmitButton />
+      </div>
+      <div className="flex-shrink-0">
+        <ResubmitButton />
+      </div>
+      <div className="flex-shrink-0">
+        <OpenExplanationButton />
+      </div>
+      <div className="flex-shrink-0">
+        <NextQuestionButton />
+      </div>
     </div>
   );
 }

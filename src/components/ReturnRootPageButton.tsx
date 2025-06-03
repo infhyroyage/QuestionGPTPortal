@@ -28,7 +28,9 @@ export default function ReturnRootPageButton() {
           <CornerDownLeft className="size-4" />
         </Button>
       </TooltipTrigger>
-      <TooltipContent>トップページに戻る</TooltipContent>
+      <TooltipContent side="bottom" align="center">
+        トップページに戻る
+      </TooltipContent>
     </Tooltip>
   );
 }

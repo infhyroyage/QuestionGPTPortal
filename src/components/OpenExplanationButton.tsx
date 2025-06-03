@@ -37,7 +37,9 @@ export default function OpenExplanationButton() {
             </Button>
           </SheetTrigger>
         </TooltipTrigger>
-        <TooltipContent>解説表示</TooltipContent>
+        <TooltipContent side="bottom" align="center">
+          解説表示
+        </TooltipContent>
       </Tooltip>
       <SheetContent
         side="bottom"

@@ -98,7 +98,9 @@ export default function SubmitButton() {
           )}
         </Button>
       </TooltipTrigger>
-      <TooltipContent>回答・解説生成</TooltipContent>
+      <TooltipContent side="bottom" align="center">
+        回答・解説生成
+      </TooltipContent>
     </Tooltip>
   );
 }
