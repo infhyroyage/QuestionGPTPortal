@@ -63,7 +63,7 @@ export default function FavoriteButton({
     <Tooltip>
       <TooltipTrigger asChild>
         <button
-          className={`bg-transparent border-none p-0 ml-1 cursor-pointer hover:opacity-80 transition-all duration-300 focus:outline-none ${
+          className={`bg-transparent border-none p-0 ml-1 cursor-pointer hover:opacity-80 transition-all duration-300 focus:outline-hidden ${
             isLoading ? "opacity-50" : ""
           }`}
           onClick={onClick}

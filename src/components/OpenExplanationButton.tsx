@@ -41,7 +41,7 @@ export default function OpenExplanationButton() {
       </Tooltip>
       <SheetContent
         side="bottom"
-        className="min-w-[100vw] max-h-[80vh] overflow-y-auto"
+        className="min-w-screen max-h-[80vh] overflow-y-auto"
       >
         <SheetHeader>
           <SheetTitle />
