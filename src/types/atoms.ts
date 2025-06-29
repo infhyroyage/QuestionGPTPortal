@@ -53,6 +53,19 @@ export type AnswerExplanation =
   | undefined;
 
 /**
+ * コミュニティ情報の生成状態の型
+ */
+export type Community =
+  | {
+      /**
+       * コミュニティでのディスカッションの要約
+       * コミュニティ情報が生成中、またはデータが存在しない場合はundefined
+       */
+      discussionsSummary?: string;
+    }
+  | undefined;
+
+/**
  * 選択状態を含む選択肢の型
  */
 export type ChoiceAndSelect = Choice & { isSelected: boolean };

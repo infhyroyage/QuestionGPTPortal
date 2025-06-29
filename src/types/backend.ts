@@ -1,4 +1,49 @@
 /**
+ * バックエンドのメソッドの型
+ */
+export type Method = "DELETE" | "GET" | "POST" | "PUT";
+
+/**
+ * [PUT] /en2ja のリクエストボディの型
+ */
+export type PutEn2JaReq = string[];
+
+/**
+ * [PUT] /en2ja のレスポンスボディの型
+ */
+export type PutEn2JaRes = string[];
+
+/**
+ * [GET] /tests のレスポンスボディの各要素の型
+ */
+export type Test = {
+  /**
+   * テストID
+   */
+  id: string;
+
+  /**
+   * テスト名
+   */
+  testName: string;
+
+  /**
+   * テストの問題数
+   */
+  length: number;
+};
+
+/**
+ * [GET] /tests のレスポンスボディの型
+ */
+export type GetTests = {
+  /**
+   * コース名をキーとする、各テストの連想配列
+   */
+  [courseName: string]: Test[];
+};
+
+/**
  * [GET] /tests/{testId}/answers/{questionNumber} のレスポンスボディの型
  */
 export type GetAnswer = {
@@ -41,6 +86,36 @@ export type PostAnswerRes = {
    * コミュニティ回答割合
    */
   communityVotes?: string[];
+};
+
+/**
+ * [GET] /tests/{testId}/communities/{questionNumber} のレスポンスボディの型
+ */
+export type GetCommunityRes = {
+  /**
+   * コミュニティでのディスカッションの要約
+   */
+  discussionsSummary: string;
+
+  /**
+   * コミュニティでのディスカッションの要約が存在する場合はtrue、存在しない場合はfalse
+   */
+  isExisted: boolean;
+};
+
+/**
+ * [POST] /tests/{testId}/communities/{questionNumber} のレスポンスボディの型
+ */
+export type PostCommunityRes = {
+  /**
+   * コミュニティでのディスカッションの要約
+   */
+  discussionsSummary: string;
+
+  /**
+   * コミュニティでのディスカッションの要約が存在する場合はtrue、存在しない場合はfalse
+   */
+  isExisted: boolean;
 };
 
 /**
@@ -192,48 +267,3 @@ export type GetQuestion = {
    */
   isMultiplied: boolean;
 };
-
-/**
- * [GET] /tests のレスポンスボディの各要素の型
- */
-export type Test = {
-  /**
-   * テストID
-   */
-  id: string;
-
-  /**
-   * テスト名
-   */
-  testName: string;
-
-  /**
-   * テストの問題数
-   */
-  length: number;
-};
-
-/**
- * [GET] /tests のレスポンスボディの型
- */
-export type GetTests = {
-  /**
-   * コース名をキーとする、各テストの連想配列
-   */
-  [courseName: string]: Test[];
-};
-
-/**
- * [PUT] /en2ja のリクエストボディの型
- */
-export type PutEn2JaReq = string[];
-
-/**
- * [PUT] /en2ja のレスポンスボディの型
- */
-export type PutEn2JaRes = string[];
-
-/**
- * バックエンドのメソッドの型
- */
-export type Method = "DELETE" | "GET" | "POST" | "PUT";
