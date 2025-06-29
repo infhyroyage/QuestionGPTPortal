@@ -16,6 +16,11 @@ export type GetAnswer = {
    * コミュニティ回答割合
    */
   communityVotes?: string[];
+
+  /**
+   * 正解の選択肢・正解/不正解の理由が存在する場合はtrue、存在しない場合はfalse
+   */
+  isExisted: boolean;
 };
 
 /**

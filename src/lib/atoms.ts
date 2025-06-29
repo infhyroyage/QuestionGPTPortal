@@ -138,9 +138,9 @@ export const fetchAnswerExplanationAtom = atom(
         instance,
         accountInfo
       );
-      if (getAnswerRes.correctIdxes && getAnswerRes.explanations) {
-        correctIdxes = getAnswerRes.correctIdxes;
-        explanations = getAnswerRes.explanations;
+      if (getAnswerRes.isExisted) {
+        correctIdxes = getAnswerRes.correctIdxes || [];
+        explanations = getAnswerRes.explanations || [];
         communityVotes = getAnswerRes.communityVotes;
       } else {
         const postAnswerRes: PostAnswerRes = await accessBackend<PostAnswerRes>(

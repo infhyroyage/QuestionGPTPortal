@@ -46,6 +46,7 @@ export type AnswerExplanation =
 
       /**
        * コミュニティ回答割合
+       * 正解・解説文が生成中、またはデータが存在しない場合はundefined
        */
       communityVotes?: string[];
     }
