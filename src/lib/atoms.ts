@@ -138,11 +138,7 @@ export const fetchAnswerExplanationAtom = atom(
         instance,
         accountInfo
       );
-      if (
-        getAnswerRes.correctIdxes &&
-        getAnswerRes.explanations &&
-        getAnswerRes.communityVotes
-      ) {
+      if (getAnswerRes.correctIdxes && getAnswerRes.explanations) {
         correctIdxes = getAnswerRes.correctIdxes;
         explanations = getAnswerRes.explanations;
         communityVotes = getAnswerRes.communityVotes;
