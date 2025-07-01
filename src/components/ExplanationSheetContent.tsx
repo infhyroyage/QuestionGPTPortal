@@ -4,6 +4,7 @@ import {
   fetchAnswerExplanationAtom,
   fetchCommunityAtom,
   fetchQuestionSelectorAtom,
+  fetchTranslationCommunityAtom,
   fetchTranslationExplanationAtom,
   fetchTranslationSubjectChoiceAtom,
 } from "@/lib/atoms";
@@ -26,6 +27,9 @@ export default function ExplanationSheetContent() {
   const answerExplanation = useAtomValue(fetchAnswerExplanationAtom);
   const [community, fetchCommunity] = useAtom(fetchCommunityAtom);
   const questionSelector = useAtomValue(fetchQuestionSelectorAtom);
+  const [translationCommunity, fetchTranslationCommunity] = useAtom(
+    fetchTranslationCommunityAtom
+  );
   const [translationExplanation, fetchTranslationExplanation] = useAtom(
     fetchTranslationExplanationAtom
   );
@@ -96,6 +100,30 @@ export default function ExplanationSheetContent() {
     translationFailedToast,
   ]);
 
+  // コミュニティ情報の取得直後に、コミュニティ情報の翻訳文を1度だけ取得
+  useEffect(() => {
+    if (community && !translationCommunity && !isOccurredTranslationFailed) {
+      (async () => {
+        try {
+          await fetchTranslationCommunity(instance, accountInfo);
+        } catch {
+          setIsOccurredTranslationFailed(true);
+          translationFailedToast("コミュニティ情報", () =>
+            setIsOccurredTranslationFailed(false)
+          );
+        }
+      })();
+    }
+  }, [
+    accountInfo,
+    community,
+    fetchTranslationCommunity,
+    instance,
+    isOccurredTranslationFailed,
+    translationCommunity,
+    translationFailedToast,
+  ]);
+
   return (
     questionSelector &&
     answerExplanation &&
@@ -144,7 +172,8 @@ export default function ExplanationSheetContent() {
             </Fragment>
           ))}
         </div>
-        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight mt-16 mb-4">
+        <Separator className="my-6" />
+        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight my-4">
           コミュニティ回答要約
         </h4>
         {answerExplanation.communityVotes && (
@@ -166,8 +195,17 @@ export default function ExplanationSheetContent() {
         ) : (
           <>
             {community.discussionsSummary ? (
-              // TODO: コミュニティ回答要約の翻訳文を表示
-              <p className="leading-7">{community.discussionsSummary}</p>
+              <div className="space-y-1">
+                <p className="leading-7">{community.discussionsSummary}</p>
+                {translationCommunity &&
+                translationCommunity.discussionsSummary ? (
+                  <p className="text-sm text-muted-foreground">
+                    {translationCommunity.discussionsSummary}
+                  </p>
+                ) : (
+                  <Skeleton className="h-5 w-full" />
+                )}
+              </div>
             ) : (
               <div className="flex items-center justify-center flex-col space-y-4">
                 <Info size={50} />
@@ -176,7 +214,6 @@ export default function ExplanationSheetContent() {
             )}
           </>
         )}
-        <Separator className="my-6" />
       </>
     )
   );

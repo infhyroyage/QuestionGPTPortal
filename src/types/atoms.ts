@@ -158,6 +158,18 @@ export type TestDetail = {
 export type TestDetails = TestDetail[] | undefined;
 
 /**
+ * コミュニティ情報に対する翻訳文の型
+ */
+export type TranslationCommunity =
+  | {
+      /**
+       * コミュニティでのディスカッションの要約
+       */
+      discussionsSummary: string;
+    }
+  | undefined;
+
+/**
  * 解説文に対する翻訳文の型
  */
 export type TranslationExplanation =
