@@ -10,7 +10,7 @@ import {
 import { Choice } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom, useAtomValue } from "jotai";
-import { TriangleAlert } from "lucide-react";
+import { Info } from "lucide-react";
 import { Fragment, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import SelectorButton from "./SelectorButton";
@@ -101,7 +101,7 @@ export default function ExplanationSheetContent() {
     answerExplanation &&
     !answerExplanation.isSubmitting && (
       <>
-        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight mt-16 mb-4">
+        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight my-4">
           選択肢と解説
         </h4>
         <div className="mb-4">
@@ -144,29 +144,20 @@ export default function ExplanationSheetContent() {
             </Fragment>
           ))}
         </div>
-        {answerExplanation.communityVotes && (
-          <>
-            <h4 className="scroll-m-20 text-xl font-semibold tracking-tight my-4">
-              コミュニティ回答割合
-            </h4>
-            <div className="flex space-x-4">
-              {answerExplanation.communityVotes.map(
-                (communityVote: string, idx: number) => (
-                  <Badge key={idx}>{communityVote}</Badge>
-                )
-              )}
-            </div>
-          </>
-        )}
-        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight my-4">
+        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight mt-16 mb-4">
           コミュニティ回答要約
         </h4>
+        {answerExplanation.communityVotes && (
+          <div className="flex space-x-4 mb-4">
+            {answerExplanation.communityVotes.map(
+              (communityVote: string, idx: number) => (
+                <Badge key={idx}>{communityVote}</Badge>
+              )
+            )}
+          </div>
+        )}
         {community === undefined ? (
           <>
-            <div className="space-y-1">
-              <Skeleton className="h-7 w-full" />
-              <Skeleton className="h-5 w-full" />
-            </div>
             <div className="space-y-1">
               <Skeleton className="h-7 w-full" />
               <Skeleton className="h-5 w-full" />
@@ -179,7 +170,7 @@ export default function ExplanationSheetContent() {
               <p className="leading-7">{community.discussionsSummary}</p>
             ) : (
               <div className="flex items-center justify-center flex-col space-y-4">
-                <TriangleAlert size={100} />
+                <Info size={50} />
                 <div>コミュニティ回答要約はありません</div>
               </div>
             )}
