@@ -1,21 +1,25 @@
 import {
   AnswerExplanation,
   ChoiceAndSelect,
+  Community,
   Histories,
   Order,
   QuestionSelector,
   TestDetail,
   TestDetails,
+  TranslationCommunity,
   TranslationExplanation,
   TranslationSubjectChoice,
 } from "@/types/atoms";
 import {
   Choice,
   GetAnswer,
+  GetCommunityRes,
   GetProgressesRes,
   GetQuestion,
   GetTests,
   PostAnswerRes,
+  PostCommunityRes,
   PostProgressesReq,
   PostProgressReq,
   PostProgressRes,
@@ -33,15 +37,20 @@ import { translateSubjectsAndChoices } from "./translation";
 const answerExplanationAtom = atom<AnswerExplanation>(undefined);
 
 /**
- * ダークモードの場合はtrue、ライトモードの場合はfalseのatom
- * toggleDarkModeAtomで隠蔽するためexportしない
+ * コミュニティ情報を管理するatom
  */
-const isDarkModeAtom = atom<boolean>(true);
+const communityAtom = atom<Community>(undefined);
 
 /**
  * 回答履歴を管理するatom
  */
 const historiesAtom = atom<Histories>(undefined);
+
+/**
+ * ダークモードの場合はtrue、ライトモードの場合はfalseのatom
+ * toggleDarkModeAtomで隠蔽するためexportしない
+ */
+const isDarkModeAtom = atom<boolean>(true);
 
 /**
  * テストを解く問題番号の順番を管理するatom
@@ -57,6 +66,11 @@ const questionSelectorAtom = atom<QuestionSelector>(undefined);
  * テスト詳細情報を管理するatom
  */
 const testDetailsAtom = atom<TestDetails>(undefined);
+
+/**
+ * コミュニティ情報に対する翻訳文を管理するatom
+ */
+const translationCommunityAtom = atom<TranslationCommunity>(undefined);
 
 /**
  * 解説文に対する翻訳文を管理するatom
@@ -175,6 +189,71 @@ export const fetchAnswerExplanationAtom = atom(
 );
 
 /**
+ * コミュニティ情報を取得するatom
+ */
+export const fetchCommunityAtom = atom(
+  (get) => get(communityAtom),
+  async (
+    get,
+    set,
+    testId: string,
+    questionNumber: string,
+    instance: IPublicClientApplication,
+    accountInfo: AccountInfo | null
+  ) => {
+    // テスト詳細情報がまだ存在しない場合は何も取得・更新しない
+    const testDetails: TestDetails = get(testDetailsAtom);
+    if (!testDetails) {
+      return;
+    }
+    const testDetail: TestDetail | undefined = testDetails.find(
+      (testDetail) => testDetail.testId === testId
+    );
+    if (!testDetail) {
+      return;
+    }
+
+    // 問題文・選択肢がまだ存在しない場合は何も取得・更新しない
+    const questionSelector: QuestionSelector = get(questionSelectorAtom);
+    if (!questionSelector) {
+      return;
+    }
+
+    // 正解・解説文がまだ存在しない場合は何も取得・更新しない
+    const answerExplanation: AnswerExplanation = get(answerExplanationAtom);
+    if (!answerExplanation) {
+      return;
+    }
+
+    // [GET] /tests/{testId}/communities/{questionNumber}にアクセスして事前に生成したコミュニティ情報を取得
+    // もし取得できなかった場合、[POST] /tests/{testId}/communities/{questionNumber}にアクセスしてコミュニティ情報を生成
+    let discussionsSummary: string | undefined = undefined;
+    const getCommunityRes: GetCommunityRes =
+      await accessBackend<GetCommunityRes>(
+        "GET",
+        `/tests/${testId}/communities/${questionNumber}`,
+        instance,
+        accountInfo
+      );
+    if (getCommunityRes.isExisted) {
+      discussionsSummary = getCommunityRes.discussionsSummary;
+    } else {
+      const postCommunityRes: PostCommunityRes =
+        await accessBackend<PostCommunityRes>(
+          "POST",
+          `/tests/${testId}/communities/${questionNumber}`,
+          instance,
+          accountInfo
+        );
+      discussionsSummary = postCommunityRes.discussionsSummary;
+    }
+    set(communityAtom, {
+      discussionsSummary,
+    });
+  }
+);
+
+/**
  * 回答履歴とテストを解く問題番号の順番を取得するatom
  */
 export const fetchProgressesAtom = atom(
@@ -260,6 +339,36 @@ export const fetchTestDetailsAtom = atom(
     );
 
     set(testDetailsAtom, testDetails);
+  }
+);
+
+/**
+ * コミュニティ情報に対する翻訳文を取得するatom
+ */
+export const fetchTranslationCommunityAtom = atom(
+  (get) => get(translationCommunityAtom),
+  async (
+    get,
+    set,
+    instance: IPublicClientApplication,
+    accountInfo: AccountInfo | null
+  ) => {
+    // 翻訳対象のコミュニティ情報がまだ存在しない場合は何も翻訳しない
+    const community: Community = get(communityAtom);
+    if (!community || !community.discussionsSummary) {
+      return;
+    }
+
+    // [PUT] /en2jaにアクセスして取得したコミュニティ情報の翻訳文で更新
+    const res: PutEn2JaRes = await accessBackend<PutEn2JaRes, PutEn2JaReq>(
+      "PUT",
+      "/en2ja",
+      instance,
+      accountInfo,
+      [community.discussionsSummary]
+    );
+
+    set(translationCommunityAtom, { discussionsSummary: res[0] });
   }
 );
 
@@ -389,9 +498,11 @@ export const initializeProgressesAtom = atom(
  */
 export const resetAtomsForAllTestPagesAtom = atom(null, (_, set) => {
   set(answerExplanationAtom, undefined);
+  set(communityAtom, undefined);
   set(historiesAtom, undefined);
   set(orderAtom, undefined);
   set(questionSelectorAtom, undefined);
+  set(translationCommunityAtom, undefined);
   set(translationSubjectChoiceAtom, undefined);
   set(translationExplanationAtom, undefined);
 });
@@ -401,7 +512,9 @@ export const resetAtomsForAllTestPagesAtom = atom(null, (_, set) => {
  */
 export const resetAtomsForTestQuestionAtom = atom(null, (_, set) => {
   set(answerExplanationAtom, undefined);
+  set(communityAtom, undefined);
   set(questionSelectorAtom, undefined);
+  set(translationCommunityAtom, undefined);
   set(translationSubjectChoiceAtom, undefined);
   set(translationExplanationAtom, undefined);
 });

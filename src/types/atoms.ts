@@ -53,6 +53,19 @@ export type AnswerExplanation =
   | undefined;
 
 /**
+ * コミュニティ情報の生成状態の型
+ */
+export type Community =
+  | {
+      /**
+       * コミュニティでのディスカッションの要約
+       * コミュニティ情報が生成中、またはデータが存在しない場合はundefined
+       */
+      discussionsSummary?: string;
+    }
+  | undefined;
+
+/**
  * 選択状態を含む選択肢の型
  */
 export type ChoiceAndSelect = Choice & { isSelected: boolean };
@@ -143,6 +156,18 @@ export type TestDetail = {
  * テスト詳細情報の型
  */
 export type TestDetails = TestDetail[] | undefined;
+
+/**
+ * コミュニティ情報に対する翻訳文の型
+ */
+export type TranslationCommunity =
+  | {
+      /**
+       * コミュニティでのディスカッションの要約
+       */
+      discussionsSummary: string;
+    }
+  | undefined;
 
 /**
  * 解説文に対する翻訳文の型
