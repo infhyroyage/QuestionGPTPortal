@@ -176,15 +176,6 @@ export default function ExplanationSheetContent() {
         <h4 className="scroll-m-20 text-xl font-semibold tracking-tight my-4">
           コミュニティ回答要約
         </h4>
-        {answerExplanation.communityVotes && (
-          <div className="flex space-x-4 mb-4">
-            {answerExplanation.communityVotes.map(
-              (communityVote: string, idx: number) => (
-                <Badge key={idx}>{communityVote}</Badge>
-              )
-            )}
-          </div>
-        )}
         {community === undefined ? (
           <>
             <div className="space-y-1">
@@ -192,9 +183,22 @@ export default function ExplanationSheetContent() {
               <Skeleton className="h-5 w-full" />
             </div>
           </>
+        ) : community.votes === undefined &&
+          community.discussionsSummary === undefined ? (
+          <div className="flex items-center justify-center flex-col space-y-4">
+            <Info size={50} />
+            <div>コミュニティ回答要約はありません</div>
+          </div>
         ) : (
           <>
-            {community.discussionsSummary ? (
+            {community.votes && (
+              <div className="flex space-x-4 mb-4">
+                {community.votes.map((vote: string, idx: number) => (
+                  <Badge key={idx}>{vote}</Badge>
+                ))}
+              </div>
+            )}
+            {community.discussionsSummary && (
               <div className="space-y-1">
                 <p className="leading-7">{community.discussionsSummary}</p>
                 {translationCommunity &&
@@ -205,11 +209,6 @@ export default function ExplanationSheetContent() {
                 ) : (
                   <Skeleton className="h-5 w-full" />
                 )}
-              </div>
-            ) : (
-              <div className="flex items-center justify-center flex-col space-y-4">
-                <Info size={50} />
-                <div>コミュニティ回答要約はありません</div>
               </div>
             )}
           </>

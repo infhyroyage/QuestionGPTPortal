@@ -58,11 +58,6 @@ export type GetAnswer = {
   explanations?: string[];
 
   /**
-   * コミュニティ回答割合
-   */
-  communityVotes?: string[];
-
-  /**
    * 正解の選択肢・正解/不正解の理由が存在する場合はtrue、存在しない場合はfalse
    */
   isExisted: boolean;
@@ -81,11 +76,6 @@ export type PostAnswerRes = {
    * 各選択肢の正解/不正解の理由
    */
   explanations: string[];
-
-  /**
-   * コミュニティ回答割合
-   */
-  communityVotes?: string[];
 };
 
 /**
@@ -96,6 +86,11 @@ export type GetCommunityRes = {
    * コミュニティでのディスカッションの要約
    */
   discussionsSummary: string;
+
+  /**
+   * コミュニティでの回答の割合
+   */
+  votes?: string[];
 
   /**
    * コミュニティでのディスカッションの要約が存在する場合はtrue、存在しない場合はfalse
@@ -111,6 +106,11 @@ export type PostCommunityRes = {
    * コミュニティでのディスカッションの要約
    */
   discussionsSummary: string;
+
+  /**
+   * コミュニティでの回答の割合
+   */
+  votes?: string[];
 
   /**
    * コミュニティでのディスカッションの要約が存在する場合はtrue、存在しない場合はfalse
