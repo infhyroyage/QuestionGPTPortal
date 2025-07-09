@@ -129,7 +129,6 @@ export const fetchAnswerExplanationAtom = atom(
 
     let correctIdxes: number[];
     let explanations: string[];
-    let communityVotes: string[] | undefined;
     if (isResubmit) {
       // 回答・解説再生成の場合、解説文に対する翻訳文を初期化してから、
       // [POST] /tests/{testId}/answers/{questionNumber}にアクセス
@@ -142,7 +141,6 @@ export const fetchAnswerExplanationAtom = atom(
       );
       correctIdxes = postAnswerRes.correctIdxes;
       explanations = postAnswerRes.explanations;
-      communityVotes = postAnswerRes.communityVotes;
     } else {
       // 回答・解説再生成ではない場合、[GET] /tests/{testId}/answers/{questionNumber}にアクセスして事前に生成した回答・解説を取得
       // もし取得できなかった場合、[POST] /tests/{testId}/answers/{questionNumber}にアクセス
@@ -155,7 +153,6 @@ export const fetchAnswerExplanationAtom = atom(
       if (getAnswerRes.isExisted) {
         correctIdxes = getAnswerRes.correctIdxes || [];
         explanations = getAnswerRes.explanations || [];
-        communityVotes = getAnswerRes.communityVotes;
       } else {
         const postAnswerRes: PostAnswerRes = await accessBackend<PostAnswerRes>(
           "POST",
@@ -165,7 +162,6 @@ export const fetchAnswerExplanationAtom = atom(
         );
         correctIdxes = postAnswerRes.correctIdxes;
         explanations = postAnswerRes.explanations;
-        communityVotes = postAnswerRes.communityVotes;
       }
     }
 
@@ -179,7 +175,6 @@ export const fetchAnswerExplanationAtom = atom(
     set(answerExplanationAtom, {
       correctFlags,
       explanations,
-      communityVotes,
       isSubmitting: false,
       isCorrect,
       correctIdxes,
@@ -228,6 +223,7 @@ export const fetchCommunityAtom = atom(
     // [GET] /tests/{testId}/communities/{questionNumber}にアクセスして事前に生成したコミュニティ情報を取得
     // もし取得できなかった場合、[POST] /tests/{testId}/communities/{questionNumber}にアクセスしてコミュニティ情報を生成
     let discussionsSummary: string | undefined = undefined;
+    let votes: string[] | undefined = undefined;
     const getCommunityRes: GetCommunityRes =
       await accessBackend<GetCommunityRes>(
         "GET",
@@ -237,6 +233,7 @@ export const fetchCommunityAtom = atom(
       );
     if (getCommunityRes.isExisted) {
       discussionsSummary = getCommunityRes.discussionsSummary;
+      votes = getCommunityRes.votes;
     } else {
       const postCommunityRes: PostCommunityRes =
         await accessBackend<PostCommunityRes>(
@@ -246,9 +243,11 @@ export const fetchCommunityAtom = atom(
           accountInfo
         );
       discussionsSummary = postCommunityRes.discussionsSummary;
+      votes = postCommunityRes.votes;
     }
     set(communityAtom, {
       discussionsSummary,
+      votes,
     });
   }
 );

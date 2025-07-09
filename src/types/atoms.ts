@@ -43,12 +43,6 @@ export type AnswerExplanation =
        * 正解・解説文が生成中の場合はundefined
        */
       isSavedProgress?: boolean;
-
-      /**
-       * コミュニティ回答割合
-       * 正解・解説文が生成中、またはデータが存在しない場合はundefined
-       */
-      communityVotes?: string[];
     }
   | undefined;
 
@@ -62,6 +56,12 @@ export type Community =
        * コミュニティ情報が生成中、またはデータが存在しない場合はundefined
        */
       discussionsSummary?: string;
+
+      /**
+       * コミュニティでの回答の割合
+       * コミュニティ情報が生成中、またはデータが存在しない場合はundefined
+       */
+      votes?: string[];
     }
   | undefined;
 
