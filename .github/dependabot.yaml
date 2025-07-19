@@ -23,8 +23,6 @@ updates:
       - dependency-name: "react-router"
       - dependency-name: "typescript"
     labels: []
-    reviewers:
-      - "infhyroyage"
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -36,5 +34,3 @@ updates:
     assignees:
       - "infhyroyage"
     labels: []
-    reviewers:
-      - "infhyroyage"
