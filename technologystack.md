@@ -2,7 +2,7 @@
 
 ## フロントエンド
 
-- Node.js 20.10.0 (Javascript ランタイム)
+- Node.js 22.17.1 (Javascript ランタイム)
   - 破壊的変更が多いため、dependabot でのアップグレード更新対象外とする
 - React 18.3.1 (Javascript フレームワーク)
   - 破壊的変更が多いため、dependabot でのアップグレード更新対象外とする
