@@ -4,11 +4,11 @@
 
 ## 概要
 
-[QuestionGPTTranslator](https://github.com/infhyroyage/QuestionGPTTranslator)を API サーバーとする Web アプリケーションを構成する。
+生成 AI を活用した、英語の IT 資格試験問題の学習支援システムのバックエンドを提供する。
 
 ## API サーバーの API リファレンス
 
-[Swagger UI](https://infhyroyage.github.io/QuestionGPTTranslator/) 参照。
+[QuestionGPTTranslatorのSwagger UI](https://infhyroyage.github.io/QuestionGPTTranslator/) に準拠する。
 
 ## 技術スタック
 
