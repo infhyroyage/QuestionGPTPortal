@@ -1,7 +1,8 @@
 import { Choice, Subject } from "./backend";
 
 /**
- * 正解・解説文の生成状態の型
+ * 正解・解説文を管理するatomの型
+ * 初期値の場合はundefined
  */
 export type AnswerExplanation =
   | {
@@ -47,7 +48,8 @@ export type AnswerExplanation =
   | undefined;
 
 /**
- * コミュニティ情報の生成状態の型
+ * コミュニティ情報を管理するatomの型
+ * 初期値の場合はundefined
  */
 export type Community =
   | {
@@ -91,17 +93,20 @@ export type History = {
 };
 
 /**
- * 回答履歴の型
+ * 回答履歴を管理するatomの型
+ * 初期値の場合はundefined
  */
 export type Histories = History[] | undefined;
 
 /**
- * テストを解く問題番号の順番の型
+ * テストを解く問題番号の順番を管理するatomの型
+ * 初期値の場合はundefined
  */
 export type Order = number[] | undefined;
 
 /**
- * 問題文・選択肢の型
+ * 問題文・選択肢を管理するatomの型
+ * 初期値の場合はundefined
  */
 export type QuestionSelector =
   | {
@@ -153,12 +158,14 @@ export type TestDetail = {
 };
 
 /**
- * テスト詳細情報の型
+ * テスト詳細情報を管理するatomの型
+ * 初期値の場合はundefined
  */
 export type TestDetails = TestDetail[] | undefined;
 
 /**
- * コミュニティ情報に対する翻訳文の型
+ * コミュニティ情報に対する翻訳文を管理するatomの型
+ * 初期値の場合はundefined
  */
 export type TranslationCommunity =
   | {
@@ -170,7 +177,8 @@ export type TranslationCommunity =
   | undefined;
 
 /**
- * 解説文に対する翻訳文の型
+ * 解説文に対する翻訳文を管理するatomの型
+ * 初期値の場合はundefined
  */
 export type TranslationExplanation =
   | {
@@ -182,7 +190,8 @@ export type TranslationExplanation =
   | undefined;
 
 /**
- * 問題文・選択肢に対する翻訳文の型
+ * 問題文・選択肢に対する翻訳文を管理するatomの型
+ * 初期値の場合はundefined
  */
 export type TranslationSubjectChoice =
   | {
