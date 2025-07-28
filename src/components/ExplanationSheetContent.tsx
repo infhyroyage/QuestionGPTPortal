@@ -4,8 +4,6 @@ import {
   fetchAnswerExplanationAtom,
   fetchCommunityAtom,
   fetchQuestionSelectorAtom,
-  fetchTranslationExplanationAtom,
-  fetchTranslationSubjectChoiceAtom,
 } from "@/lib/atoms";
 import { Choice } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
@@ -23,15 +21,9 @@ import { Skeleton } from "./ui/skeleton";
  * @returns 解説シートのコンテンツのコンポーネント
  */
 export default function ExplanationSheetContent() {
-  const answerExplanation = useAtomValue(fetchAnswerExplanationAtom);
+  const [answerExplanation, fetchAnswerExplanation] = useAtom(fetchAnswerExplanationAtom);
   const [community, fetchCommunity] = useAtom(fetchCommunityAtom);
   const questionSelector = useAtomValue(fetchQuestionSelectorAtom);
-  const [translationExplanation, fetchTranslationExplanation] = useAtom(
-    fetchTranslationExplanationAtom
-  );
-  const translationSubjectChoice = useAtomValue(
-    fetchTranslationSubjectChoiceAtom
-  );
   const [isOccurredTranslationFailed, setIsOccurredTranslationFailed] =
     useState<boolean>(false);
   const [isOccurredSystemError, setIsOccurredSystemError] =
@@ -72,12 +64,13 @@ export default function ExplanationSheetContent() {
   useEffect(() => {
     if (
       answerExplanation &&
-      !translationExplanation &&
+      answerExplanation.explanations &&
+      !answerExplanation.translatedExplanations &&
       !isOccurredTranslationFailed
     ) {
       (async () => {
         try {
-          await fetchTranslationExplanation(instance, accountInfo);
+          await fetchAnswerExplanation(testId!, questionNumber!, instance, accountInfo, false, true);
         } catch {
           setIsOccurredTranslationFailed(true);
           translationFailedToast("解説", () =>
@@ -89,10 +82,11 @@ export default function ExplanationSheetContent() {
   }, [
     accountInfo,
     answerExplanation,
-    fetchTranslationExplanation,
+    fetchAnswerExplanation,
     instance,
     isOccurredTranslationFailed,
-    translationExplanation,
+    questionNumber,
+    testId,
     translationFailedToast,
   ]);
 
@@ -150,8 +144,8 @@ export default function ExplanationSheetContent() {
                   img={choice.img}
                   sentence={choice.sentence}
                   translation={
-                    translationSubjectChoice
-                      ? translationSubjectChoice.choices[idx]
+                    questionSelector.translatedChoices
+                      ? questionSelector.translatedChoices[idx]
                       : null
                   }
                   variant="outline"
@@ -161,10 +155,10 @@ export default function ExplanationSheetContent() {
                     {answerExplanation.explanations &&
                       answerExplanation.explanations[idx]}
                   </p>
-                  {translationExplanation &&
-                  translationExplanation.explanations[idx] ? (
+                  {answerExplanation.translatedExplanations &&
+                  answerExplanation.translatedExplanations[idx] ? (
                     <p className="text-sm text-muted-foreground">
-                      {translationExplanation.explanations[idx]}
+                      {answerExplanation.translatedExplanations[idx]}
                     </p>
                   ) : (
                     <Skeleton className="h-5 w-full" />

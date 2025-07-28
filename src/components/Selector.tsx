@@ -1,7 +1,6 @@
 import {
   fetchAnswerExplanationAtom,
   fetchQuestionSelectorAtom,
-  fetchTranslationSubjectChoiceAtom,
   toggleSelectedChoiceAtom,
 } from "@/lib/atoms";
 import { Choice } from "@/types/backend";
@@ -18,9 +17,6 @@ export default function Selector() {
   const answerExplanation = useAtomValue(fetchAnswerExplanationAtom);
   const questionSelector = useAtomValue(fetchQuestionSelectorAtom);
   const toggleSelectedChoice = useSetAtom(toggleSelectedChoiceAtom);
-  const translationSubjectChoice = useAtomValue(
-    fetchTranslationSubjectChoiceAtom
-  );
 
   // 回答・解説が生成中の場合は、選択肢をすべて非活性とする
   const isDisabledSelectorButtons = useMemo<boolean>(
@@ -70,8 +66,8 @@ export default function Selector() {
               onClick={onClickSelectButton(idx)}
               sentence={choice.sentence}
               translation={
-                translationSubjectChoice
-                  ? translationSubjectChoice.choices[idx]
+                questionSelector.translatedChoices
+                  ? questionSelector.translatedChoices[idx]
                   : null
               }
               variant={

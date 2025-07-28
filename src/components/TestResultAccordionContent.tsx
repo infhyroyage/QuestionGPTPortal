@@ -1,6 +1,5 @@
 import useTranslationFailedToast from "@/hooks/useTranslationFailedToast";
 import { translateSubjectsAndChoices } from "@/lib/translation";
-import { TranslationSubjectChoice } from "@/types/atoms";
 import { TestResultAccordionContentProps } from "@/types/props";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useEffect, useState } from "react";
@@ -18,7 +17,7 @@ export default function TestResultAccordionContent({
   history,
 }: TestResultAccordionContentProps) {
   const [translation, setTranslation] =
-    useState<TranslationSubjectChoice>(undefined);
+    useState<{ subjects: string[], choices: (string | null)[] } | undefined>(undefined);
   const [isOccurredTranslationFailed, setIsOccurredTranslationFailed] =
     useState<boolean>(false);
 
@@ -31,7 +30,7 @@ export default function TestResultAccordionContent({
     if (getQuestion && !translation && !isOccurredTranslationFailed) {
       (async () => {
         try {
-          const translationSubjectChoice: TranslationSubjectChoice =
+          const translationSubjectChoice =
             await translateSubjectsAndChoices(
               getQuestion.subjects,
               getQuestion.choices,

@@ -13,7 +13,6 @@ import {
   fetchAnswerExplanationAtom,
   fetchProgressesAtom,
   fetchQuestionSelectorAtom,
-  fetchTranslationSubjectChoiceAtom,
   resetAtomsForTestQuestionAtom,
 } from "@/lib/atoms";
 import { basePath } from "@/lib/github";
@@ -31,9 +30,6 @@ export default function TestQuestionPage() {
   const { histories, order } = useAtomValue(fetchProgressesAtom);
   const [questionSelector, fetchQuestionSelector] = useAtom(
     fetchQuestionSelectorAtom
-  );
-  const [translationSubjectChoice, fetchTranslationSubjectChoice] = useAtom(
-    fetchTranslationSubjectChoiceAtom
   );
   const resetAtomsForTestQuestion = useSetAtom(resetAtomsForTestQuestionAtom);
   const [isOccurredTranslationFailed, setIsOccurredTranslationFailed] =
@@ -111,12 +107,13 @@ export default function TestQuestionPage() {
   useEffect(() => {
     if (
       questionSelector &&
-      !translationSubjectChoice &&
+      !questionSelector.translatedSubjects &&
+      !questionSelector.translatedChoices &&
       !isOccurredTranslationFailed
     ) {
       (async () => {
         try {
-          await fetchTranslationSubjectChoice(instance, accountInfo);
+          await fetchQuestionSelector(testId!, questionNumber!, instance, accountInfo, true);
         } catch {
           setIsOccurredTranslationFailed(true);
           translationFailedToast("問題文・選択肢", () =>
@@ -127,12 +124,13 @@ export default function TestQuestionPage() {
     }
   }, [
     accountInfo,
-    fetchTranslationSubjectChoice,
+    fetchQuestionSelector,
     instance,
     isOccurredTranslationFailed,
+    questionNumber,
     questionSelector,
+    testId,
     translationFailedToast,
-    translationSubjectChoice,
   ]);
 
   return (
@@ -157,8 +155,8 @@ export default function TestQuestionPage() {
                 <SubjectDisplay
                   subjects={questionSelector && questionSelector.subjects}
                   translation={
-                    translationSubjectChoice &&
-                    translationSubjectChoice.subjects
+                    questionSelector &&
+                    questionSelector.translatedSubjects
                   }
                 />
               </div>

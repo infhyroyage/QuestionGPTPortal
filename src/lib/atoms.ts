@@ -7,8 +7,6 @@ import {
   QuestionSelector,
   TestDetail,
   TestDetails,
-  TranslationExplanation,
-  TranslationSubjectChoice,
 } from "@/types/atoms";
 import {
   Choice,
@@ -68,15 +66,7 @@ const testDetailsAtom = atom<TestDetails>(undefined);
 
 
 
-/**
- * 解説文に対する翻訳文を管理するatom
- */
-const translationExplanationAtom = atom<TranslationExplanation>(undefined);
 
-/**
- * 問題文・選択肢に対する翻訳文を管理するatom
- */
-const translationSubjectChoiceAtom = atom<TranslationSubjectChoice>(undefined);
 
 /**
  * 正解・解説文を取得するatom
@@ -90,7 +80,8 @@ export const fetchAnswerExplanationAtom = atom(
     questionNumber: string,
     instance: IPublicClientApplication,
     accountInfo: AccountInfo | null,
-    isResubmit: boolean = false
+    isResubmit: boolean = false,
+    shouldTranslate: boolean = false
   ) => {
     // テスト詳細情報がまだ存在しない場合は何も取得・更新しない
     const testDetails: TestDetails = get(testDetailsAtom);
@@ -126,9 +117,7 @@ export const fetchAnswerExplanationAtom = atom(
     let correctIdxes: number[];
     let explanations: string[];
     if (isResubmit) {
-      // 回答・解説再生成の場合、解説文に対する翻訳文を初期化してから、
-      // [POST] /tests/{testId}/answers/{questionNumber}にアクセス
-      set(translationExplanationAtom, undefined);
+      // 回答・解説再生成の場合、[POST] /tests/{testId}/answers/{questionNumber}にアクセス
       const postAnswerRes: PostAnswerRes = await accessBackend<PostAnswerRes>(
         "POST",
         `/tests/${testId}/answers/${questionNumber}`,
@@ -161,6 +150,19 @@ export const fetchAnswerExplanationAtom = atom(
       }
     }
 
+    // 翻訳が必要で、explanationsが存在する場合は翻訳を実行
+    let translatedExplanations: string[] | undefined = undefined;
+    if (shouldTranslate && explanations.length > 0) {
+      const res: PutEn2JaRes = await accessBackend<PutEn2JaRes, PutEn2JaReq>(
+        "PUT",
+        "/en2ja",
+        instance,
+        accountInfo,
+        explanations
+      );
+      translatedExplanations = res;
+    }
+
     // 生成/取得した正解・解説文で更新
     const correctFlags: boolean[] = [
       ...Array(questionSelector.choices.length),
@@ -171,6 +173,7 @@ export const fetchAnswerExplanationAtom = atom(
     set(answerExplanationAtom, {
       correctFlags,
       explanations,
+      translatedExplanations,
       isSubmitting: false,
       isCorrect,
       correctIdxes,
@@ -303,7 +306,8 @@ export const fetchQuestionSelectorAtom = atom(
     testId: string,
     questionNumber: string,
     instance: IPublicClientApplication,
-    accountInfo: AccountInfo | null
+    accountInfo: AccountInfo | null,
+    shouldTranslate: boolean = false
   ) => {
     // [GET] /tests/{testId}/questions/{questionNumber}にアクセスして取得した問題文で更新
     const res: GetQuestion = await accessBackend<GetQuestion>(
@@ -312,13 +316,30 @@ export const fetchQuestionSelectorAtom = atom(
       instance,
       accountInfo
     );
+
+    // 翻訳が必要な場合は翻訳を実行
+    let translatedSubjects: string[] | undefined = undefined;
+    let translatedChoices: (string | null)[] | undefined = undefined;
+    if (shouldTranslate) {
+      const translationSubjectChoice = await translateSubjectsAndChoices(
+        res.subjects,
+        res.choices,
+        instance,
+        accountInfo
+      );
+      translatedSubjects = translationSubjectChoice.subjects;
+      translatedChoices = translationSubjectChoice.choices;
+    }
+
     set(questionSelectorAtom, {
       questionNumber,
       subjects: res.subjects,
+      translatedSubjects,
       choices: res.choices.map((choice: Choice) => ({
         ...choice,
         isSelected: false,
       })),
+      translatedChoices,
       isMultiplied: res.isMultiplied,
     });
   }
@@ -355,64 +376,7 @@ export const fetchTestDetailsAtom = atom(
 
 
 
-/**
- * 解説文に対する翻訳文を取得するatom
- */
-export const fetchTranslationExplanationAtom = atom(
-  (get) => get(translationExplanationAtom),
-  async (
-    get,
-    set,
-    instance: IPublicClientApplication,
-    accountInfo: AccountInfo | null
-  ) => {
-    // 翻訳対象の解説文がまだ存在しない場合は何も翻訳しない
-    const answerExplanation: AnswerExplanation = get(answerExplanationAtom);
-    if (!answerExplanation || !answerExplanation.explanations) {
-      return;
-    }
 
-    // [PUT] /en2jaにアクセスして取得した解説文の翻訳文で更新
-    const res: PutEn2JaRes = await accessBackend<PutEn2JaRes, PutEn2JaReq>(
-      "PUT",
-      "/en2ja",
-      instance,
-      accountInfo,
-      answerExplanation.explanations
-    );
-
-    set(translationExplanationAtom, { explanations: res });
-  }
-);
-
-/**
- * 問題文・選択肢に対する翻訳文を取得するatom
- */
-export const fetchTranslationSubjectChoiceAtom = atom(
-  (get) => get(translationSubjectChoiceAtom),
-  async (
-    get,
-    set,
-    instance: IPublicClientApplication,
-    accountInfo: AccountInfo | null
-  ) => {
-    // 翻訳対象の問題文・選択肢がまだ存在しない場合は何も翻訳しない
-    const questionSelector: QuestionSelector = get(questionSelectorAtom);
-    if (!questionSelector) {
-      return;
-    }
-
-    // 問題文・選択肢を翻訳
-    const translationSubjectChoice: TranslationSubjectChoice =
-      await translateSubjectsAndChoices(
-        questionSelector.subjects,
-        questionSelector.choices,
-        instance,
-        accountInfo
-      );
-    set(translationSubjectChoiceAtom, translationSubjectChoice);
-  }
-);
 
 /**
  * 回答履歴とテストを解く問題番号の順番を初期化し、初期化後の最初の問題番号を返すatom(write only)
@@ -485,8 +449,6 @@ export const resetAtomsForAllTestPagesAtom = atom(null, (_, set) => {
   set(historiesAtom, undefined);
   set(orderAtom, undefined);
   set(questionSelectorAtom, undefined);
-  set(translationSubjectChoiceAtom, undefined);
-  set(translationExplanationAtom, undefined);
 });
 
 /**
@@ -496,8 +458,6 @@ export const resetAtomsForTestQuestionAtom = atom(null, (_, set) => {
   set(answerExplanationAtom, undefined);
   set(communityAtom, undefined);
   set(questionSelectorAtom, undefined);
-  set(translationSubjectChoiceAtom, undefined);
-  set(translationExplanationAtom, undefined);
 });
 
 /**

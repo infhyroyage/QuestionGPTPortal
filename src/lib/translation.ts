@@ -1,4 +1,3 @@
-import { TranslationSubjectChoice } from "@/types/atoms";
 import { Choice, PutEn2JaReq, PutEn2JaRes, Subject } from "@/types/backend";
 import { AccountInfo, IPublicClientApplication } from "@azure/msal-browser";
 import { accessBackend } from "./backend";
@@ -9,14 +8,14 @@ import { accessBackend } from "./backend";
  * @param {Choice[]} choices 選択肢
  * @param {IPublicClientApplication} instance MSALインスタンス
  * @param {AccountInfo | null} accountInfo ログイン済のアカウント情報
- * @returns {TranslationSubjectChoice} 翻訳後の問題文と選択肢
+ * @returns {{ subjects: string[], choices: (string | null)[] }} 翻訳後の問題文と選択肢
  */
 export async function translateSubjectsAndChoices(
   subjects: Subject[],
   choices: Choice[],
   instance: IPublicClientApplication,
   accountInfo: AccountInfo | null
-): Promise<TranslationSubjectChoice> {
+): Promise<{ subjects: string[], choices: (string | null)[] }> {
   // 問題文、選択肢それぞれに対して[PUT] /en2jpにアクセスせず、
   // 問題文→選択肢の順で連結した1つの配列を用いて、翻訳を1回にまとめて行うよう整形する
   const data: PutEn2JaReq = [

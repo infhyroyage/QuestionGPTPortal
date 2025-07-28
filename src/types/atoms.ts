@@ -26,6 +26,12 @@ export type AnswerExplanation =
       explanations?: string[];
 
       /**
+       * 各選択肢の正解/不正解の理由の翻訳文
+       * 翻訳文が生成中、またはデータが存在しない場合はundefined
+       */
+      translatedExplanations?: string[];
+
+      /**
        * 正解・解説文が生成済みかつ正解の場合はtrue、
        * 正解・解説文が生成済みかつ不正解の場合はfalse、
        * 正解・解説文が生成中の場合はundefined
@@ -127,9 +133,21 @@ export type QuestionSelector =
       subjects: Subject[];
 
       /**
+       * 各問題文の翻訳文
+       * 翻訳文が生成中、またはデータが存在しない場合はundefined
+       */
+      translatedSubjects?: string[];
+
+      /**
        * 各選択肢の文
        */
       choices: ChoiceAndSelect[];
+
+      /**
+       * 各選択肢の文の翻訳文(画像URLのみの場合はnull)
+       * 翻訳文が生成中、またはデータが存在しない場合はundefined
+       */
+      translatedChoices?: (string | null)[];
 
       /**
        * 回答が複数個の場合はtrue、回答が1個の場合はfalse
@@ -171,33 +189,4 @@ export type TestDetails = TestDetail[] | undefined;
 
 
 
-/**
- * 解説文に対する翻訳文を管理するatomの型
- * 初期値の場合はundefined
- */
-export type TranslationExplanation =
-  | {
-      /**
-       * 各選択肢の正解/不正解の理由
-       */
-      explanations: string[];
-    }
-  | undefined;
 
-/**
- * 問題文・選択肢に対する翻訳文を管理するatomの型
- * 初期値の場合はundefined
- */
-export type TranslationSubjectChoice =
-  | {
-      /**
-       * 各問題文
-       */
-      subjects: string[];
-
-      /**
-       * 各選択肢の文(画像URLのみの場合はnull)
-       */
-      choices: (string | null)[];
-    }
-  | undefined;
