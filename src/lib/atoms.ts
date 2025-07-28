@@ -7,7 +7,6 @@ import {
   QuestionSelector,
   TestDetail,
   TestDetails,
-  TranslationCommunity,
   TranslationExplanation,
   TranslationSubjectChoice,
 } from "@/types/atoms";
@@ -67,10 +66,7 @@ const questionSelectorAtom = atom<QuestionSelector>(undefined);
  */
 const testDetailsAtom = atom<TestDetails>(undefined);
 
-/**
- * コミュニティ情報に対する翻訳文を管理するatom
- */
-const translationCommunityAtom = atom<TranslationCommunity>(undefined);
+
 
 /**
  * 解説文に対する翻訳文を管理するatom
@@ -194,7 +190,8 @@ export const fetchCommunityAtom = atom(
     testId: string,
     questionNumber: string,
     instance: IPublicClientApplication,
-    accountInfo: AccountInfo | null
+    accountInfo: AccountInfo | null,
+    shouldTranslate: boolean = false
   ) => {
     // テスト詳細情報がまだ存在しない場合は何も取得・更新しない
     const testDetails: TestDetails = get(testDetailsAtom);
@@ -245,8 +242,23 @@ export const fetchCommunityAtom = atom(
       discussionsSummary = postCommunityRes.discussionsSummary;
       votes = postCommunityRes.votes;
     }
+
+    // 翻訳が必要で、discussionsSummaryが存在する場合は翻訳を実行
+    let translatedDiscussionsSummary: string | undefined = undefined;
+    if (shouldTranslate && discussionsSummary) {
+      const res: PutEn2JaRes = await accessBackend<PutEn2JaRes, PutEn2JaReq>(
+        "PUT",
+        "/en2ja",
+        instance,
+        accountInfo,
+        [discussionsSummary]
+      );
+      translatedDiscussionsSummary = res[0];
+    }
+
     set(communityAtom, {
       discussionsSummary,
+      translatedDiscussionsSummary,
       votes,
     });
   }
@@ -341,35 +353,7 @@ export const fetchTestDetailsAtom = atom(
   }
 );
 
-/**
- * コミュニティ情報に対する翻訳文を取得するatom
- */
-export const fetchTranslationCommunityAtom = atom(
-  (get) => get(translationCommunityAtom),
-  async (
-    get,
-    set,
-    instance: IPublicClientApplication,
-    accountInfo: AccountInfo | null
-  ) => {
-    // 翻訳対象のコミュニティ情報がまだ存在しない場合は何も翻訳しない
-    const community: Community = get(communityAtom);
-    if (!community || !community.discussionsSummary) {
-      return;
-    }
 
-    // [PUT] /en2jaにアクセスして取得したコミュニティ情報の翻訳文で更新
-    const res: PutEn2JaRes = await accessBackend<PutEn2JaRes, PutEn2JaReq>(
-      "PUT",
-      "/en2ja",
-      instance,
-      accountInfo,
-      [community.discussionsSummary]
-    );
-
-    set(translationCommunityAtom, { discussionsSummary: res[0] });
-  }
-);
 
 /**
  * 解説文に対する翻訳文を取得するatom
@@ -501,7 +485,6 @@ export const resetAtomsForAllTestPagesAtom = atom(null, (_, set) => {
   set(historiesAtom, undefined);
   set(orderAtom, undefined);
   set(questionSelectorAtom, undefined);
-  set(translationCommunityAtom, undefined);
   set(translationSubjectChoiceAtom, undefined);
   set(translationExplanationAtom, undefined);
 });
@@ -513,7 +496,6 @@ export const resetAtomsForTestQuestionAtom = atom(null, (_, set) => {
   set(answerExplanationAtom, undefined);
   set(communityAtom, undefined);
   set(questionSelectorAtom, undefined);
-  set(translationCommunityAtom, undefined);
   set(translationSubjectChoiceAtom, undefined);
   set(translationExplanationAtom, undefined);
 });

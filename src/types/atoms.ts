@@ -60,6 +60,12 @@ export type Community =
       discussionsSummary?: string;
 
       /**
+       * コミュニティでのディスカッションの要約の翻訳文
+       * 翻訳文が生成中、またはデータが存在しない場合はundefined
+       */
+      translatedDiscussionsSummary?: string;
+
+      /**
        * コミュニティでの回答の割合
        * コミュニティ情報が生成中、またはデータが存在しない場合はundefined
        */
@@ -163,18 +169,7 @@ export type TestDetail = {
  */
 export type TestDetails = TestDetail[] | undefined;
 
-/**
- * コミュニティ情報に対する翻訳文を管理するatomの型
- * 初期値の場合はundefined
- */
-export type TranslationCommunity =
-  | {
-      /**
-       * コミュニティでのディスカッションの要約
-       */
-      discussionsSummary: string;
-    }
-  | undefined;
+
 
 /**
  * 解説文に対する翻訳文を管理するatomの型

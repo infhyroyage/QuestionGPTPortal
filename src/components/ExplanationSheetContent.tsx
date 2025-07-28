@@ -4,7 +4,6 @@ import {
   fetchAnswerExplanationAtom,
   fetchCommunityAtom,
   fetchQuestionSelectorAtom,
-  fetchTranslationCommunityAtom,
   fetchTranslationExplanationAtom,
   fetchTranslationSubjectChoiceAtom,
 } from "@/lib/atoms";
@@ -27,9 +26,6 @@ export default function ExplanationSheetContent() {
   const answerExplanation = useAtomValue(fetchAnswerExplanationAtom);
   const [community, fetchCommunity] = useAtom(fetchCommunityAtom);
   const questionSelector = useAtomValue(fetchQuestionSelectorAtom);
-  const [translationCommunity, fetchTranslationCommunity] = useAtom(
-    fetchTranslationCommunityAtom
-  );
   const [translationExplanation, fetchTranslationExplanation] = useAtom(
     fetchTranslationExplanationAtom
   );
@@ -102,10 +98,15 @@ export default function ExplanationSheetContent() {
 
   // コミュニティ情報の取得直後に、コミュニティ情報の翻訳文を1度だけ取得
   useEffect(() => {
-    if (community && !translationCommunity && !isOccurredTranslationFailed) {
+    if (
+      community &&
+      community.discussionsSummary &&
+      !community.translatedDiscussionsSummary &&
+      !isOccurredTranslationFailed
+    ) {
       (async () => {
         try {
-          await fetchTranslationCommunity(instance, accountInfo);
+          await fetchCommunity(testId!, questionNumber!, instance, accountInfo, true);
         } catch {
           setIsOccurredTranslationFailed(true);
           translationFailedToast("コミュニティ情報", () =>
@@ -117,10 +118,11 @@ export default function ExplanationSheetContent() {
   }, [
     accountInfo,
     community,
-    fetchTranslationCommunity,
+    fetchCommunity,
     instance,
     isOccurredTranslationFailed,
-    translationCommunity,
+    questionNumber,
+    testId,
     translationFailedToast,
   ]);
 
@@ -201,10 +203,9 @@ export default function ExplanationSheetContent() {
             {community.discussionsSummary && (
               <div className="space-y-1">
                 <p className="leading-7">{community.discussionsSummary}</p>
-                {translationCommunity &&
-                translationCommunity.discussionsSummary ? (
+                {community.translatedDiscussionsSummary ? (
                   <p className="text-sm text-muted-foreground">
-                    {translationCommunity.discussionsSummary}
+                    {community.translatedDiscussionsSummary}
                   </p>
                 ) : (
                   <Skeleton className="h-5 w-full" />
