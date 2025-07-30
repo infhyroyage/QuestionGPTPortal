@@ -8,7 +8,7 @@
 
 ## API サーバーの API リファレンス
 
-[QuestionGPTTranslatorのSwagger UI](https://infhyroyage.github.io/QuestionGPTTranslator/) に準拠する。
+[QuestionGPTTranslator の Swagger UI](https://infhyroyage.github.io/QuestionGPTTranslator/) に準拠する。
 
 ## 技術スタック
 
@@ -21,6 +21,10 @@
 ## ローカル環境構築手順・削除手順
 
 [localenvironment.md](localenvironment.md) 参照。
+
+## Contribution Guide
+
+[CONTRIBUTING.md](CONTRIBUTING.md) 参照。
 
 ## ライセンス
 
