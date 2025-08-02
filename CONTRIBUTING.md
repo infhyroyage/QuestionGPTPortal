@@ -12,7 +12,7 @@
 - Jotai 2.12.3 (状態管理)
 - React Router 7.1.1 (ルーティング)
 - Axios 1.11.0 (HTTP クライアント)
-- MSAL (Azure AD 認証)
+- MSAL (Entra ID 認証)
 
 ## ローカル開発環境のセットアップ
 
