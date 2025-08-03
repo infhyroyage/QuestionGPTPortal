@@ -6,7 +6,7 @@ import { Favorite, GetFavoritesRes, GetQuestion } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtomValue } from "jotai";
 import { Check, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import FavoriteButton from "./FavoriteButton";
 import TestResultAccordionContent from "./TestResultAccordionContent";
@@ -25,6 +25,7 @@ export default function TestResultAccordion() {
   }>({});
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
+  const fetchFavoritesCalledRef = useRef<boolean>(false);
 
   const { testId } = useParams();
   const { instance, accounts } = useMsal();
@@ -35,51 +36,54 @@ export default function TestResultAccordion() {
   // すべての問題番号のお気に入り状態を取得
   useEffect(() => {
     if (
-      testId &&
-      histories &&
-      order &&
-      favorites === undefined &&
-      !isOccurredSystemError
+      !testId ||
+      !histories ||
+      !order ||
+      favorites !== undefined ||
+      isOccurredSystemError ||
+      fetchFavoritesCalledRef.current
     ) {
-      (async () => {
-        try {
-          // [GET] /tests/{testId}/favoritesにアクセスしてお気に入り情報を取得
-          const res: GetFavoritesRes = await accessBackend<GetFavoritesRes>(
-            "GET",
-            `/tests/${testId}/favorites`,
-            instance,
-            accountInfo
-          );
-
-          // お気に入り情報を設定して更新
-          setFavorites(
-            res.reduce((prev: boolean[], favorite: Favorite) => {
-              if (favorite.isFavorite) {
-                const favoriteIdx = order.findIndex(
-                  (order: number) => order === favorite.questionNumber
-                );
-                if (favoriteIdx !== -1) {
-                  prev[favoriteIdx] = true;
-                }
-              }
-              return prev;
-            }, new Array(histories.length).fill(false))
-          );
-        } catch (e) {
-          setIsOccurredSystemError(true);
-          systemErrorToast(e);
-        }
-      })();
+      return;
     }
+    fetchFavoritesCalledRef.current = true;
+    (async () => {
+      try {
+        // [GET] /tests/{testId}/favoritesにアクセスしてお気に入り情報を取得
+        const res: GetFavoritesRes = await accessBackend<GetFavoritesRes>(
+          "GET",
+          `/tests/${testId}/favorites`,
+          instance,
+          accountInfo
+        );
+
+        // お気に入り情報を設定して更新
+        setFavorites(
+          res.reduce((prev: boolean[], favorite: Favorite) => {
+            if (favorite.isFavorite) {
+              const favoriteIdx = order.findIndex(
+                (order: number) => order === favorite.questionNumber
+              );
+              if (favoriteIdx !== -1) {
+                prev[favoriteIdx] = true;
+              }
+            }
+            return prev;
+          }, new Array(histories.length).fill(false))
+        );
+      } catch (e) {
+        setIsOccurredSystemError(true);
+        systemErrorToast(e);
+      }
+    })();
   }, [
-    accountInfo,
-    favorites,
-    histories,
-    instance,
-    isOccurredSystemError,
-    order,
-    systemErrorToast,
     testId,
+    histories,
+    order,
+    favorites,
+    isOccurredSystemError,
+    instance,
+    accountInfo,
+    systemErrorToast,
   ]);
 
   // i番目(0スタート)の問題のお気に入り切替ボタンのお気に入り状態変更時の動作

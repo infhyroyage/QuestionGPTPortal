@@ -8,7 +8,7 @@ import { History } from "@/types/atoms";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtomValue } from "jotai";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useNavigationType, useParams } from "react-router";
 
 /**
@@ -18,6 +18,7 @@ import { useNavigate, useNavigationType, useParams } from "react-router";
 export default function TestResultPage() {
   const { histories, order } = useAtomValue(fetchProgressesAtom);
   const [isFinishedDelete, setIsFinishedDelete] = useState<boolean>(false);
+  const deleteProgressesCalledRef = useRef<boolean>(false);
 
   const navigate = useNavigate();
   const navigationType = useNavigationType();
@@ -44,37 +45,40 @@ export default function TestResultPage() {
   // 回答履歴とテストを解く問題番号の順番の整合性が取れた場合、バックエンドからその回答履歴を削除
   useEffect(() => {
     if (
-      testId &&
-      histories &&
-      order &&
-      histories.length > 0 &&
-      order.length > 0 &&
-      histories.length === order.length &&
-      !isFinishedDelete
+      !testId ||
+      !histories ||
+      !order ||
+      histories.length === 0 ||
+      order.length === 0 ||
+      histories.length !== order.length ||
+      isFinishedDelete ||
+      deleteProgressesCalledRef.current
     ) {
-      (async () => {
-        try {
-          await accessBackend(
-            "DELETE",
-            `/tests/${testId}/progresses`,
-            instance,
-            accountInfo
-          );
-        } catch (e) {
-          systemErrorToast(e);
-        } finally {
-          setIsFinishedDelete(true);
-        }
-      })();
+      return;
     }
+    deleteProgressesCalledRef.current = true;
+    (async () => {
+      try {
+        await accessBackend(
+          "DELETE",
+          `/tests/${testId}/progresses`,
+          instance,
+          accountInfo
+        );
+      } catch (e) {
+        systemErrorToast(e);
+      } finally {
+        setIsFinishedDelete(true);
+      }
+    })();
   }, [
-    accountInfo,
-    histories,
-    instance,
-    isFinishedDelete,
-    order,
-    systemErrorToast,
     testId,
+    histories,
+    order,
+    isFinishedDelete,
+    instance,
+    accountInfo,
+    systemErrorToast,
   ]);
 
   return (
