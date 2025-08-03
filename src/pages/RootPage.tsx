@@ -9,7 +9,7 @@ import {
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom, useSetAtom } from "jotai";
 import { TriangleAlert } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * トップページのコンポーネント
@@ -20,6 +20,7 @@ export default function RootPage() {
   const resetAtomsForAllTestPages = useSetAtom(resetAtomsForAllTestPagesAtom);
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
+  const fetchTestDetailsCalledRef = useRef<boolean>(false);
 
   const { instance, accounts } = useMsal();
   const accountInfo = useAccount(accounts[0] || {});
@@ -28,7 +29,12 @@ export default function RootPage() {
 
   // テスト一覧情報を1回だけ取得
   useEffect(() => {
-    if (!testDetails && !isOccurredSystemError) {
+    if (
+      !testDetails &&
+      !isOccurredSystemError &&
+      !fetchTestDetailsCalledRef.current
+    ) {
+      fetchTestDetailsCalledRef.current = true;
       (async () => {
         try {
           await fetchTestDetails(instance, accountInfo);

@@ -9,7 +9,7 @@ import { Favorite, GetFavoritesRes } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom, useAtomValue } from "jotai";
 import { Loader2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useNavigationType, useParams } from "react-router";
 
 /**
@@ -24,6 +24,8 @@ export default function TestReadyPage() {
   >(undefined);
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
+  const fetchProgressesCalledRef = useRef<boolean>(false);
+  const fetchFavoritesCalledRef = useRef<boolean>(false);
 
   const navigate = useNavigate();
   const navigationType = useNavigationType();
@@ -52,61 +54,76 @@ export default function TestReadyPage() {
 
   // 今まで回答した問題の回答履歴とテストを解く問題番号の順番を取得
   useEffect(() => {
-    if (testDetail && testId && !histories && !isOccurredSystemError) {
-      (async () => {
-        try {
-          await fetchProgresses(testId, instance, accountInfo);
-        } catch (e) {
-          setIsOccurredSystemError(true);
-          systemErrorToast(e);
-        }
-      })();
+    if (
+      !testDetail ||
+      !testId ||
+      histories ||
+      isOccurredSystemError ||
+      fetchProgressesCalledRef.current
+    ) {
+      return;
     }
+    fetchProgressesCalledRef.current = true;
+    (async () => {
+      try {
+        await fetchProgresses(testId, instance, accountInfo);
+      } catch (e) {
+        setIsOccurredSystemError(true);
+        systemErrorToast(e);
+      }
+    })();
   }, [
-    accountInfo,
-    fetchProgresses,
-    histories,
-    instance,
-    isOccurredSystemError,
-    systemErrorToast,
     testDetail,
     testId,
+    histories,
+    isOccurredSystemError,
+    fetchProgresses,
+    instance,
+    accountInfo,
+    systemErrorToast,
   ]);
 
   // すべての問題番号のお気に入り状態を取得
   useEffect(() => {
-    if (testId && !favoriteQuestionNumbers && !isOccurredSystemError) {
-      (async () => {
-        try {
-          const res: GetFavoritesRes = await accessBackend<GetFavoritesRes>(
-            "GET",
-            `/tests/${testId}/favorites`,
-            instance,
-            accountInfo
-          );
-          setFavoriteQuestionNumbers(
-            res
-              .reduce((prev: number[], favorite: Favorite) => {
-                if (favorite.isFavorite) {
-                  prev.push(favorite.questionNumber);
-                }
-                return prev;
-              }, [])
-              .sort((a, b) => a - b) // 問題番号の昇順にソート
-          );
-        } catch (e) {
-          setIsOccurredSystemError(true);
-          systemErrorToast(e);
-        }
-      })();
+    if (
+      !testId ||
+      favoriteQuestionNumbers ||
+      isOccurredSystemError ||
+      fetchFavoritesCalledRef.current
+    ) {
+      return;
     }
+    fetchFavoritesCalledRef.current = true;
+    (async () => {
+      try {
+        const res: GetFavoritesRes = await accessBackend<GetFavoritesRes>(
+          "GET",
+          `/tests/${testId}/favorites`,
+          instance,
+          accountInfo
+        );
+        setFavoriteQuestionNumbers(
+          res
+            .reduce((prev: number[], favorite: Favorite) => {
+              if (favorite.isFavorite) {
+                prev.push(favorite.questionNumber);
+              }
+              return prev;
+            }, [])
+            .sort((a, b) => a - b) // 問題番号の昇順にソート
+        );
+      } catch (e) {
+        setIsOccurredSystemError(true);
+        systemErrorToast(e);
+      }
+    })();
   }, [
-    accountInfo,
-    favoriteQuestionNumbers,
-    instance,
-    isOccurredSystemError,
-    systemErrorToast,
     testId,
+    favoriteQuestionNumbers,
+    isOccurredSystemError,
+    instance,
+    accountInfo,
+    systemErrorToast,
   ]);
 
   return (
