@@ -6,7 +6,7 @@ import { TestReadyButtonsProps } from "@/types/props";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { Loader2 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
 /**
@@ -23,6 +23,8 @@ export default function TestReadyButtons({
   );
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
+  const initializeProgressesCalledRef = useRef<boolean>(false);
+  const previousHasOnlyFavoritesRef = useRef<boolean | undefined>(undefined);
 
   const navigate = useNavigate();
   const { testId } = useParams();
@@ -31,39 +33,54 @@ export default function TestReadyButtons({
 
   const systemErrorToast = useSystemErrorToast();
 
+  // hasOnlyFavoritesが変更された場合、API呼び出しフラグをリセット
+  useEffect(() => {
+    if (previousHasOnlyFavoritesRef.current !== hasOnlyFavorites) {
+      initializeProgressesCalledRef.current = false;
+      previousHasOnlyFavoritesRef.current = hasOnlyFavorites;
+    }
+  }, [hasOnlyFavorites]);
+
   // 開始ボタン押下後、回答履歴とテストを解く問題番号の順番を初期化し、最初の問題番号のテストページへ遷移
   useEffect(() => {
-    if (testId && hasOnlyFavorites !== undefined && !isOccurredSystemError) {
-      (async () => {
-        try {
-          const initialQuestionNumber: number | undefined =
-            await initializeProgresses(
-              testId,
-              instance,
-              accountInfo,
-              hasOnlyFavorites ? favoriteQuestionNumbers : undefined
-            );
-          if (initialQuestionNumber) {
-            navigate(
-              `${basePath}/tests/${testId}/questions/${initialQuestionNumber}`
-            );
-          }
-        } catch (e) {
-          setIsOccurredSystemError(true);
-          systemErrorToast(e);
-        }
-      })();
+    if (
+      !testId ||
+      hasOnlyFavorites === undefined ||
+      isOccurredSystemError ||
+      initializeProgressesCalledRef.current
+    ) {
+      return;
     }
+    initializeProgressesCalledRef.current = true;
+    (async () => {
+      try {
+        const initialQuestionNumber: number | undefined =
+          await initializeProgresses(
+            testId,
+            instance,
+            accountInfo,
+            hasOnlyFavorites ? favoriteQuestionNumbers : undefined
+          );
+        if (initialQuestionNumber) {
+          navigate(
+            `${basePath}/tests/${testId}/questions/${initialQuestionNumber}`
+          );
+        }
+      } catch (e) {
+        setIsOccurredSystemError(true);
+        systemErrorToast(e);
+      }
+    })();
   }, [
-    accountInfo,
-    favoriteQuestionNumbers,
+    testId,
     hasOnlyFavorites,
+    isOccurredSystemError,
+    favoriteQuestionNumbers,
     initializeProgresses,
     instance,
-    isOccurredSystemError,
+    accountInfo,
     navigate,
     systemErrorToast,
-    testId,
   ]);
 
   // テスト結果ページへ遷移
