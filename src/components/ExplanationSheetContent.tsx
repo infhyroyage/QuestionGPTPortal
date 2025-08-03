@@ -12,7 +12,7 @@ import { Choice } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom, useAtomValue } from "jotai";
 import { Info } from "lucide-react";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import SelectorButton from "./SelectorButton";
 import { Badge } from "./ui/badge";
@@ -40,6 +40,10 @@ export default function ExplanationSheetContent() {
     useState<boolean>(false);
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
+  const fetchCommunityCalledRef = useRef<boolean>(false);
+  const fetchTranslationExplanationCalledRef = useRef<boolean>(false);
+  const fetchTranslationCommunityCalledRef = useRef<boolean>(false);
+  const previousQuestionNumberRef = useRef<string | undefined>(undefined);
 
   const { testId, questionNumber } = useParams();
   const { instance, accounts } = useMsal();
@@ -48,79 +52,106 @@ export default function ExplanationSheetContent() {
   const translationFailedToast = useTranslationFailedToast();
   const systemErrorToast = useSystemErrorToast();
 
+  // 問題番号が変更された場合、API呼び出しフラグをリセット
+  useEffect(() => {
+    if (previousQuestionNumberRef.current !== questionNumber) {
+      fetchCommunityCalledRef.current = false;
+      fetchTranslationExplanationCalledRef.current = false;
+      fetchTranslationCommunityCalledRef.current = false;
+      previousQuestionNumberRef.current = questionNumber;
+    }
+  }, [questionNumber]);
+
   // 解説シートの表示直前に、コミュニティ情報を1度だけ取得
   useEffect(() => {
-    if (testId && questionNumber && !community && !isOccurredSystemError) {
-      (async () => {
-        try {
-          await fetchCommunity(testId, questionNumber, instance, accountInfo);
-        } catch (e) {
-          setIsOccurredSystemError(true);
-          systemErrorToast(e);
-        }
-      })();
+    if (
+      !testId ||
+      !questionNumber ||
+      community ||
+      isOccurredSystemError ||
+      fetchCommunityCalledRef.current
+    ) {
+      return;
     }
+    fetchCommunityCalledRef.current = true;
+    (async () => {
+      try {
+        await fetchCommunity(testId, questionNumber, instance, accountInfo);
+      } catch (e) {
+        setIsOccurredSystemError(true);
+        systemErrorToast(e);
+      }
+    })();
   }, [
-    accountInfo,
-    answerExplanation,
+    testId,
+    questionNumber,
     community,
+    isOccurredSystemError,
     fetchCommunity,
     instance,
-    isOccurredSystemError,
-    questionNumber,
+    accountInfo,
     systemErrorToast,
-    testId,
   ]);
 
   // 回答・解説の生成/取得直後に、解説の翻訳文を1度だけ取得
   useEffect(() => {
     if (
-      answerExplanation &&
-      !translationExplanation &&
-      !isOccurredTranslationFailed
+      !answerExplanation ||
+      translationExplanation ||
+      isOccurredTranslationFailed ||
+      fetchTranslationExplanationCalledRef.current
     ) {
-      (async () => {
-        try {
-          await fetchTranslationExplanation(instance, accountInfo);
-        } catch {
-          setIsOccurredTranslationFailed(true);
-          translationFailedToast("解説", () =>
-            setIsOccurredTranslationFailed(false)
-          );
-        }
-      })();
+      return;
     }
+    fetchTranslationExplanationCalledRef.current = true;
+    (async () => {
+      try {
+        await fetchTranslationExplanation(instance, accountInfo);
+      } catch {
+        setIsOccurredTranslationFailed(true);
+        translationFailedToast("解説", () =>
+          setIsOccurredTranslationFailed(false)
+        );
+      }
+    })();
   }, [
-    accountInfo,
     answerExplanation,
+    translationExplanation,
+    isOccurredTranslationFailed,
     fetchTranslationExplanation,
     instance,
-    isOccurredTranslationFailed,
-    translationExplanation,
+    accountInfo,
     translationFailedToast,
   ]);
 
   // コミュニティ情報の取得直後に、コミュニティ情報の翻訳文を1度だけ取得
   useEffect(() => {
-    if (community && !translationCommunity && !isOccurredTranslationFailed) {
-      (async () => {
-        try {
-          await fetchTranslationCommunity(instance, accountInfo);
-        } catch {
-          setIsOccurredTranslationFailed(true);
-          translationFailedToast("コミュニティ情報", () =>
-            setIsOccurredTranslationFailed(false)
-          );
-        }
-      })();
+    if (
+      !community ||
+      translationCommunity ||
+      isOccurredTranslationFailed ||
+      fetchTranslationCommunityCalledRef.current
+    ) {
+      return;
     }
+    fetchTranslationCommunityCalledRef.current = true;
+    (async () => {
+      try {
+        await fetchTranslationCommunity(instance, accountInfo);
+      } catch {
+        setIsOccurredTranslationFailed(true);
+        translationFailedToast("コミュニティ情報", () =>
+          setIsOccurredTranslationFailed(false)
+        );
+      }
+    })();
   }, [
-    accountInfo,
     community,
+    translationCommunity,
+    isOccurredTranslationFailed,
     fetchTranslationCommunity,
     instance,
-    isOccurredTranslationFailed,
-    translationCommunity,
+    accountInfo,
     translationFailedToast,
   ]);
 

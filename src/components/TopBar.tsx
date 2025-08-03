@@ -4,7 +4,7 @@ import { basePath } from "@/lib/github";
 import { GetFavoriteRes } from "@/types/backend";
 import { TopBarProps } from "@/types/props";
 import { useAccount, useMsal } from "@azure/msal-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router";
 import DarkModeSwitchButton from "./DarkModeSwitchButton";
 import FavoriteButton from "./FavoriteButton";
@@ -18,6 +18,8 @@ export default function TopBar({ title }: TopBarProps) {
   const [isFavorite, setIsFavorite] = useState<boolean | undefined>(undefined);
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
+  const fetchFavoriteCalledRef = useRef<boolean>(false);
+  const previousQuestionNumberRef = useRef<string | undefined>(undefined);
 
   const location = useLocation();
   const { testId, questionNumber } = useParams();
@@ -36,45 +38,50 @@ export default function TopBar({ title }: TopBarProps) {
     [location.pathname, questionNumber, testId]
   );
 
-  // 問題番号変更時にお気に入り状態を初期化
+  // 問題番号が変更された場合、お気に入り状態とAPI呼び出しフラグをリセット
   useEffect(() => {
-    if (questionNumber) {
+    if (previousQuestionNumberRef.current !== questionNumber) {
       setIsFavorite(undefined);
+      fetchFavoriteCalledRef.current = false;
+      previousQuestionNumberRef.current = questionNumber;
     }
   }, [questionNumber]);
 
   // 問題番号変更時にお気に入り状態を取得
   useEffect(() => {
     if (
-      testId &&
-      isTestQuestionPage &&
-      questionNumber &&
-      isFavorite === undefined &&
-      !isOccurredSystemError
+      !testId ||
+      !isTestQuestionPage ||
+      !questionNumber ||
+      isFavorite !== undefined ||
+      isOccurredSystemError ||
+      fetchFavoriteCalledRef.current
     ) {
-      (async () => {
-        try {
-          const response = await accessBackend<GetFavoriteRes>(
-            "GET",
-            `/tests/${testId}/favorites/${questionNumber}`,
-            instance,
-            accountInfo
-          );
-          setIsFavorite(response.isFavorite);
-        } catch (e) {
-          setIsOccurredSystemError(true);
-          systemErrorToast(e);
-        }
-      })();
+      return;
     }
+    fetchFavoriteCalledRef.current = true;
+    (async () => {
+      try {
+        const response = await accessBackend<GetFavoriteRes>(
+          "GET",
+          `/tests/${testId}/favorites/${questionNumber}`,
+          instance,
+          accountInfo
+        );
+        setIsFavorite(response.isFavorite);
+      } catch (e) {
+        setIsOccurredSystemError(true);
+        systemErrorToast(e);
+      }
+    })();
   }, [
-    accountInfo,
-    instance,
-    isFavorite,
+    testId,
     isTestQuestionPage,
     questionNumber,
-    testId,
+    isFavorite,
     isOccurredSystemError,
+    instance,
+    accountInfo,
     systemErrorToast,
   ]);
 

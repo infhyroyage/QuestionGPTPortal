@@ -19,7 +19,7 @@ import {
 import { basePath } from "@/lib/github";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useNavigationType, useParams } from "react-router";
 
 /**
@@ -40,6 +40,9 @@ export default function TestQuestionPage() {
     useState<boolean>(false);
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
+  const fetchQuestionSelectorCalledRef = useRef<boolean>(false);
+  const fetchTranslationSubjectChoiceCalledRef = useRef<boolean>(false);
+  const previousQuestionNumberRef = useRef<string | undefined>(undefined);
 
   const navigate = useNavigate();
   const navigationType = useNavigationType();
@@ -49,6 +52,15 @@ export default function TestQuestionPage() {
 
   const translationFailedToast = useTranslationFailedToast();
   const systemErrorToast = useSystemErrorToast();
+
+  // 問題番号が変更された場合、API呼び出しフラグをリセット
+  useEffect(() => {
+    if (previousQuestionNumberRef.current !== questionNumber) {
+      fetchQuestionSelectorCalledRef.current = false;
+      fetchTranslationSubjectChoiceCalledRef.current = false;
+      previousQuestionNumberRef.current = questionNumber;
+    }
+  }, [questionNumber]);
 
   // 回答履歴とテストを解く問題番号の順番の整合性が取れない、またはブラウザバックした場合はトップページにリダイレクト
   useEffect(() => {
@@ -77,62 +89,68 @@ export default function TestQuestionPage() {
   // ページ遷移直後に、問題文・選択肢を1回だけ取得
   useEffect(() => {
     if (
-      testId &&
-      questionNumber &&
-      !questionSelector &&
-      !isOccurredSystemError
+      !testId ||
+      !questionNumber ||
+      questionSelector ||
+      isOccurredSystemError ||
+      fetchQuestionSelectorCalledRef.current
     ) {
-      (async () => {
-        try {
-          await fetchQuestionSelector(
-            testId,
-            questionNumber,
-            instance,
-            accountInfo
-          );
-        } catch (e) {
-          setIsOccurredSystemError(true);
-          systemErrorToast(e);
-        }
-      })();
+      return;
     }
+    fetchQuestionSelectorCalledRef.current = true;
+    (async () => {
+      try {
+        await fetchQuestionSelector(
+          testId,
+          questionNumber,
+          instance,
+          accountInfo
+        );
+      } catch (e) {
+        setIsOccurredSystemError(true);
+        systemErrorToast(e);
+      }
+    })();
   }, [
-    accountInfo,
-    fetchQuestionSelector,
-    instance,
-    isOccurredSystemError,
+    testId,
     questionNumber,
     questionSelector,
+    isOccurredSystemError,
+    fetchQuestionSelector,
+    instance,
+    accountInfo,
     systemErrorToast,
-    testId,
   ]);
 
   // 問題文・選択肢の取得直後に、それらの翻訳文を1度だけ取得
   useEffect(() => {
     if (
-      questionSelector &&
-      !translationSubjectChoice &&
-      !isOccurredTranslationFailed
+      !questionSelector ||
+      translationSubjectChoice ||
+      isOccurredTranslationFailed ||
+      fetchTranslationSubjectChoiceCalledRef.current
     ) {
-      (async () => {
-        try {
-          await fetchTranslationSubjectChoice(instance, accountInfo);
-        } catch {
-          setIsOccurredTranslationFailed(true);
-          translationFailedToast("問題文・選択肢", () =>
-            setIsOccurredTranslationFailed(false)
-          );
-        }
-      })();
+      return;
     }
+    fetchTranslationSubjectChoiceCalledRef.current = true;
+    (async () => {
+      try {
+        await fetchTranslationSubjectChoice(instance, accountInfo);
+      } catch {
+        setIsOccurredTranslationFailed(true);
+        translationFailedToast("問題文・選択肢", () =>
+          setIsOccurredTranslationFailed(false)
+        );
+      }
+    })();
   }, [
-    accountInfo,
+    questionSelector,
+    translationSubjectChoice,
+    isOccurredTranslationFailed,
     fetchTranslationSubjectChoice,
     instance,
-    isOccurredTranslationFailed,
-    questionSelector,
+    accountInfo,
     translationFailedToast,
-    translationSubjectChoice,
   ]);
 
   return (
