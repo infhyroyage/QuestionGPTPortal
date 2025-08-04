@@ -1,12 +1,9 @@
 import IconButtonsContainer from "@/components/IconButtonsContainer";
 import Selector from "@/components/Selector";
 import SubjectDisplay from "@/components/SubjectDisplay";
+import TestQuestionResizableHandle from "@/components/TestQuestionResizableHandle";
 import TopBar from "@/components/TopBar";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
+import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import useTranslationFailedToast from "@/hooks/useTranslationFailedToast";
 import {
@@ -183,7 +180,7 @@ export default function TestQuestionPage() {
               <IconButtonsContainer />
             </div>
           </ResizablePanel>
-          <ResizableHandle withHandle />
+          <TestQuestionResizableHandle withHandle />
           <ResizablePanel defaultSize={40}>
             <div className="h-full min-h-0 overflow-y-auto bg-slate-200 dark:bg-slate-800">
               <Selector />
