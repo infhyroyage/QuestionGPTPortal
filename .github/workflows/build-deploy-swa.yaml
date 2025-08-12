@@ -11,14 +11,48 @@ on:
       - index.html
       - package*.json
       - postcss.config.js
+      - resources/base.bicep
       - tailwind.config.js
       - tsconfig*.json
       - vite.config.ts
 
+env:
+  LOCATION: japaneast
+  RESOURCE_GROUP: qgportal-je
+
 jobs:
-  build_and_deploy:
+  create-resources:
     runs-on: ubuntu-latest
-    name: Build and Deploy
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Login Azure as Contributor
+        uses: azure/login@v2
+        with:
+          creds: '{"clientId":"${{ vars.AZURE_AD_SP_CONTRIBUTOR_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_AD_SP_CONTRIBUTOR_CLIENT_SECRET }}","subscriptionId":"${{ vars.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ vars.AZURE_TENANT_ID }}"}'
+
+      - name: Create Resource Group if Needed
+        run: |
+          az group create \
+            -n ${{ env.RESOURCE_GROUP }} \
+            -l ${{ env.LOCATION }}
+
+      - name: Upgrade Bicep
+        run: az bicep upgrade
+
+      - name: Create Resources
+        uses: azure/arm-deploy@v2
+        with:
+          scope: resourcegroup
+          subscriptionId: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          resourceGroupName: ${{ env.RESOURCE_GROUP }}
+          template: ./resources/base.bicep
+          parameters: swaName=${{ vars.SWA_NAME }}
+
+  build_and_deploy:
+    needs: create-resources
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
