@@ -61,7 +61,7 @@ GitHub Pages を通して React + TypeScript をベースとしたシングル�
 
 [QuestionGPTTranslator](https://github.com/infhyroyage/QuestionGPTTranslator) を API サーバーとして連携する。
 API 仕様は [QuestionGPTTranslator の Swagger UI](https://infhyroyage.github.io/QuestionGPTTranslator/) を参照。
-API サーバーの URL は、環境変数 `VITE_API_URI` で管理する。
+API サーバーの URL は、環境変数 `API_URI` で管理する。
 API サーバーへのアクセスは、`src/lib/backend.ts` で統一的に行う。
 
 ### 3.2 認証システム
@@ -70,9 +70,9 @@ Azure 環境の場合は、Microsoft Entra ID を利用した認証システム�
 
 `src/lib/msal.ts` で、以下の MSAL の設定を定義する。
 
-- クライアント ID: 環境変数 `VITE_AZURE_AD_SP_MSAL_CLIENT_ID` で管理
+- クライアント ID: 環境変数 `AZURE_AD_SP_MSAL_CLIENT_ID` で管理
 - Microsoft Indentity Platform の URL: `https://login.microsoftonline.com/{テナント ID}`
-  - テナント ID: 環境変数 `VITE_AZURE_TENANT_ID` で管理
+  - テナント ID: 環境変数 `AZURE_TENANT_ID` で管理
 - 認証後のリダイレクト URI: `https://infhyroyage.github.io/QuestionGPTPortal`
 - アクセストークンの格納先: ブラウザの Session Storage
 
