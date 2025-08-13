@@ -1,0 +1,23 @@
+name: Deploy Azure Static Web Apps (Reusable Workflow)
+
+on:
+  workflow_call:
+    secrets:
+      SWA_DEPLOY_TOKEN:
+        required: true
+
+jobs:
+  deploy-swa:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.SWA_DEPLOY_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "/"
+          output_location: "dist"

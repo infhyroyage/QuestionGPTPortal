@@ -1,20 +1,12 @@
-name: Build and Deploy Azure Static Web Apps
+name: Create Azure Resources
 
 on:
   push:
     branches:
       - feature/migration_azure_swa # TODO: mainブランチに変更
     paths:
-      - .github/workflows/build-deploy-swa.yaml
-      - src/**
-      - components.json
-      - index.html
-      - package*.json
-      - postcss.config.js
-      - resources/base.bicep
-      - tailwind.config.js
-      - tsconfig*.json
-      - vite.config.ts
+      - .github/workflows/create-azure-resources.yaml
+      - resources**
 
 env:
   LOCATION: japaneast
@@ -50,18 +42,8 @@ jobs:
           template: ./resources/base.bicep
           parameters: swaName=${{ vars.SWA_NAME }}
 
-  build_and_deploy:
+  use-deploy-swa-workflow:
     needs: create-resources
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Build And Deploy
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.STATIC_WEB_APPS_DEPLOY_TOKEN }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          action: "upload"
-          app_location: "/"
-          output_location: "dist"
+    uses: ./.github/workflows/reusable-deploy-swa.yaml
+    secrets:
+      SWA_DEPLOY_TOKEN: ${{ secrets.SWA_DEPLOY_TOKEN }}

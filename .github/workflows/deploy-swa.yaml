@@ -1,0 +1,23 @@
+name: Deploy Azure Static Web Apps
+
+on:
+  push:
+    branches:
+      - feature/migration_azure_swa # TODO: mainブランチに変更
+    paths:
+      - .github/workflows/deploy-swa.yaml
+      - src/**
+      - components.json
+      - index.html
+      - package*.json
+      - postcss.config.js
+      - resources/base.bicep
+      - tailwind.config.js
+      - tsconfig*.json
+      - vite.config.ts
+
+jobs:
+  use-deploy-swa-workflow:
+    uses: ./.github/workflows/reusable-deploy-swa.yaml
+    secrets:
+      SWA_DEPLOY_TOKEN: ${{ secrets.SWA_DEPLOY_TOKEN }}
