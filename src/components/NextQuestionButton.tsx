@@ -3,7 +3,6 @@ import {
   fetchProgressesAtom,
   saveProgressAtom,
 } from "@/lib/atoms";
-import { basePath } from "@/lib/github";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { ChevronRight, Loader2 } from "lucide-react";
@@ -59,8 +58,8 @@ export default function NextQuestionButton() {
     if (testId && histories && order) {
       navigate(
         histories.length === order.length
-          ? `${basePath}/tests/${testId}/result`
-          : `${basePath}/tests/${testId}/questions/${order[histories.length]}`
+          ? `/tests/${testId}/result`
+          : `/tests/${testId}/questions/${order[histories.length]}`
       );
     }
   }, [histories, navigate, order, testId]);

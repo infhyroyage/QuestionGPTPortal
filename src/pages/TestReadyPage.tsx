@@ -3,7 +3,6 @@ import TopBar from "@/components/TopBar";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import { fetchProgressesAtom, fetchTestDetailsAtom } from "@/lib/atoms";
 import { accessBackend } from "@/lib/backend";
-import { basePath } from "@/lib/github";
 import { TestDetail } from "@/types/atoms";
 import { Favorite, GetFavoritesRes } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
@@ -48,7 +47,7 @@ export default function TestReadyPage() {
   // テスト詳細情報が取得できていない、またはブラウザバックした場合はトップページにリダイレクト
   useEffect(() => {
     if (!testDetail || navigationType === "POP") {
-      navigate(`${basePath}/`);
+      navigate("/");
     }
   }, [navigate, testDetail, navigationType]);
 

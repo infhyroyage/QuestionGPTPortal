@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import { fetchProgressesAtom, initializeProgressesAtom } from "@/lib/atoms";
-import { basePath } from "@/lib/github";
 import { TestReadyButtonsProps } from "@/types/props";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtomValue, useSetAtom } from "jotai";
@@ -62,9 +61,7 @@ export default function TestReadyButtons({
             hasOnlyFavorites ? favoriteQuestionNumbers : undefined
           );
         if (initialQuestionNumber) {
-          navigate(
-            `${basePath}/tests/${testId}/questions/${initialQuestionNumber}`
-          );
+          navigate(`/tests/${testId}/questions/${initialQuestionNumber}`);
         }
       } catch (e) {
         setIsOccurredSystemError(true);
@@ -86,16 +83,14 @@ export default function TestReadyButtons({
   // テスト結果ページへ遷移
   const onClickResultButton = useCallback(() => {
     if (testId) {
-      navigate(`${basePath}/tests/${testId}/result`);
+      navigate(`/tests/${testId}/result`);
     }
   }, [navigate, testId]);
 
   // 途中の問題のテストページへ遷移
   const onClickResumeButton = useCallback(() => {
     if (testId && histories && order) {
-      navigate(
-        `${basePath}/tests/${testId}/questions/${order[histories.length]}`
-      );
+      navigate(`/tests/${testId}/questions/${order[histories.length]}`);
     }
   }, [histories, navigate, order, testId]);
 
