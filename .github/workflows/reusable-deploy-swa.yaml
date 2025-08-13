@@ -2,6 +2,16 @@ name: Deploy Azure Static Web Apps (Reusable Workflow)
 
 on:
   workflow_call:
+    inputs:
+      API_URI:
+        required: true
+        type: string
+      AZURE_AD_SP_MSAL_CLIENT_ID:
+        required: true
+        type: string
+      AZURE_TENANT_ID:
+        required: true
+        type: string
     secrets:
       SWA_DEPLOY_TOKEN:
         required: true
@@ -16,8 +26,12 @@ jobs:
       - name: Deploy Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.SWA_DEPLOY_TOKEN }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
           app_location: "/"
+          azure_static_web_apps_api_token: ${{ secrets.SWA_DEPLOY_TOKEN }}
           output_location: "dist"
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          VITE_API_URI: ${{ inputs.API_URI }}
+          VITE_AZURE_AD_SP_MSAL_CLIENT_ID: ${{ inputs.AZURE_AD_SP_MSAL_CLIENT_ID }}
+          VITE_AZURE_TENANT_ID: ${{ inputs.AZURE_TENANT_ID }}

@@ -20,5 +20,9 @@ on:
 jobs:
   use-deploy-swa-workflow:
     uses: ./.github/workflows/reusable-deploy-swa.yaml
+    with:
+      API_URI: ${{ vars.API_URI }}
+      AZURE_AD_SP_MSAL_CLIENT_ID: ${{ vars.AZURE_AD_SP_MSAL_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
     secrets:
       SWA_DEPLOY_TOKEN: ${{ secrets.SWA_DEPLOY_TOKEN }}
