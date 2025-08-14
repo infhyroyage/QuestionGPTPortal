@@ -44,7 +44,8 @@
   npm run lint
   ```
 - 以下の CI/CD パイプラインは GitHub Actions によって自動化する:
-  - GutHub Pages のビルド・デプロイ: .github/workflows/build-deploy-pages.yaml
+  - Azure リソースの作成: .github/workflows/create-azure-resources.yaml
+  - Azure Static Web Apps のデプロイ: .github/workflows/deploy-swa.yaml
   - Pull Request 発行時の ESLint 実行: .github/workflows/lint.yaml
 
 ## コミット・プルリクエストのワークフロー
