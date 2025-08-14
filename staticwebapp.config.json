@@ -1,0 +1,11 @@
+{
+  "routes": [
+    {
+      "route": "/tests/*/ready",
+      "methods": [
+        "get"
+      ],
+      "redirect": "/"
+    }
+  ]
+}
