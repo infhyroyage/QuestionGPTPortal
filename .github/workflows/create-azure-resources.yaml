@@ -3,7 +3,7 @@ name: Create Azure Resources
 on:
   push:
     branches:
-      - feature/migration_azure_swa # TODO: mainブランチに変更
+      - main
     paths:
       - .github/workflows/create-azure-resources.yaml
       - resources**

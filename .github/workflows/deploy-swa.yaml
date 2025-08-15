@@ -3,7 +3,7 @@ name: Deploy Azure Static Web Apps
 on:
   push:
     branches:
-      - feature/migration_azure_swa # TODO: mainブランチに変更
+      - main
     paths:
       - .github/workflows/deploy-swa.yaml
       - .github/workflows/reusable-deploy-swa.yaml
