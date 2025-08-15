@@ -1,6 +1,5 @@
 import TopBar from "@/components/TopBar";
 import { Button } from "@/components/ui/button";
-import { basePath } from "@/lib/github";
 import { Frown } from "lucide-react";
 import { useCallback } from "react";
 import { useNavigate } from "react-router";
@@ -13,7 +12,7 @@ export default function NotFoundPage() {
   const navigate = useNavigate();
 
   const onClick = useCallback(() => {
-    navigate(`${basePath}/`);
+    navigate("/");
   }, [navigate]);
 
   return (

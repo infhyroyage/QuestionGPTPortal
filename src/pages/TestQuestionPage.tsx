@@ -13,7 +13,6 @@ import {
   fetchTranslationSubjectChoiceAtom,
   resetAtomsForTestQuestionAtom,
 } from "@/lib/atoms";
-import { basePath } from "@/lib/github";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useRef, useState } from "react";
@@ -67,7 +66,7 @@ export default function TestQuestionPage() {
       order.length === 0 ||
       navigationType === "POP"
     ) {
-      navigate(`${basePath}/`);
+      navigate("/");
     }
   }, [histories, navigate, navigationType, order]);
 

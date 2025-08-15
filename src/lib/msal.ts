@@ -10,9 +10,9 @@ export const config: Configuration = {
       import.meta.env.VITE_AZURE_TENANT_ID
     }`,
     // ログイン後のリダイレクト先
-    redirectUri: "https://infhyroyage.github.io/QuestionGPTPortal",
+    redirectUri: "https://calm-beach-0dcc3f900.1.azurestaticapps.net",
     // ログアウト後のリダイレクト先
-    postLogoutRedirectUri: "https://infhyroyage.github.io/QuestionGPTPortal",
+    postLogoutRedirectUri: "https://calm-beach-0dcc3f900.1.azurestaticapps.net",
   },
   cache: {
     // アクセストークンの格納先

@@ -1,6 +1,7 @@
 # QuestionGPTPortal
 
-[![Build and Deploy GitHub Pages](https://github.com/infhyroyage/QuestionGPTPortal/actions/workflows/build-deploy-pages.yaml/badge.svg)](https://github.com/infhyroyage/QuestionGPTPortal/actions/workflows/build-deploy-pages.yaml)
+[![Create Azure Resources](https://github.com/infhyroyage/QuestionGPTPortal/actions/workflows/create-azure-resources.yaml/badge.svg)](https://github.com/infhyroyage/QuestionGPTPortal/actions/workflows/create-azure-resources.yaml)
+[![Deploy Azure Static Web Apps](https://github.com/infhyroyage/QuestionGPTPortal/actions/workflows/deploy-swa.yaml/badge.svg)](https://github.com/infhyroyage/QuestionGPTPortal/actions/workflows/deploy-swa.yaml)
 
 ## 概要
 

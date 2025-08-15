@@ -1,5 +1,4 @@
 import { fetchTestDetailsAtom } from "@/lib/atoms";
-import { basePath } from "@/lib/github";
 import { TestDetail } from "@/types/atoms";
 import { useAtomValue } from "jotai";
 import { ScrollText } from "lucide-react";
@@ -25,7 +24,7 @@ export default function TestListAccordion() {
   // testIdのテスト準備ページへ遷移
   const onClickInnerButton = useCallback(
     (testId: string) => {
-      navigate(`${basePath}/tests/${testId}/ready`);
+      navigate(`/tests/${testId}/ready`);
     },
     [navigate]
   );

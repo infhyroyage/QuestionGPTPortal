@@ -3,7 +3,6 @@ import TopBar from "@/components/TopBar";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import { fetchProgressesAtom } from "@/lib/atoms";
 import { accessBackend } from "@/lib/backend";
-import { basePath } from "@/lib/github";
 import { History } from "@/types/atoms";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtomValue } from "jotai";
@@ -38,7 +37,7 @@ export default function TestResultPage() {
       histories.length !== order.length ||
       navigationType === "POP"
     ) {
-      navigate(`${basePath}/`);
+      navigate("/");
     }
   }, [histories, navigate, navigationType, order]);
 
