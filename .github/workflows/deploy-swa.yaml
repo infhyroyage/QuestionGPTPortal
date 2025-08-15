@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - .github/workflows/deploy-swa.yaml
-      - .github/workflows/reusable-deploy-swa.yaml
       - src/**
       - components.json
       - index.html
