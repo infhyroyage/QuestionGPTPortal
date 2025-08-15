@@ -10,9 +10,10 @@ export const config: Configuration = {
       import.meta.env.VITE_AZURE_TENANT_ID
     }`,
     // ログイン後のリダイレクト先
-    redirectUri: "https://calm-beach-0dcc3f900.1.azurestaticapps.net",
+    // TODO: ハードコーディングせず、Viteの環境変数で設定
+    redirectUri: "https://lively-cliff-0750a6500.1.azurestaticapps.net",
     // ログアウト後のリダイレクト先
-    postLogoutRedirectUri: "https://calm-beach-0dcc3f900.1.azurestaticapps.net",
+    postLogoutRedirectUri: "https://lively-cliff-0750a6500.1.azurestaticapps.net",
   },
   cache: {
     // アクセストークンの格納先
