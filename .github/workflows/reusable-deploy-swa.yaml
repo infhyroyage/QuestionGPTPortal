@@ -6,15 +6,27 @@ on:
       API_URI:
         required: true
         type: string
+      AZURE_AD_SP_CONTRIBUTOR_CLIENT_ID:
+        required: true
+        type: string
       AZURE_AD_SP_MSAL_CLIENT_ID:
+        required: true
+        type: string
+      AZURE_SUBSCRIPTION_ID:
         required: true
         type: string
       AZURE_TENANT_ID:
         required: true
         type: string
-    secrets:
-      SWA_DEPLOY_TOKEN:
+      SWA_NAME:
         required: true
+        type: string
+    secrets:
+      AZURE_AD_SP_CONTRIBUTOR_CLIENT_SECRET:
+        required: true
+
+env:
+  RESOURCE_GROUP: qgportal-je
 
 jobs:
   deploy-swa:
@@ -23,12 +35,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Login Azure as Contributor
+        uses: azure/login@v2
+        with:
+          creds: '{"clientId":"${{ inputs.AZURE_AD_SP_CONTRIBUTOR_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_AD_SP_CONTRIBUTOR_CLIENT_SECRET }}","subscriptionId":"${{ inputs.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ inputs.AZURE_TENANT_ID }}"}'
+
+      - name: Get Azure Static Web Apps API Token
+        id: get-swa-token
+        run: |
+          az staticwebapp secrets list \
+            -n ${{ inputs.SWA_NAME }} \
+            -g ${{ env.RESOURCE_GROUP }} \
+            --query 'properties.apiKey' \
+            -o tsv
+
       - name: Deploy Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
           action: "upload"
           app_location: "/"
-          azure_static_web_apps_api_token: ${{ secrets.SWA_DEPLOY_TOKEN }}
+          azure_static_web_apps_api_token: ${{ steps.get-swa-token.outputs.token }}
           output_location: "dist"
           repo_token: ${{ secrets.GITHUB_TOKEN }}
         env:

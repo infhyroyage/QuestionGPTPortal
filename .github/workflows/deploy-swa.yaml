@@ -23,7 +23,10 @@ jobs:
     uses: ./.github/workflows/reusable-deploy-swa.yaml
     with:
       API_URI: ${{ vars.API_URI }}
+      AZURE_AD_SP_CONTRIBUTOR_CLIENT_ID: ${{ vars.AZURE_AD_SP_CONTRIBUTOR_CLIENT_ID }}
       AZURE_AD_SP_MSAL_CLIENT_ID: ${{ vars.AZURE_AD_SP_MSAL_CLIENT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
       AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      SWA_NAME: ${{ vars.SWA_NAME }}
     secrets:
-      SWA_DEPLOY_TOKEN: ${{ secrets.SWA_DEPLOY_TOKEN }}
+      AZURE_AD_SP_CONTRIBUTOR_CLIENT_SECRET: ${{ secrets.AZURE_AD_SP_CONTRIBUTOR_CLIENT_SECRET }}
