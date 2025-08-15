@@ -22,6 +22,8 @@
 
 コード品質と一貫性を確保するため、以下の実装規則に従う:
 
+- Web アプリケーションは、React を用いた Single Page Application(SPA)として構築する。
+- ビルドした SPA のホスティングは、ルーティング機能を持つ Azure Static Web Apps 上に構築し、そのインフラストラクチャは手動管理ではなく、 Infrastructure as Code (IaC) で管理する。本システムでは、Azure Bicep テンプレートで Azure Static Web Apps を定義する。
 - 再利用可能なコンポーネントは src/components に配置し、src/components/ui には shadcn/ui ベースの基本 UI コンポーネントを配置する。
 - ルートごとのページコンポーネントは src/pages に配置する。
 - ユーティリティ関数、API 通信、状態管理などのビジネスロジックは src/lib に配置する。
