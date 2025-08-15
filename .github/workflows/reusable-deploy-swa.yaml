@@ -43,11 +43,12 @@ jobs:
       - name: Get Azure Static Web Apps API Token
         id: get-swa-token
         run: |
-          az staticwebapp secrets list \
+          TOKEN=$(az staticwebapp secrets list \
             -n ${{ inputs.SWA_NAME }} \
             -g ${{ env.RESOURCE_GROUP }} \
             --query 'properties.apiKey' \
-            -o tsv
+            -o tsv)
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
 
       - name: Deploy Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
