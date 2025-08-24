@@ -7,7 +7,6 @@ import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import useTranslationFailedToast from "@/hooks/useTranslationFailedToast";
 import {
-  fetchAnswerExplanationAtom,
   fetchProgressesAtom,
   fetchQuestionSelectorAtom,
   fetchTranslationSubjectChoiceAtom,
@@ -23,7 +22,6 @@ import { useNavigate, useNavigationType, useParams } from "react-router";
  * @returns テストページのコンポーネント
  */
 export default function TestQuestionPage() {
-  const answerExplanation = useAtomValue(fetchAnswerExplanationAtom);
   const { histories, order } = useAtomValue(fetchProgressesAtom);
   const [questionSelector, fetchQuestionSelector] = useAtom(
     fetchQuestionSelectorAtom
@@ -151,15 +149,14 @@ export default function TestQuestionPage() {
 
   return (
     testId &&
+    questionNumber &&
     histories &&
     order && (
       <>
         <TopBar
-          title={`${
-            answerExplanation && answerExplanation.isSavedProgress
-              ? histories.length
-              : histories.length + 1
-          }問目 (全${order.length}問)`}
+          title={`${order.indexOf(parseInt(questionNumber)) + 1}問目 (全${
+            order.length
+          }問)`}
         />
         <ResizablePanelGroup
           direction="vertical"
