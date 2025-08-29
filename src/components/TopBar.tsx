@@ -89,7 +89,7 @@ export default function TopBar({ title }: TopBarProps) {
   }, []);
 
   return (
-    <div className="fixed top-0 left-0 right-0 h-[52px] p-3 bg-slate-200 dark:bg-slate-800 z-10">
+    <div className="fixed top-0 left-0 right-0 h-[52px] p-3 bg-slate-200 dark:bg-slate-800 z-30">
       <div className="mx-3 flex items-center justify-between">
         <div className="flex items-center">
           <h1 className="text-lg font-bold">{title}</h1>

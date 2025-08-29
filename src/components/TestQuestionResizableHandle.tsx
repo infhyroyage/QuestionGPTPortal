@@ -18,7 +18,7 @@ const TestQuestionResizableHandle = ({
     {...props}
   >
     {withHandle && (
-      <div className="z-10 flex h-4 w-3 items-center justify-center rounded-sm border bg-border hover:bg-sky-500 transition-colors duration-200">
+      <div className="z-20 flex h-4 w-3 items-center justify-center rounded-sm border bg-border hover:bg-sky-500 transition-colors duration-200">
         <GripVertical className="h-2.5 w-2.5" />
       </div>
     )}
