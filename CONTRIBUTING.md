@@ -4,14 +4,14 @@
 
 本システムの開発には、以下のツールとテクノロジーを使用する:
 
-- Node.js 22.17.1 (JavaScript ランタイム)
-- React 18.3.1 + TypeScript 5.5.3 (フロントエンドフレームワーク)
-- Vite 7.0.6 (ビルドツール・開発サーバー)
-- ESLint 9.31.0 + TypeScript ESLint 8.37.0 (コード静的解析)
-- Tailwind CSS 4.1.11 + shadcn/ui (UI フレームワーク)
-- Jotai 2.12.3 (状態管理)
-- React Router 7.1.1 (ルーティング)
-- Axios 1.11.0 (HTTP クライアント)
+- Node.js (TypeScript ランタイム)
+- React + TypeScript (フロントエンドフレームワーク)
+- Vite (ビルドツール・開発サーバー)
+- ESLint (コード静的解析)
+- Tailwind CSS + shadcn/ui (UI フレームワーク)
+- Jotai (状態管理)
+- React Router (ルーティング)
+- Axios (HTTP クライアント)
 - MSAL (Entra ID 認証)
 
 ## ローカル開発環境のセットアップ
