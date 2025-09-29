@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@azure/msal-browser": "^4.20.0",
+    "@azure/msal-browser": "^4.24.0",
     "@azure/msal-react": "^3.0.16",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-dialog": "^1.1.14",
