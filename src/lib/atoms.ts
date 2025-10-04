@@ -612,7 +612,7 @@ export const toggleSelectedChoiceAtom = atom(null, (get, set, idx: number) => {
   if (!questionSelector) return;
 
   // 複数個の回答が存在する場合はidx番目のみ選択状態を反転し、
-  // 1つの回答のみが存在する場合はidx番目を選択・idx番目以外を未選択とする
+  // 1つの回答のみが存在する場合もidx番目の選択状態を反転し、idx番目以外を未選択とする
   set(questionSelectorAtom, {
     ...questionSelector,
     choices: questionSelector.choices.map(
@@ -622,7 +622,9 @@ export const toggleSelectedChoiceAtom = atom(null, (get, set, idx: number) => {
           ? i === idx
             ? !choice.isSelected
             : choice.isSelected
-          : i === idx,
+          : i === idx
+          ? !choice.isSelected
+          : false,
       })
     ),
   });
