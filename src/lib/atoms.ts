@@ -611,8 +611,10 @@ export const toggleSelectedChoiceAtom = atom(null, (get, set, idx: number) => {
   const questionSelector: QuestionSelector = get(questionSelectorAtom);
   if (!questionSelector) return;
 
-  // 複数個の回答が存在する場合はidx番目のみ選択状態を反転し、
-  // 1つの回答のみが存在する場合はidx番目を選択・idx番目以外を未選択とする
+  // 複数個の回答が存在する場合（isMultiplied=true）はidx番目のみ選択状態を反転し、その他はそのまま
+  // 1つの回答のみが存在する場合（isMultiplied=false）は以下のように動作：
+  //   - idx番目が選択されている場合：idx番目を非選択にする
+  //   - idx番目が選択されていない場合：idx番目を選択・その他を非選択にする
   set(questionSelectorAtom, {
     ...questionSelector,
     choices: questionSelector.choices.map(
@@ -622,7 +624,9 @@ export const toggleSelectedChoiceAtom = atom(null, (get, set, idx: number) => {
           ? i === idx
             ? !choice.isSelected
             : choice.isSelected
-          : i === idx,
+          : i === idx
+          ? !choice.isSelected
+          : false,
       })
     ),
   });
