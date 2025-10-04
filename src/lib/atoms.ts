@@ -623,8 +623,8 @@ export const toggleSelectedChoiceAtom = atom(null, (get, set, idx: number) => {
             ? !choice.isSelected
             : choice.isSelected
           : i === idx
-          ? !choice.isSelected
-          : false,
+            ? !choice.isSelected
+            : false,
       })
     ),
   });
