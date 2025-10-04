@@ -620,13 +620,10 @@ export const toggleSelectedChoiceAtom = atom(null, (get, set, idx: number) => {
     choices: questionSelector.choices.map(
       (choice: ChoiceAndSelect, i: number) => ({
         ...choice,
-        isSelected: questionSelector.isMultiplied
-          ? i === idx
+        isSelected:
+          i === idx
             ? !choice.isSelected
-            : choice.isSelected
-          : i === idx
-          ? !choice.isSelected
-          : false,
+            : questionSelector.isMultiplied && choice.isSelected,
       })
     ),
   });
