@@ -6,9 +6,9 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default defineConfig(
-  { ignores: ["dist", "src/components/ui", "src/hooks/ui", "src/lib"] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
+  { ignores: ["dist", "src/components/ui", "src/hooks/ui", "src/lib"] },
   {
     files: ["**/*.{ts,tsx}"],
     languageOptions: {

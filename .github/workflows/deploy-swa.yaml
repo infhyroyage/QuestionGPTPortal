@@ -10,7 +10,6 @@ on:
       - components.json
       - index.html
       - package*.json
-      - postcss.config.js
       - resources/base.bicep
       - staticwebapp.config.json
       - tailwind.config.js
