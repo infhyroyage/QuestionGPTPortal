@@ -21,7 +21,9 @@ export default function NotFoundPage() {
       <div className="pt-[52px] flex items-center justify-center min-h-screen flex-col space-y-4">
         <Frown size={100} />
         <div>Not Found</div>
-        <Button onClick={onClick}>トップページへ戻る</Button>
+        <Button onClick={onClick} size="lg">
+          トップページへ戻る
+        </Button>
       </div>
     </>
   );

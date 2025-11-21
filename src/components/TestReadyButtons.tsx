@@ -94,6 +94,11 @@ export default function TestReadyButtons({
     }
   }, [histories, navigate, order, testId]);
 
+  // トップページへ戻るボタンのクリック時の動作
+  const onClickRootPageButton = useCallback(() => {
+    navigate("/");
+  }, [navigate]);
+
   return (
     histories &&
     order && (
@@ -151,6 +156,9 @@ export default function TestReadyButtons({
             )}
           </>
         )}
+        <Button onClick={onClickRootPageButton} size="lg">
+          トップページへ戻る
+        </Button>
       </div>
     )
   );
