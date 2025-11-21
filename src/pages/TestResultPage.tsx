@@ -1,5 +1,6 @@
 import TestResultAccordion from "@/components/TestResultAccordion";
 import TopBar from "@/components/TopBar";
+import { Button } from "@/components/ui/button";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import { fetchProgressesAtom } from "@/lib/atoms";
 import { accessBackend } from "@/lib/backend";
@@ -7,7 +8,7 @@ import { History } from "@/types/atoms";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtomValue } from "jotai";
 import { Loader2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useNavigationType, useParams } from "react-router";
 
 /**
@@ -27,7 +28,12 @@ export default function TestResultPage() {
 
   const systemErrorToast = useSystemErrorToast();
 
-  //回答履歴とテストを解く問題番号の順番の整合性が取れない、またはブラウザバックした場合はトップページにリダイレクト
+  // トップページへ戻るボタンのクリック時の動作
+  const onClick = useCallback(() => {
+    navigate("/");
+  }, [navigate]);
+
+  // 回答履歴とテストを解く問題番号の順番の整合性が取れない、またはブラウザバックした場合はトップページにリダイレクト
   useEffect(() => {
     if (
       !order ||
@@ -99,6 +105,9 @@ export default function TestResultPage() {
                 100
             )}%)`}
           </h3>
+          <Button onClick={onClick} size="lg">
+            トップページへ戻る
+          </Button>
           {isFinishedDelete ? (
             <TestResultAccordion />
           ) : (
