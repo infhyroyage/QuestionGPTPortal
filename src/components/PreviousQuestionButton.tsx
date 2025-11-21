@@ -7,7 +7,7 @@ import { Button } from "./ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 /**
- * 前問題遷移ボタンのコンポーネント
+ * 前問題遷移ボタンのコンポーネント（TopBar用）
  * @returns 前問題遷移ボタンのコンポーネント
  */
 export default function PreviousQuestionButton() {
@@ -42,8 +42,14 @@ export default function PreviousQuestionButton() {
     order && (
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button size="icon" disabled={isDisabled} onClick={onClick}>
-            <ChevronLeft />
+          <Button
+            className="size-7"
+            size="icon"
+            variant="outline"
+            disabled={isDisabled}
+            onClick={onClick}
+          >
+            <ChevronLeft className="size-4" />
           </Button>
         </TooltipTrigger>
         <TooltipContent side="bottom" align="center">

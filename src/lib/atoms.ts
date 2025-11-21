@@ -604,6 +604,81 @@ export const toggleDarkModeAtom = atom(
 );
 
 /**
+ * 過去の回答履歴から回答結果を復元するatom(write only)
+ */
+export const restoreAnswerFromHistoriesAtom = atom(
+  null,
+  async (
+    get,
+    set,
+    testId: string,
+    questionNumber: string,
+    instance: IPublicClientApplication,
+    accountInfo: AccountInfo | null
+  ) => {
+    // 回答履歴とorderがまだ存在しない場合は何も復元しない
+    const histories: Histories = get(historiesAtom);
+    const order: Order = get(orderAtom);
+    if (!histories || !order) {
+      return false;
+    }
+
+    // 現在の問題番号がorderの中で何番目か取得
+    const currentQuestionNumber = parseInt(questionNumber);
+    const currentIndex = order.indexOf(currentQuestionNumber);
+
+    // 該当する回答履歴が存在しない場合は何も復元しない
+    if (currentIndex < 0 || currentIndex >= histories.length) {
+      return false;
+    }
+
+    // 問題文・選択肢がまだ存在しない場合は何も復元しない
+    const questionSelector: QuestionSelector = get(questionSelectorAtom);
+    if (!questionSelector) {
+      return false;
+    }
+
+    // 回答履歴から選択状態と正解情報を取得
+    const history = histories[currentIndex];
+
+    // 選択肢の選択状態を復元
+    set(questionSelectorAtom, {
+      ...questionSelector,
+      choices: questionSelector.choices.map(
+        (choice: ChoiceAndSelect, i: number) => ({
+          ...choice,
+          isSelected: history.selectedIdxes.includes(i),
+        })
+      ),
+    });
+
+    // [GET] /tests/{testId}/answers/{questionNumber}にアクセスして解説文を取得
+    const getAnswerRes: GetAnswer = await accessBackend<GetAnswer>(
+      "GET",
+      `/tests/${testId}/answers/${questionNumber}`,
+      instance,
+      accountInfo
+    );
+
+    // 正解・解説文を復元
+    const correctFlags: boolean[] = [
+      ...Array(questionSelector.choices.length),
+    ].map((_, idx: number) => history.correctIdxes.includes(idx));
+
+    set(answerExplanationAtom, {
+      correctFlags,
+      explanations: getAnswerRes.explanations || [],
+      isSubmitting: false,
+      isCorrect: history.isCorrect,
+      correctIdxes: history.correctIdxes,
+      isSavedProgress: true,
+    });
+
+    return true;
+  }
+);
+
+/**
  * 選択肢の選択状態の切り替えを管理するatom(write only)
  */
 export const toggleSelectedChoiceAtom = atom(null, (get, set, idx: number) => {

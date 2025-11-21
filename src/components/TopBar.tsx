@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router";
 import DarkModeSwitchButton from "./DarkModeSwitchButton";
 import FavoriteButton from "./FavoriteButton";
+import PreviousQuestionButton from "./PreviousQuestionButton";
 
 /**
  * トップバーのコンポーネント
@@ -104,6 +105,11 @@ export default function TopBar({ title }: TopBarProps) {
           )}
         </div>
         <div className="flex items-center space-x-2 min-w-fit">
+          {isTestQuestionPage && (
+            <div className="shrink-0">
+              <PreviousQuestionButton />
+            </div>
+          )}
           <div className="shrink-0">
             <DarkModeSwitchButton />
           </div>

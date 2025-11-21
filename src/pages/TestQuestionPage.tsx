@@ -11,6 +11,7 @@ import {
   fetchQuestionSelectorAtom,
   fetchTranslationSubjectChoiceAtom,
   resetAtomsForTestQuestionAtom,
+  restoreAnswerFromHistoriesAtom,
 } from "@/lib/atoms";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
@@ -30,12 +31,14 @@ export default function TestQuestionPage() {
     fetchTranslationSubjectChoiceAtom
   );
   const resetAtomsForTestQuestion = useSetAtom(resetAtomsForTestQuestionAtom);
+  const restoreAnswerFromHistories = useSetAtom(restoreAnswerFromHistoriesAtom);
   const [isOccurredTranslationFailed, setIsOccurredTranslationFailed] =
     useState<boolean>(false);
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
   const fetchQuestionSelectorCalledRef = useRef<boolean>(false);
   const fetchTranslationSubjectChoiceCalledRef = useRef<boolean>(false);
+  const restoreAnswerCalledRef = useRef<boolean>(false);
   const previousQuestionNumberRef = useRef<string | undefined>(undefined);
 
   const navigate = useNavigate();
@@ -52,6 +55,7 @@ export default function TestQuestionPage() {
     if (previousQuestionNumberRef.current !== questionNumber) {
       fetchQuestionSelectorCalledRef.current = false;
       fetchTranslationSubjectChoiceCalledRef.current = false;
+      restoreAnswerCalledRef.current = false;
       previousQuestionNumberRef.current = questionNumber;
     }
   }, [questionNumber]);
@@ -114,6 +118,43 @@ export default function TestQuestionPage() {
     instance,
     accountInfo,
     systemErrorToast,
+  ]);
+
+  // 問題文・選択肢の取得直後に、回答履歴が存在する場合は復元
+  useEffect(() => {
+    if (
+      !testId ||
+      !questionNumber ||
+      !questionSelector ||
+      !histories ||
+      !order ||
+      restoreAnswerCalledRef.current
+    ) {
+      return;
+    }
+    restoreAnswerCalledRef.current = true;
+    (async () => {
+      try {
+        await restoreAnswerFromHistories(
+          testId,
+          questionNumber,
+          instance,
+          accountInfo
+        );
+      } catch (e) {
+        // 回答履歴の復元に失敗した場合は何もしない（新規回答として扱う）
+        console.error("Failed to restore answer from histories:", e);
+      }
+    })();
+  }, [
+    testId,
+    questionNumber,
+    questionSelector,
+    histories,
+    order,
+    restoreAnswerFromHistories,
+    instance,
+    accountInfo,
   ]);
 
   // 問題文・選択肢の取得直後に、それらの翻訳文を1度だけ取得
