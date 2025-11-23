@@ -519,6 +519,14 @@ export const resetAtomsForTestQuestionAtom = atom(null, (_, set) => {
 });
 
 /**
+ * コミュニティ情報と翻訳を初期値に戻すatom(write only)
+ */
+export const resetCommunityAtom = atom(null, (_, set) => {
+  set(communityAtom, undefined);
+  set(translationCommunityAtom, undefined);
+});
+
+/**
  * 回答履歴を保存するatom(write only)
  */
 export const saveProgressAtom = atom(

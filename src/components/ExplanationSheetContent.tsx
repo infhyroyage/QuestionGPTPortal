@@ -7,10 +7,11 @@ import {
   fetchTranslationCommunityAtom,
   fetchTranslationExplanationAtom,
   fetchTranslationSubjectChoiceAtom,
+  resetCommunityAtom,
 } from "@/lib/atoms";
 import { Choice } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { Info, RefreshCw } from "lucide-react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
@@ -37,6 +38,7 @@ export default function ExplanationSheetContent() {
   const translationSubjectChoice = useAtomValue(
     fetchTranslationSubjectChoiceAtom
   );
+  const resetCommunity = useSetAtom(resetCommunityAtom);
   const [isOccurredTranslationFailed, setIsOccurredTranslationFailed] =
     useState<boolean>(false);
   const [isOccurredSystemError, setIsOccurredSystemError] =
@@ -62,9 +64,11 @@ export default function ExplanationSheetContent() {
     }
     setIsRefreshingCommunity(true);
     try {
+      // コミュニティ情報と翻訳をクリア（ローディング表示にするため）
+      resetCommunity();
       // コミュニティ情報を再取得
       await fetchCommunity(testId, questionNumber, instance, accountInfo);
-      // 翻訳も再取得
+      // 翻訳も再取得するためにフラグをリセット
       fetchTranslationCommunityCalledRef.current = false;
       setIsOccurredTranslationFailed(false);
     } catch (e) {
@@ -235,7 +239,7 @@ export default function ExplanationSheetContent() {
             variant="ghost"
             size="icon"
             onClick={handleRefreshCommunity}
-            disabled={isRefreshingCommunity}
+            disabled={community === undefined || isRefreshingCommunity}
             title="コミュニティ情報を再取得"
           >
             <RefreshCw
