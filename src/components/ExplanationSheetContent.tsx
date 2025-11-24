@@ -7,15 +7,17 @@ import {
   fetchTranslationCommunityAtom,
   fetchTranslationExplanationAtom,
   fetchTranslationSubjectChoiceAtom,
+  resetCommunityAtom,
 } from "@/lib/atoms";
 import { Choice } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
-import { useAtom, useAtomValue } from "jotai";
-import { Info } from "lucide-react";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { Info, RefreshCw } from "lucide-react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import SelectorButton from "./SelectorButton";
 import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import { Skeleton } from "./ui/skeleton";
 
@@ -36,6 +38,7 @@ export default function ExplanationSheetContent() {
   const translationSubjectChoice = useAtomValue(
     fetchTranslationSubjectChoiceAtom
   );
+  const resetCommunity = useSetAtom(resetCommunityAtom);
   const [isOccurredTranslationFailed, setIsOccurredTranslationFailed] =
     useState<boolean>(false);
   const [isOccurredSystemError, setIsOccurredSystemError] =
@@ -51,6 +54,25 @@ export default function ExplanationSheetContent() {
 
   const translationFailedToast = useTranslationFailedToast();
   const systemErrorToast = useSystemErrorToast();
+
+  // コミュニティ情報を再取得する関数
+  const handleRefreshCommunity = async () => {
+    if (!testId || !questionNumber || community === undefined) {
+      return;
+    }
+    try {
+      // コミュニティ情報と翻訳をクリア（ローディング表示にするため）
+      resetCommunity();
+      // コミュニティ情報を再生成（isRefresh: trueでPOSTのみ実行）
+      await fetchCommunity(testId, questionNumber, instance, accountInfo, true);
+      // 翻訳も再取得するためにフラグをリセット
+      fetchTranslationCommunityCalledRef.current = false;
+      setIsOccurredTranslationFailed(false);
+    } catch (e) {
+      setIsOccurredSystemError(true);
+      systemErrorToast(e);
+    }
+  };
 
   // 問題番号が変更された場合、API呼び出しフラグをリセット
   useEffect(() => {
@@ -204,9 +226,23 @@ export default function ExplanationSheetContent() {
           ))}
         </div>
         <Separator className="my-6" />
-        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight my-4">
-          コミュニティ回答要約
-        </h4>
+        <div className="flex items-center justify-between my-4">
+          <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+            コミュニティ回答要約
+          </h4>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleRefreshCommunity}
+            disabled={community === undefined}
+            title="コミュニティ情報を再取得"
+          >
+            <RefreshCw
+              className={community === undefined ? "animate-spin" : ""}
+              size={20}
+            />
+          </Button>
+        </div>
         {community === undefined ? (
           <>
             <div className="space-y-1">
