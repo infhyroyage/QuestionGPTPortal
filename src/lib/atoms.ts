@@ -194,7 +194,8 @@ export const fetchCommunityAtom = atom(
     testId: string,
     questionNumber: string,
     instance: IPublicClientApplication,
-    accountInfo: AccountInfo | null
+    accountInfo: AccountInfo | null,
+    isRefresh: boolean = false
   ) => {
     // テスト詳細情報がまだ存在しない場合は何も取得・更新しない
     const testDetails: TestDetails = get(testDetailsAtom);
@@ -220,21 +221,12 @@ export const fetchCommunityAtom = atom(
       return;
     }
 
-    // [GET] /tests/{testId}/communities/{questionNumber}にアクセスして事前に生成したコミュニティ情報を取得
-    // もし取得できなかった場合、[POST] /tests/{testId}/communities/{questionNumber}にアクセスしてコミュニティ情報を生成
     let discussionsSummary: string | undefined = undefined;
     let votes: string[] | undefined = undefined;
-    const getCommunityRes: GetCommunityRes =
-      await accessBackend<GetCommunityRes>(
-        "GET",
-        `/tests/${testId}/communities/${questionNumber}`,
-        instance,
-        accountInfo
-      );
-    if (getCommunityRes.isExisted) {
-      discussionsSummary = getCommunityRes.discussionsSummary;
-      votes = getCommunityRes.votes;
-    } else {
+    if (isRefresh) {
+      // コミュニティ情報再取得の場合、コミュニティ情報に対する翻訳文を初期化してから、
+      // [POST] /tests/{testId}/communities/{questionNumber}にアクセス
+      set(translationCommunityAtom, undefined);
       const postCommunityRes: PostCommunityRes =
         await accessBackend<PostCommunityRes>(
           "POST",
@@ -244,6 +236,30 @@ export const fetchCommunityAtom = atom(
         );
       discussionsSummary = postCommunityRes.discussionsSummary;
       votes = postCommunityRes.votes;
+    } else {
+      // コミュニティ情報再取得ではない場合、[GET] /tests/{testId}/communities/{questionNumber}にアクセスして事前に生成したコミュニティ情報を取得
+      // もし取得できなかった場合、[POST] /tests/{testId}/communities/{questionNumber}にアクセス
+      const getCommunityRes: GetCommunityRes =
+        await accessBackend<GetCommunityRes>(
+          "GET",
+          `/tests/${testId}/communities/${questionNumber}`,
+          instance,
+          accountInfo
+        );
+      if (getCommunityRes.isExisted) {
+        discussionsSummary = getCommunityRes.discussionsSummary;
+        votes = getCommunityRes.votes;
+      } else {
+        const postCommunityRes: PostCommunityRes =
+          await accessBackend<PostCommunityRes>(
+            "POST",
+            `/tests/${testId}/communities/${questionNumber}`,
+            instance,
+            accountInfo
+          );
+        discussionsSummary = postCommunityRes.discussionsSummary;
+        votes = postCommunityRes.votes;
+      }
     }
     set(communityAtom, {
       discussionsSummary,
@@ -516,6 +532,14 @@ export const resetAtomsForTestQuestionAtom = atom(null, (_, set) => {
   set(translationCommunityAtom, undefined);
   set(translationSubjectChoiceAtom, undefined);
   set(translationExplanationAtom, undefined);
+});
+
+/**
+ * コミュニティ情報と翻訳を初期値に戻すatom(write only)
+ */
+export const resetCommunityAtom = atom(null, (_, set) => {
+  set(communityAtom, undefined);
+  set(translationCommunityAtom, undefined);
 });
 
 /**
