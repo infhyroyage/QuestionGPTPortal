@@ -43,8 +43,6 @@ export default function ExplanationSheetContent() {
     useState<boolean>(false);
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
-  const [isRefreshingCommunity, setIsRefreshingCommunity] =
-    useState<boolean>(false);
   const fetchCommunityCalledRef = useRef<boolean>(false);
   const fetchTranslationExplanationCalledRef = useRef<boolean>(false);
   const fetchTranslationCommunityCalledRef = useRef<boolean>(false);
@@ -59,10 +57,9 @@ export default function ExplanationSheetContent() {
 
   // コミュニティ情報を再取得する関数
   const handleRefreshCommunity = async () => {
-    if (!testId || !questionNumber || isRefreshingCommunity) {
+    if (!testId || !questionNumber || community === undefined) {
       return;
     }
-    setIsRefreshingCommunity(true);
     try {
       // コミュニティ情報と翻訳をクリア（ローディング表示にするため）
       resetCommunity();
@@ -74,8 +71,6 @@ export default function ExplanationSheetContent() {
     } catch (e) {
       setIsOccurredSystemError(true);
       systemErrorToast(e);
-    } finally {
-      setIsRefreshingCommunity(false);
     }
   };
 
@@ -243,7 +238,7 @@ export default function ExplanationSheetContent() {
             title="コミュニティ情報を再取得"
           >
             <RefreshCw
-              className={isRefreshingCommunity ? "animate-spin" : ""}
+              className={community === undefined ? "animate-spin" : ""}
               size={20}
             />
           </Button>
