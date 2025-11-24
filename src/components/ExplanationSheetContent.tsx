@@ -239,7 +239,7 @@ export default function ExplanationSheetContent() {
             variant="ghost"
             size="icon"
             onClick={handleRefreshCommunity}
-            disabled={community === undefined || isRefreshingCommunity}
+            disabled={community === undefined}
             title="コミュニティ情報を再取得"
           >
             <RefreshCw
