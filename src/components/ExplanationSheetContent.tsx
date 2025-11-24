@@ -66,8 +66,8 @@ export default function ExplanationSheetContent() {
     try {
       // コミュニティ情報と翻訳をクリア（ローディング表示にするため）
       resetCommunity();
-      // コミュニティ情報を再取得
-      await fetchCommunity(testId, questionNumber, instance, accountInfo);
+      // コミュニティ情報を再生成（isRefresh: trueでPOSTのみ実行）
+      await fetchCommunity(testId, questionNumber, instance, accountInfo, true);
       // 翻訳も再取得するためにフラグをリセット
       fetchTranslationCommunityCalledRef.current = false;
       setIsOccurredTranslationFailed(false);
