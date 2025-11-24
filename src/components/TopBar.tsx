@@ -106,12 +106,16 @@ export default function TopBar({ title }: TopBarProps) {
           )}
         </div>
         <div className="flex items-center space-x-2 min-w-fit">
-          <div className="shrink-0">
-            <PreviousAnsweredQuestionButton />
-          </div>
-          <div className="shrink-0">
-            <NextAnsweredQuestionButton />
-          </div>
+          {isTestQuestionPage && questionNumber && (
+            <>
+              <div className="shrink-0">
+                <PreviousAnsweredQuestionButton />
+              </div>
+              <div className="shrink-0">
+                <NextAnsweredQuestionButton />
+              </div>
+            </>
+          )}
           <div className="shrink-0">
             <DarkModeSwitchButton />
           </div>
