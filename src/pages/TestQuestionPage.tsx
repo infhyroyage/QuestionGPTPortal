@@ -11,6 +11,7 @@ import {
   fetchQuestionSelectorAtom,
   fetchTranslationSubjectChoiceAtom,
   resetAtomsForTestQuestionAtom,
+  restoreSelectedChoicesAtom,
 } from "@/lib/atoms";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
@@ -30,12 +31,14 @@ export default function TestQuestionPage() {
     fetchTranslationSubjectChoiceAtom
   );
   const resetAtomsForTestQuestion = useSetAtom(resetAtomsForTestQuestionAtom);
+  const restoreSelectedChoices = useSetAtom(restoreSelectedChoicesAtom);
   const [isOccurredTranslationFailed, setIsOccurredTranslationFailed] =
     useState<boolean>(false);
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
   const fetchQuestionSelectorCalledRef = useRef<boolean>(false);
   const fetchTranslationSubjectChoiceCalledRef = useRef<boolean>(false);
+  const restoreSelectedChoicesCalledRef = useRef<boolean>(false);
   const previousQuestionNumberRef = useRef<string | undefined>(undefined);
 
   const navigate = useNavigate();
@@ -52,6 +55,7 @@ export default function TestQuestionPage() {
     if (previousQuestionNumberRef.current !== questionNumber) {
       fetchQuestionSelectorCalledRef.current = false;
       fetchTranslationSubjectChoiceCalledRef.current = false;
+      restoreSelectedChoicesCalledRef.current = false;
       previousQuestionNumberRef.current = questionNumber;
     }
   }, [questionNumber]);
@@ -146,6 +150,20 @@ export default function TestQuestionPage() {
     accountInfo,
     translationFailedToast,
   ]);
+
+  // 問題文・選択肢の取得直後に、回答済み問題であれば選択状態とanswerExplanationを1度だけ復元
+  useEffect(() => {
+    if (
+      !questionNumber ||
+      !questionSelector ||
+      questionSelector.questionNumber !== questionNumber ||
+      restoreSelectedChoicesCalledRef.current
+    ) {
+      return;
+    }
+    restoreSelectedChoicesCalledRef.current = true;
+    restoreSelectedChoices(questionNumber);
+  }, [questionNumber, questionSelector, restoreSelectedChoices]);
 
   return (
     testId &&

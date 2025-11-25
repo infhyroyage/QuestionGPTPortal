@@ -628,6 +628,57 @@ export const toggleDarkModeAtom = atom(
 );
 
 /**
+ * 回答済み問題の選択状態を復元するatom(write only)
+ * @param questionNumber 復元対象の問題番号
+ * @returns 復元に成功したらtrue、回答済みでなければfalse
+ */
+export const restoreSelectedChoicesAtom = atom(
+  null,
+  (get, set, questionNumber: string) => {
+    const histories: Histories = get(historiesAtom);
+    const order: Order = get(orderAtom);
+    const questionSelector: QuestionSelector = get(questionSelectorAtom);
+
+    if (!histories || !order || !questionSelector) {
+      return false;
+    }
+
+    const orderIndex = order.indexOf(parseInt(questionNumber));
+    if (orderIndex < 0 || orderIndex >= histories.length) {
+      return false; // 回答済みでない
+    }
+
+    const history = histories[orderIndex];
+
+    // 選択状態を復元
+    set(questionSelectorAtom, {
+      ...questionSelector,
+      choices: questionSelector.choices.map(
+        (choice: ChoiceAndSelect, idx: number) => ({
+          ...choice,
+          isSelected: history.selectedIdxes.includes(idx),
+        })
+      ),
+    });
+
+    // answerExplanationを設定（回答済み状態として表示）
+    const correctFlags: boolean[] = questionSelector.choices.map((_, idx) =>
+      history.correctIdxes.includes(idx)
+    );
+    set(answerExplanationAtom, {
+      correctFlags,
+      explanations: [], // 解説はAPIから別途取得
+      isSubmitting: false,
+      isCorrect: history.isCorrect,
+      correctIdxes: history.correctIdxes,
+      isSavedProgress: true, // すでに保存済み
+    });
+
+    return true;
+  }
+);
+
+/**
  * 選択肢の選択状態の切り替えを管理するatom(write only)
  */
 export const toggleSelectedChoiceAtom = atom(null, (get, set, idx: number) => {
