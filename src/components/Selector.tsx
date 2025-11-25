@@ -22,9 +22,9 @@ export default function Selector() {
     fetchTranslationSubjectChoiceAtom
   );
 
-  // 回答・解説が生成中の場合は、選択肢をすべて非活性とする
+  // 回答・解説が生成中または既に生成済みの場合は、選択肢をすべて非活性とする
   const isDisabledSelectorButtons = useMemo<boolean>(
-    () => !!answerExplanation && answerExplanation.isSubmitting,
+    () => !!answerExplanation,
     [answerExplanation]
   );
 

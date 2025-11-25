@@ -652,3 +652,26 @@ export const toggleSelectedChoiceAtom = atom(null, (get, set, idx: number) => {
     ),
   });
 });
+
+/**
+ * 回答済み問題の選択肢の選択状態を復元するatom(write only)
+ */
+export const restoreSelectedChoicesAtom = atom(
+  null,
+  (get, set, selectedIdxes: number[]) => {
+    // まだ選択肢を取得していない場合は何もしない
+    const questionSelector: QuestionSelector = get(questionSelectorAtom);
+    if (!questionSelector) return;
+
+    // 選択肢の選択状態を復元
+    set(questionSelectorAtom, {
+      ...questionSelector,
+      choices: questionSelector.choices.map(
+        (choice: ChoiceAndSelect, i: number) => ({
+          ...choice,
+          isSelected: selectedIdxes.includes(i),
+        })
+      ),
+    });
+  }
+);

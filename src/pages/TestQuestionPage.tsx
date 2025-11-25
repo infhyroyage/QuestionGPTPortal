@@ -7,10 +7,12 @@ import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import useTranslationFailedToast from "@/hooks/useTranslationFailedToast";
 import {
+  fetchAnswerExplanationAtom,
   fetchProgressesAtom,
   fetchQuestionSelectorAtom,
   fetchTranslationSubjectChoiceAtom,
   resetAtomsForTestQuestionAtom,
+  restoreSelectedChoicesAtom,
 } from "@/lib/atoms";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
@@ -29,7 +31,11 @@ export default function TestQuestionPage() {
   const [translationSubjectChoice, fetchTranslationSubjectChoice] = useAtom(
     fetchTranslationSubjectChoiceAtom
   );
+  const [answerExplanation, setAnswerExplanation] = useAtom(
+    fetchAnswerExplanationAtom
+  );
   const resetAtomsForTestQuestion = useSetAtom(resetAtomsForTestQuestionAtom);
+  const restoreSelectedChoices = useSetAtom(restoreSelectedChoicesAtom);
   const [isOccurredTranslationFailed, setIsOccurredTranslationFailed] =
     useState<boolean>(false);
   const [isOccurredSystemError, setIsOccurredSystemError] =
@@ -37,6 +43,7 @@ export default function TestQuestionPage() {
   const fetchQuestionSelectorCalledRef = useRef<boolean>(false);
   const fetchTranslationSubjectChoiceCalledRef = useRef<boolean>(false);
   const previousQuestionNumberRef = useRef<string | undefined>(undefined);
+  const restoredAnswerRef = useRef<boolean>(false);
 
   const navigate = useNavigate();
   const navigationType = useNavigationType();
@@ -52,6 +59,7 @@ export default function TestQuestionPage() {
     if (previousQuestionNumberRef.current !== questionNumber) {
       fetchQuestionSelectorCalledRef.current = false;
       fetchTranslationSubjectChoiceCalledRef.current = false;
+      restoredAnswerRef.current = false;
       previousQuestionNumberRef.current = questionNumber;
     }
   }, [questionNumber]);
@@ -114,6 +122,56 @@ export default function TestQuestionPage() {
     instance,
     accountInfo,
     systemErrorToast,
+  ]);
+
+  // 問題文・選択肢の取得直後に、回答済み問題の場合は選択肢と回答・解説を復元
+  useEffect(() => {
+    if (
+      !questionNumber ||
+      !questionSelector ||
+      !histories ||
+      !order ||
+      restoredAnswerRef.current ||
+      answerExplanation // 既に回答・解説が存在する場合はスキップ
+    ) {
+      return;
+    }
+
+    // 現在の問題番号がorderのどのインデックスか取得
+    const currentIndex = order.indexOf(parseInt(questionNumber));
+    if (currentIndex === -1 || currentIndex >= histories.length) {
+      // 回答済みでない場合は何もしない
+      return;
+    }
+
+    // 回答済み問題の場合、選択肢の選択状態と回答・解説を復元
+    restoredAnswerRef.current = true;
+    const history = histories[currentIndex];
+
+    // 選択肢の選択状態を復元
+    restoreSelectedChoices(history.selectedIdxes);
+
+    // 回答・解説を復元
+    const correctFlags = questionSelector.choices.map((_, idx) =>
+      history.correctIdxes.includes(idx)
+    );
+
+    setAnswerExplanation({
+      correctFlags,
+      explanations: [], // 解説文は後で取得（必要に応じて）
+      isSubmitting: false,
+      isCorrect: history.isCorrect,
+      correctIdxes: history.correctIdxes,
+      isSavedProgress: true,
+    });
+  }, [
+    questionNumber,
+    questionSelector,
+    histories,
+    order,
+    answerExplanation,
+    setAnswerExplanation,
+    restoreSelectedChoices,
   ]);
 
   // 問題文・選択肢の取得直後に、それらの翻訳文を1度だけ取得
