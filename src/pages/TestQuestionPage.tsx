@@ -11,7 +11,7 @@ import {
   fetchQuestionSelectorAtom,
   fetchTranslationSubjectChoiceAtom,
   resetAtomsForTestQuestionAtom,
-  restoreSelectedChoicesAtom,
+  restoreAnsweredQuestionStateAtom,
 } from "@/lib/atoms";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
@@ -31,14 +31,14 @@ export default function TestQuestionPage() {
     fetchTranslationSubjectChoiceAtom
   );
   const resetAtomsForTestQuestion = useSetAtom(resetAtomsForTestQuestionAtom);
-  const restoreSelectedChoices = useSetAtom(restoreSelectedChoicesAtom);
+  const restoreAnsweredQuestionState = useSetAtom(restoreAnsweredQuestionStateAtom);
   const [isOccurredTranslationFailed, setIsOccurredTranslationFailed] =
     useState<boolean>(false);
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
   const fetchQuestionSelectorCalledRef = useRef<boolean>(false);
   const fetchTranslationSubjectChoiceCalledRef = useRef<boolean>(false);
-  const restoreSelectedChoicesCalledRef = useRef<boolean>(false);
+  const restoreAnsweredQuestionStateCalledRef = useRef<boolean>(false);
   const previousQuestionNumberRef = useRef<string | undefined>(undefined);
 
   const navigate = useNavigate();
@@ -55,7 +55,7 @@ export default function TestQuestionPage() {
     if (previousQuestionNumberRef.current !== questionNumber) {
       fetchQuestionSelectorCalledRef.current = false;
       fetchTranslationSubjectChoiceCalledRef.current = false;
-      restoreSelectedChoicesCalledRef.current = false;
+      restoreAnsweredQuestionStateCalledRef.current = false;
       previousQuestionNumberRef.current = questionNumber;
     }
   }, [questionNumber]);
@@ -151,19 +151,42 @@ export default function TestQuestionPage() {
     translationFailedToast,
   ]);
 
-  // 問題文・選択肢の取得直後に、回答済み問題であれば選択状態とanswerExplanationを1度だけ復元
+  // 問題文・選択肢の取得直後に、回答済み問題であれば選択状態と解説を1度だけ復元
   useEffect(() => {
     if (
+      !testId ||
       !questionNumber ||
       !questionSelector ||
       questionSelector.questionNumber !== questionNumber ||
-      restoreSelectedChoicesCalledRef.current
+      isOccurredSystemError ||
+      restoreAnsweredQuestionStateCalledRef.current
     ) {
       return;
     }
-    restoreSelectedChoicesCalledRef.current = true;
-    restoreSelectedChoices(questionNumber);
-  }, [questionNumber, questionSelector, restoreSelectedChoices]);
+    restoreAnsweredQuestionStateCalledRef.current = true;
+    (async () => {
+      try {
+        await restoreAnsweredQuestionState(
+          testId,
+          questionNumber,
+          instance,
+          accountInfo
+        );
+      } catch (e) {
+        setIsOccurredSystemError(true);
+        systemErrorToast(e);
+      }
+    })();
+  }, [
+    testId,
+    questionNumber,
+    questionSelector,
+    isOccurredSystemError,
+    restoreAnsweredQuestionState,
+    instance,
+    accountInfo,
+    systemErrorToast,
+  ]);
 
   return (
     testId &&

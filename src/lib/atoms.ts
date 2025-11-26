@@ -632,13 +632,23 @@ export const toggleDarkModeAtom = atom(
 );
 
 /**
- * 回答済み問題の選択状態を復元するatom(write only)
+ * 回答済み問題の選択状態と解説を復元するatom(write only)
+ * @param testId テストID
  * @param questionNumber 復元対象の問題番号
+ * @param instance MSALインスタンス
+ * @param accountInfo アカウント情報
  * @returns 復元に成功したらtrue、回答済みでなければfalse
  */
-export const restoreSelectedChoicesAtom = atom(
+export const restoreAnsweredQuestionStateAtom = atom(
   null,
-  (get, set, questionNumber: string) => {
+  async (
+    get,
+    set,
+    testId: string,
+    questionNumber: string,
+    instance: IPublicClientApplication,
+    accountInfo: AccountInfo | null
+  ) => {
     const histories: Histories = get(historiesAtom);
     const order: Order = get(orderAtom);
     const questionSelector: QuestionSelector = get(questionSelectorAtom);
@@ -665,13 +675,21 @@ export const restoreSelectedChoicesAtom = atom(
       ),
     });
 
+    // APIから解説を取得
+    const getAnswerRes: GetAnswer = await accessBackend<GetAnswer>(
+      "GET",
+      `/tests/${testId}/answers/${questionNumber}`,
+      instance,
+      accountInfo
+    );
+
     // answerExplanationを設定（回答済み状態として表示）
     const correctFlags: boolean[] = questionSelector.choices.map((_, idx) =>
       history.correctIdxes.includes(idx)
     );
     set(answerExplanationAtom, {
       correctFlags,
-      explanations: [], // 解説はAPIから別途取得
+      explanations: getAnswerRes.explanations || [],
       isSubmitting: false,
       isCorrect: history.isCorrect,
       correctIdxes: history.correctIdxes,
