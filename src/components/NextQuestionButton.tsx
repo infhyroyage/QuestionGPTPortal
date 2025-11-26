@@ -25,10 +25,25 @@ export default function NextQuestionButton() {
   const { instance, accounts } = useMsal();
   const accountInfo = useAccount(accounts[0] || {});
 
-  // 回答履歴を保存していない場合は、次問題遷移ボタンを非活性とする
+  // 現在の問題がorderの何番目にあるか
+  const currentIdx = useMemo<number>(
+    () =>
+      order && questionNumber ? order.indexOf(parseInt(questionNumber)) : -1,
+    [order, questionNumber]
+  );
+
+  // 回答済み問題（過去の問題に遷移した場合）かどうか
+  const isAnsweredQuestion = useMemo<boolean>(
+    () => histories !== undefined && currentIdx >= 0 && currentIdx < histories.length,
+    [histories, currentIdx]
+  );
+
+  // 以下の場合は次問題遷移ボタンを非活性とする
+  // * 回答履歴を保存していない
+  // * 回答済み問題に遷移した場合
   const isDisabledOpenExplanationButton = useMemo<boolean>(
-    () => !answerExplanation || !answerExplanation.isSavedProgress,
-    [answerExplanation]
+    () => !answerExplanation || !answerExplanation.isSavedProgress || isAnsweredQuestion,
+    [answerExplanation, isAnsweredQuestion]
   );
 
   // 回答・解説が生成済み、かつ回答履歴を保存していない場合は、回答履歴を保存する

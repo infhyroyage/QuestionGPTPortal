@@ -1,4 +1,7 @@
-import { fetchProgressesAtom } from "@/lib/atoms";
+import {
+  fetchProgressesAtom,
+  fetchTranslationSubjectChoiceAtom,
+} from "@/lib/atoms";
 import { useAtomValue } from "jotai";
 import { ChevronRight } from "lucide-react";
 import { useCallback, useMemo } from "react";
@@ -12,6 +15,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
  */
 export default function NextAnsweredQuestionButton() {
   const { histories, order } = useAtomValue(fetchProgressesAtom);
+  const translationSubjectChoice = useAtomValue(
+    fetchTranslationSubjectChoiceAtom
+  );
 
   const navigate = useNavigate();
   const { testId, questionNumber } = useParams();
@@ -23,11 +29,16 @@ export default function NextAnsweredQuestionButton() {
     [order, questionNumber]
   );
 
-  // 現在が最新の未回答問題（histories.lengthと同じ位置）にいる場合は非活性
+  // 現在が最新の未回答問題（histories.lengthと同じ位置）にいる場合、または翻訳が完了していない場合は非活性
   // currentIdx < histories.length なら、次に進める（次の回答済み問題または最新の進行中問題がある）
   const isDisabled = useMemo<boolean>(
-    () => !histories || !order || currentIdx < 0 || currentIdx >= histories.length,
-    [histories, order, currentIdx]
+    () =>
+      !histories ||
+      !order ||
+      currentIdx < 0 ||
+      currentIdx >= histories.length ||
+      !translationSubjectChoice,
+    [histories, order, currentIdx, translationSubjectChoice]
   );
 
   const onClick = useCallback(() => {

@@ -1,4 +1,7 @@
-import { fetchProgressesAtom } from "@/lib/atoms";
+import {
+  fetchProgressesAtom,
+  fetchTranslationSubjectChoiceAtom,
+} from "@/lib/atoms";
 import { useAtomValue } from "jotai";
 import { ChevronLeft } from "lucide-react";
 import { useCallback, useMemo } from "react";
@@ -12,6 +15,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
  */
 export default function PreviousAnsweredQuestionButton() {
   const { histories, order } = useAtomValue(fetchProgressesAtom);
+  const translationSubjectChoice = useAtomValue(
+    fetchTranslationSubjectChoiceAtom
+  );
 
   const navigate = useNavigate();
   const { testId, questionNumber } = useParams();
@@ -23,10 +29,10 @@ export default function PreviousAnsweredQuestionButton() {
     [order, questionNumber]
   );
 
-  // 前の問題がない場合は非活性
+  // 前の問題がない場合、または翻訳が完了していない場合は非活性
   const isDisabled = useMemo<boolean>(
-    () => !order || currentIdx <= 0,
-    [order, currentIdx]
+    () => !order || currentIdx <= 0 || !translationSubjectChoice,
+    [order, currentIdx, translationSubjectChoice]
   );
 
   const onClick = useCallback(() => {
