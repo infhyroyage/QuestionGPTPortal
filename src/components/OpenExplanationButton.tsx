@@ -21,9 +21,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 export default function OpenExplanationButton() {
   const answerExplanation = useAtomValue(fetchAnswerExplanationAtom);
 
-  // 回答・解説を生成していない場合は、解説表示ボタンを非活性とする
+  // 回答・解説を生成していない、または解説が空の場合は、解説表示ボタンを非活性とする
   const isDisabledOpenExplanationButton = useMemo<boolean>(
-    () => !answerExplanation || !answerExplanation.explanations,
+    () =>
+      !answerExplanation ||
+      !answerExplanation.explanations ||
+      answerExplanation.explanations.length === 0,
     [answerExplanation]
   );
 

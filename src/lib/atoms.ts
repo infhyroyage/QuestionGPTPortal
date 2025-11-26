@@ -398,9 +398,13 @@ export const fetchTranslationExplanationAtom = atom(
     instance: IPublicClientApplication,
     accountInfo: AccountInfo | null
   ) => {
-    // 翻訳対象の解説文がまだ存在しない場合は何も翻訳しない
+    // 翻訳対象の解説文がまだ存在しない、または空配列の場合は何も翻訳しない
     const answerExplanation: AnswerExplanation = get(answerExplanationAtom);
-    if (!answerExplanation || !answerExplanation.explanations) {
+    if (
+      !answerExplanation ||
+      !answerExplanation.explanations ||
+      answerExplanation.explanations.length === 0
+    ) {
       return;
     }
 
