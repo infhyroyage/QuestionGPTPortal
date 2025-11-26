@@ -105,11 +105,13 @@ export default function TestResultPage() {
                 100
             )}%)`}
           </h3>
-          <Button onClick={onClick} size="lg">
+          <Button onClick={onClick} size="lg" className="shrink-0">
             トップページへ戻る
           </Button>
           {isFinishedDelete ? (
-            <TestResultAccordion />
+            <div className="flex-1 overflow-y-auto min-h-0">
+              <TestResultAccordion />
+            </div>
           ) : (
             <div className="flex-1 flex items-center justify-center">
               <Loader2 size={150} className="animate-spin" />
