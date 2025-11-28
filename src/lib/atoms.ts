@@ -628,6 +628,65 @@ export const toggleDarkModeAtom = atom(
 );
 
 /**
+ * 回答済みの問題の状態を復元するatom(write only)
+ * histories から選択状態と正解情報を復元する
+ */
+export const restoreAnsweredQuestionAtom = atom(
+  null,
+  (get, set, questionNumber: string) => {
+    // 問題文・選択肢がまだ存在しない場合は何もしない
+    const questionSelector: QuestionSelector = get(questionSelectorAtom);
+    if (!questionSelector) {
+      return false;
+    }
+
+    // 回答履歴とテストを解く問題番号の順番がまだ存在しない場合は何もしない
+    const histories: Histories = get(historiesAtom);
+    const order: Order = get(orderAtom);
+    if (!histories || !order) {
+      return false;
+    }
+
+    // 現在の問題が order の何番目かを取得
+    const currentIdx = order.indexOf(parseInt(questionNumber));
+    if (currentIdx === -1) {
+      return false;
+    }
+
+    // 回答済みでない場合は何もしない
+    if (currentIdx >= histories.length) {
+      return false;
+    }
+
+    // histories から回答情報を取得
+    const history = histories[currentIdx];
+
+    // 選択状態を復元
+    set(questionSelectorAtom, {
+      ...questionSelector,
+      choices: questionSelector.choices.map((choice: ChoiceAndSelect, idx: number) => ({
+        ...choice,
+        isSelected: history.selectedIdxes.includes(idx),
+      })),
+    });
+
+    // 正解情報を復元
+    const correctFlags: boolean[] = questionSelector.choices.map(
+      (_, idx: number) => history.correctIdxes.includes(idx)
+    );
+    set(answerExplanationAtom, {
+      isSubmitting: false,
+      correctFlags,
+      isCorrect: history.isCorrect,
+      correctIdxes: history.correctIdxes,
+      isSavedProgress: true,
+    });
+
+    return true;
+  }
+);
+
+/**
  * 選択肢の選択状態の切り替えを管理するatom(write only)
  */
 export const toggleSelectedChoiceAtom = atom(null, (get, set, idx: number) => {
