@@ -1,7 +1,6 @@
 import { fetchQuestionSelectorAtom } from "@/lib/atoms";
 import { useAtomValue } from "jotai";
 import { useMemo } from "react";
-import NextQuestionButton from "./NextQuestionButton";
 import OpenExplanationButton from "./OpenExplanationButton";
 import ResubmitButton from "./ResubmitButton";
 import SubmitButton from "./SubmitButton";
@@ -28,17 +27,14 @@ export default function IconButtonsContainer() {
       }
       `}
     >
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         <SubmitButton />
       </div>
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         <ResubmitButton />
       </div>
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         <OpenExplanationButton />
-      </div>
-      <div className="flex-shrink-0">
-        <NextQuestionButton />
       </div>
     </div>
   );
