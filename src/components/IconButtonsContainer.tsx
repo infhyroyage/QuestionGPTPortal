@@ -28,16 +28,16 @@ export default function IconButtonsContainer() {
       }
       `}
     >
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         <SubmitButton />
       </div>
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         <ResubmitButton />
       </div>
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         <OpenExplanationButton />
       </div>
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         <NextQuestionButton />
       </div>
     </div>
