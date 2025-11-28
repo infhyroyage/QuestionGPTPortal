@@ -1,7 +1,7 @@
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
-import { fetchAnswerExplanationAtom, fetchProgressesAtom } from "@/lib/atoms";
+import { fetchAnswerExplanationAtom } from "@/lib/atoms";
 import { useAccount, useMsal } from "@azure/msal-react";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom } from "jotai";
 import { RefreshCcw } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useParams } from "react-router";
@@ -16,7 +16,6 @@ export default function ResubmitButton() {
   const [answerExplanation, fetchAnswerExplanation] = useAtom(
     fetchAnswerExplanationAtom
   );
-  const { histories, order } = useAtomValue(fetchProgressesAtom);
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
 
@@ -26,25 +25,10 @@ export default function ResubmitButton() {
 
   const systemErrorToast = useSystemErrorToast();
 
-  // 現在の問題がorderの何番目にあるか
-  const currentIdx = useMemo<number>(
-    () =>
-      order && questionNumber ? order.indexOf(parseInt(questionNumber)) : -1,
-    [order, questionNumber]
-  );
-
-  // 回答済み問題（過去の問題に遷移した場合）かどうか
-  const isAnsweredQuestion = useMemo<boolean>(
-    () => histories !== undefined && currentIdx >= 0 && currentIdx < histories.length,
-    [histories, currentIdx]
-  );
-
-  // 以下の場合は回答・解説再生成ボタンを非活性とする
-  // * 回答・解説を生成していない
-  // * 回答済み問題に遷移した場合
+  // 回答・解説を生成していない場合は、回答・解説再生成ボタンを非活性とする
   const isDisabledResubmitButton = useMemo<boolean>(
-    () => !answerExplanation || answerExplanation.isSubmitting || isAnsweredQuestion,
-    [answerExplanation, isAnsweredQuestion]
+    () => !answerExplanation || answerExplanation.isSubmitting,
+    [answerExplanation]
   );
 
   // 回答・解説再生成ボタン押下時に、回答・解説を1度だけ再生成
