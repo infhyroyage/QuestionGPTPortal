@@ -125,6 +125,8 @@ export default function TestQuestionPage() {
     if (
       !questionNumber ||
       !questionSelector ||
+      // questionSelectorが現在の問題番号と一致しない場合はまだAPIレスポンス待ち
+      questionSelector.questionNumber !== questionNumber ||
       restoreAnsweredQuestionCalledRef.current
     ) {
       return;
