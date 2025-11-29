@@ -184,7 +184,7 @@ export const fetchAnswerExplanationAtom = atom(
 );
 
 /**
- * 解説文のみを取得するatom（回答済みの問題に遷移した際に使用）
+ * 解説文のみを取得するatom(回答済みの問題に遷移した際に使用)
  * 既存のanswerExplanationの状態を保持したまま、解説のみを追加する
  */
 export const fetchExplanationsOnlyAtom = atom(
@@ -378,7 +378,9 @@ export const fetchQuestionSelectorAtom = atom(
 
     // 回答済みの問題かどうかを判定
     let isAnswered = false;
-    let history: { isCorrect: boolean; selectedIdxes: number[]; correctIdxes: number[] } | undefined;
+    let history:
+      | { isCorrect: boolean; selectedIdxes: number[]; correctIdxes: number[] }
+      | undefined;
     if (histories && order) {
       const currentIdx = order.indexOf(parseInt(questionNumber));
       if (currentIdx !== -1 && currentIdx < histories.length) {
@@ -387,21 +389,22 @@ export const fetchQuestionSelectorAtom = atom(
       }
     }
 
-    // 問題文・選択肢を更新（回答済みの場合は選択状態を復元）
+    // 問題文・選択肢を更新(回答済みの場合は選択状態を復元)
     set(questionSelectorAtom, {
       questionNumber,
       subjects: res.subjects,
       choices: res.choices.map((choice: Choice, idx: number) => ({
         ...choice,
-        isSelected: isAnswered && history ? history.selectedIdxes.includes(idx) : false,
+        isSelected:
+          isAnswered && history ? history.selectedIdxes.includes(idx) : false,
       })),
       isMultiplied: res.isMultiplied,
     });
 
     // 回答済みの場合は正解情報も復元
     if (isAnswered && history) {
-      const correctFlags: boolean[] = res.choices.map(
-        (_, idx: number) => history!.correctIdxes.includes(idx)
+      const correctFlags: boolean[] = res.choices.map((_, idx: number) =>
+        history!.correctIdxes.includes(idx)
       );
       set(answerExplanationAtom, {
         isSubmitting: false,
@@ -750,10 +753,12 @@ export const restoreAnsweredQuestionAtom = atom(
     // 選択状態を復元
     set(questionSelectorAtom, {
       ...questionSelector,
-      choices: questionSelector.choices.map((choice: ChoiceAndSelect, idx: number) => ({
-        ...choice,
-        isSelected: history.selectedIdxes.includes(idx),
-      })),
+      choices: questionSelector.choices.map(
+        (choice: ChoiceAndSelect, idx: number) => ({
+          ...choice,
+          isSelected: history.selectedIdxes.includes(idx),
+        })
+      ),
     });
 
     // 正解情報を復元
@@ -780,8 +785,8 @@ export const toggleSelectedChoiceAtom = atom(null, (get, set, idx: number) => {
   const questionSelector: QuestionSelector = get(questionSelectorAtom);
   if (!questionSelector) return;
 
-  // 複数個の回答が存在する場合（isMultiplied=true）はidx番目のみ選択状態を反転し、その他はそのまま
-  // 1つの回答のみが存在する場合（isMultiplied=false）は以下のように動作：
+  // 複数個の回答が存在する場合(isMultiplied=true)はidx番目のみ選択状態を反転し、その他はそのまま
+  // 1つの回答のみが存在する場合(isMultiplied=false)は以下のように動作：
   //   - idx番目が選択されている場合：idx番目を非選択にする
   //   - idx番目が選択されていない場合：idx番目を選択・その他を非選択にする
   set(questionSelectorAtom, {

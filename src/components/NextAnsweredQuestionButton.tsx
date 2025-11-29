@@ -22,13 +22,13 @@ export default function NextAnsweredQuestionButton() {
   }, [order, questionNumber]);
 
   // 以下の場合は非活性
-  // - 現在の問題が最新の未回答問題（またはそれ以降）の場合
-  // - 現在の問題が最後の問題の場合（次の問題が存在しない）
+  // - 現在の問題が最新の未回答問題(またはそれ以降)の場合
+  // - 現在の問題が最後の問題の場合(次の問題が存在しない)
   const isDisabled = useMemo(() => {
     if (!histories || !order || currentIdx === -1) return true;
     // 次の問題が存在しない場合は非活性
     if (currentIdx + 1 >= order.length) return true;
-    // 現在の問題が最新の未回答問題（またはそれ以降）の場合は非活性
+    // 現在の問題が最新の未回答問題(またはそれ以降)の場合は非活性
     return currentIdx >= histories.length;
   }, [histories, order, currentIdx]);
 

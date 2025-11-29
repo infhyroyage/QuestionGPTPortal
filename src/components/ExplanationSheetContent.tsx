@@ -64,9 +64,9 @@ export default function ExplanationSheetContent() {
       return;
     }
     try {
-      // コミュニティ情報と翻訳をクリア（ローディング表示にするため）
+      // コミュニティ情報と翻訳をクリア(ローディング表示にするため)
       resetCommunity();
-      // コミュニティ情報を再生成（isRefresh: trueでPOSTのみ実行）
+      // コミュニティ情報を再生成(isRefresh: trueでPOSTのみ実行)
       await fetchCommunity(testId, questionNumber, instance, accountInfo, true);
       // 翻訳も再取得するためにフラグをリセット
       fetchTranslationCommunityCalledRef.current = false;
@@ -119,7 +119,7 @@ export default function ExplanationSheetContent() {
     systemErrorToast,
   ]);
 
-  // 解説がない場合（回答済みの問題に遷移した場合）、解説を取得
+  // 解説がない場合(回答済みの問題に遷移した場合)、解説を取得
   useEffect(() => {
     if (
       !testId ||
@@ -134,7 +134,12 @@ export default function ExplanationSheetContent() {
     fetchExplanationsOnlyCalledRef.current = true;
     (async () => {
       try {
-        await fetchExplanationsOnly(testId, questionNumber, instance, accountInfo);
+        await fetchExplanationsOnly(
+          testId,
+          questionNumber,
+          instance,
+          accountInfo
+        );
       } catch (e) {
         setIsOccurredSystemError(true);
         systemErrorToast(e);

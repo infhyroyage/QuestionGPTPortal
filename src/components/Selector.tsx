@@ -23,7 +23,7 @@ export default function Selector() {
   );
 
   // 回答・解説が生成開始後は、選択肢をすべて非活性とする
-  // （回答生成中・回答済みの問題を表示している場合は選択状態を変更できない）
+  // (回答生成中・回答済みの問題を表示している場合は選択状態を変更できない)
   const isDisabledSelectorButtons = useMemo<boolean>(
     () => !!answerExplanation,
     [answerExplanation]
