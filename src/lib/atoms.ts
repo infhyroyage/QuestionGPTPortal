@@ -184,6 +184,61 @@ export const fetchAnswerExplanationAtom = atom(
 );
 
 /**
+ * 解説文のみを取得するatom（回答済みの問題に遷移した際に使用）
+ * 既存のanswerExplanationの状態を保持したまま、解説のみを追加する
+ */
+export const fetchExplanationsOnlyAtom = atom(
+  null,
+  async (
+    get,
+    set,
+    testId: string,
+    questionNumber: string,
+    instance: IPublicClientApplication,
+    accountInfo: AccountInfo | null
+  ) => {
+    // 既存のanswerExplanationを取得
+    const answerExplanation: AnswerExplanation = get(answerExplanationAtom);
+    if (!answerExplanation) {
+      return;
+    }
+
+    // 既に解説が存在する場合は何もしない
+    if (answerExplanation.explanations) {
+      return;
+    }
+
+    // [GET] /tests/{testId}/answers/{questionNumber}にアクセスして解説を取得
+    const getAnswerRes: GetAnswer = await accessBackend<GetAnswer>(
+      "GET",
+      `/tests/${testId}/answers/${questionNumber}`,
+      instance,
+      accountInfo
+    );
+
+    let explanations: string[] = [];
+    if (getAnswerRes.isExisted) {
+      explanations = getAnswerRes.explanations || [];
+    } else {
+      // 解説がまだ生成されていない場合は、POSTで生成
+      const postAnswerRes: PostAnswerRes = await accessBackend<PostAnswerRes>(
+        "POST",
+        `/tests/${testId}/answers/${questionNumber}`,
+        instance,
+        accountInfo
+      );
+      explanations = postAnswerRes.explanations;
+    }
+
+    // 既存の状態を保持したまま、解説のみを追加
+    set(answerExplanationAtom, {
+      ...answerExplanation,
+      explanations,
+    });
+  }
+);
+
+/**
  * コミュニティ情報を取得するatom
  */
 export const fetchCommunityAtom = atom(
@@ -302,7 +357,7 @@ export const fetchProgressesAtom = atom(
 export const fetchQuestionSelectorAtom = atom(
   (get) => get(questionSelectorAtom),
   async (
-    _,
+    get,
     set,
     testId: string,
     questionNumber: string,
@@ -316,15 +371,46 @@ export const fetchQuestionSelectorAtom = atom(
       instance,
       accountInfo
     );
+
+    // 回答履歴とテストを解く問題番号の順番を取得
+    const histories: Histories = get(historiesAtom);
+    const order: Order = get(orderAtom);
+
+    // 回答済みの問題かどうかを判定
+    let isAnswered = false;
+    let history: { isCorrect: boolean; selectedIdxes: number[]; correctIdxes: number[] } | undefined;
+    if (histories && order) {
+      const currentIdx = order.indexOf(parseInt(questionNumber));
+      if (currentIdx !== -1 && currentIdx < histories.length) {
+        isAnswered = true;
+        history = histories[currentIdx];
+      }
+    }
+
+    // 問題文・選択肢を更新（回答済みの場合は選択状態を復元）
     set(questionSelectorAtom, {
       questionNumber,
       subjects: res.subjects,
-      choices: res.choices.map((choice: Choice) => ({
+      choices: res.choices.map((choice: Choice, idx: number) => ({
         ...choice,
-        isSelected: false,
+        isSelected: isAnswered && history ? history.selectedIdxes.includes(idx) : false,
       })),
       isMultiplied: res.isMultiplied,
     });
+
+    // 回答済みの場合は正解情報も復元
+    if (isAnswered && history) {
+      const correctFlags: boolean[] = res.choices.map(
+        (_, idx: number) => history!.correctIdxes.includes(idx)
+      );
+      set(answerExplanationAtom, {
+        isSubmitting: false,
+        correctFlags,
+        isCorrect: history.isCorrect,
+        correctIdxes: history.correctIdxes,
+        isSavedProgress: true,
+      });
+    }
   }
 );
 
@@ -624,6 +710,65 @@ export const toggleDarkModeAtom = atom(
   (get, set) => {
     const isDarkMode = get(isDarkModeAtom);
     set(isDarkModeAtom, !isDarkMode);
+  }
+);
+
+/**
+ * 回答済みの問題の状態を復元するatom(write only)
+ * histories から選択状態と正解情報を復元する
+ */
+export const restoreAnsweredQuestionAtom = atom(
+  null,
+  (get, set, questionNumber: string) => {
+    // 問題文・選択肢がまだ存在しない場合は何もしない
+    const questionSelector: QuestionSelector = get(questionSelectorAtom);
+    if (!questionSelector) {
+      return false;
+    }
+
+    // 回答履歴とテストを解く問題番号の順番がまだ存在しない場合は何もしない
+    const histories: Histories = get(historiesAtom);
+    const order: Order = get(orderAtom);
+    if (!histories || !order) {
+      return false;
+    }
+
+    // 現在の問題が order の何番目かを取得
+    const currentIdx = order.indexOf(parseInt(questionNumber));
+    if (currentIdx === -1) {
+      return false;
+    }
+
+    // 回答済みでない場合は何もしない
+    if (currentIdx >= histories.length) {
+      return false;
+    }
+
+    // histories から回答情報を取得
+    const history = histories[currentIdx];
+
+    // 選択状態を復元
+    set(questionSelectorAtom, {
+      ...questionSelector,
+      choices: questionSelector.choices.map((choice: ChoiceAndSelect, idx: number) => ({
+        ...choice,
+        isSelected: history.selectedIdxes.includes(idx),
+      })),
+    });
+
+    // 正解情報を復元
+    const correctFlags: boolean[] = questionSelector.choices.map(
+      (_, idx: number) => history.correctIdxes.includes(idx)
+    );
+    set(answerExplanationAtom, {
+      isSubmitting: false,
+      correctFlags,
+      isCorrect: history.isCorrect,
+      correctIdxes: history.correctIdxes,
+      isSavedProgress: true,
+    });
+
+    return true;
   }
 );
 

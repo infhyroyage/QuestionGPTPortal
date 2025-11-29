@@ -11,6 +11,7 @@ import {
   fetchQuestionSelectorAtom,
   fetchTranslationSubjectChoiceAtom,
   resetAtomsForTestQuestionAtom,
+  restoreAnsweredQuestionAtom,
 } from "@/lib/atoms";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
@@ -30,12 +31,14 @@ export default function TestQuestionPage() {
     fetchTranslationSubjectChoiceAtom
   );
   const resetAtomsForTestQuestion = useSetAtom(resetAtomsForTestQuestionAtom);
+  const restoreAnsweredQuestion = useSetAtom(restoreAnsweredQuestionAtom);
   const [isOccurredTranslationFailed, setIsOccurredTranslationFailed] =
     useState<boolean>(false);
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
   const fetchQuestionSelectorCalledRef = useRef<boolean>(false);
   const fetchTranslationSubjectChoiceCalledRef = useRef<boolean>(false);
+  const restoreAnsweredQuestionCalledRef = useRef<boolean>(false);
   const previousQuestionNumberRef = useRef<string | undefined>(undefined);
 
   const navigate = useNavigate();
@@ -52,6 +55,7 @@ export default function TestQuestionPage() {
     if (previousQuestionNumberRef.current !== questionNumber) {
       fetchQuestionSelectorCalledRef.current = false;
       fetchTranslationSubjectChoiceCalledRef.current = false;
+      restoreAnsweredQuestionCalledRef.current = false;
       previousQuestionNumberRef.current = questionNumber;
     }
   }, [questionNumber]);
@@ -115,6 +119,21 @@ export default function TestQuestionPage() {
     accountInfo,
     systemErrorToast,
   ]);
+
+  // 問題文・選択肢の取得直後に、回答済みの問題の場合は状態を復元
+  useEffect(() => {
+    if (
+      !questionNumber ||
+      !questionSelector ||
+      // questionSelectorが現在の問題番号と一致しない場合はまだAPIレスポンス待ち
+      questionSelector.questionNumber !== questionNumber ||
+      restoreAnsweredQuestionCalledRef.current
+    ) {
+      return;
+    }
+    restoreAnsweredQuestionCalledRef.current = true;
+    restoreAnsweredQuestion(questionNumber);
+  }, [questionNumber, questionSelector, restoreAnsweredQuestion]);
 
   // 問題文・選択肢の取得直後に、それらの翻訳文を1度だけ取得
   useEffect(() => {
