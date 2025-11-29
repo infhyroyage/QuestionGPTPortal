@@ -184,6 +184,61 @@ export const fetchAnswerExplanationAtom = atom(
 );
 
 /**
+ * 解説文のみを取得するatom（回答済みの問題に遷移した際に使用）
+ * 既存のanswerExplanationの状態を保持したまま、解説のみを追加する
+ */
+export const fetchExplanationsOnlyAtom = atom(
+  null,
+  async (
+    get,
+    set,
+    testId: string,
+    questionNumber: string,
+    instance: IPublicClientApplication,
+    accountInfo: AccountInfo | null
+  ) => {
+    // 既存のanswerExplanationを取得
+    const answerExplanation: AnswerExplanation = get(answerExplanationAtom);
+    if (!answerExplanation) {
+      return;
+    }
+
+    // 既に解説が存在する場合は何もしない
+    if (answerExplanation.explanations) {
+      return;
+    }
+
+    // [GET] /tests/{testId}/answers/{questionNumber}にアクセスして解説を取得
+    const getAnswerRes: GetAnswer = await accessBackend<GetAnswer>(
+      "GET",
+      `/tests/${testId}/answers/${questionNumber}`,
+      instance,
+      accountInfo
+    );
+
+    let explanations: string[] = [];
+    if (getAnswerRes.isExisted) {
+      explanations = getAnswerRes.explanations || [];
+    } else {
+      // 解説がまだ生成されていない場合は、POSTで生成
+      const postAnswerRes: PostAnswerRes = await accessBackend<PostAnswerRes>(
+        "POST",
+        `/tests/${testId}/answers/${questionNumber}`,
+        instance,
+        accountInfo
+      );
+      explanations = postAnswerRes.explanations;
+    }
+
+    // 既存の状態を保持したまま、解説のみを追加
+    set(answerExplanationAtom, {
+      ...answerExplanation,
+      explanations,
+    });
+  }
+);
+
+/**
  * コミュニティ情報を取得するatom
  */
 export const fetchCommunityAtom = atom(

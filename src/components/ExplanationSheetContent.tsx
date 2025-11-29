@@ -3,6 +3,7 @@ import useTranslationFailedToast from "@/hooks/useTranslationFailedToast";
 import {
   fetchAnswerExplanationAtom,
   fetchCommunityAtom,
+  fetchExplanationsOnlyAtom,
   fetchQuestionSelectorAtom,
   fetchTranslationCommunityAtom,
   fetchTranslationExplanationAtom,
@@ -28,6 +29,7 @@ import { Skeleton } from "./ui/skeleton";
 export default function ExplanationSheetContent() {
   const answerExplanation = useAtomValue(fetchAnswerExplanationAtom);
   const [community, fetchCommunity] = useAtom(fetchCommunityAtom);
+  const fetchExplanationsOnly = useSetAtom(fetchExplanationsOnlyAtom);
   const questionSelector = useAtomValue(fetchQuestionSelectorAtom);
   const [translationCommunity, fetchTranslationCommunity] = useAtom(
     fetchTranslationCommunityAtom
@@ -44,6 +46,7 @@ export default function ExplanationSheetContent() {
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
   const fetchCommunityCalledRef = useRef<boolean>(false);
+  const fetchExplanationsOnlyCalledRef = useRef<boolean>(false);
   const fetchTranslationExplanationCalledRef = useRef<boolean>(false);
   const fetchTranslationCommunityCalledRef = useRef<boolean>(false);
   const previousQuestionNumberRef = useRef<string | undefined>(undefined);
@@ -78,6 +81,7 @@ export default function ExplanationSheetContent() {
   useEffect(() => {
     if (previousQuestionNumberRef.current !== questionNumber) {
       fetchCommunityCalledRef.current = false;
+      fetchExplanationsOnlyCalledRef.current = false;
       fetchTranslationExplanationCalledRef.current = false;
       fetchTranslationCommunityCalledRef.current = false;
       previousQuestionNumberRef.current = questionNumber;
@@ -110,6 +114,38 @@ export default function ExplanationSheetContent() {
     community,
     isOccurredSystemError,
     fetchCommunity,
+    instance,
+    accountInfo,
+    systemErrorToast,
+  ]);
+
+  // 解説がない場合（回答済みの問題に遷移した場合）、解説を取得
+  useEffect(() => {
+    if (
+      !testId ||
+      !questionNumber ||
+      !answerExplanation ||
+      answerExplanation.explanations ||
+      isOccurredSystemError ||
+      fetchExplanationsOnlyCalledRef.current
+    ) {
+      return;
+    }
+    fetchExplanationsOnlyCalledRef.current = true;
+    (async () => {
+      try {
+        await fetchExplanationsOnly(testId, questionNumber, instance, accountInfo);
+      } catch (e) {
+        setIsOccurredSystemError(true);
+        systemErrorToast(e);
+      }
+    })();
+  }, [
+    testId,
+    questionNumber,
+    answerExplanation,
+    isOccurredSystemError,
+    fetchExplanationsOnly,
     instance,
     accountInfo,
     systemErrorToast,
