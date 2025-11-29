@@ -21,16 +21,26 @@ export default function NextAnsweredQuestionButton() {
     return order.indexOf(parseInt(questionNumber));
   }, [order, questionNumber]);
 
-  // 現在の問題が最新の未回答問題（またはそれ以降）の場合は非活性
-  // histories.length は回答済みの問題数なので、currentIdx >= histories.length の場合は
-  // これ以上先の問題には進めない
+  // 以下の場合は非活性
+  // - 現在の問題が最新の未回答問題（またはそれ以降）の場合
+  // - 現在の問題が最後の問題の場合（次の問題が存在しない）
   const isDisabled = useMemo(() => {
-    if (!histories || currentIdx === -1) return true;
+    if (!histories || !order || currentIdx === -1) return true;
+    // 次の問題が存在しない場合は非活性
+    if (currentIdx + 1 >= order.length) return true;
+    // 現在の問題が最新の未回答問題（またはそれ以降）の場合は非活性
     return currentIdx >= histories.length;
-  }, [histories, currentIdx]);
+  }, [histories, order, currentIdx]);
 
   const onClick = useCallback(() => {
-    if (testId && order && histories && currentIdx >= 0 && currentIdx < histories.length) {
+    if (
+      testId &&
+      order &&
+      histories &&
+      currentIdx >= 0 &&
+      currentIdx < histories.length &&
+      currentIdx + 1 < order.length
+    ) {
       // 1つ後の問題に遷移
       navigate(`/tests/${testId}/questions/${order[currentIdx + 1]}`);
     }
