@@ -523,6 +523,9 @@ export const fetchTranslationSubjectChoiceAtom = atom(
       return;
     }
 
+    // 翻訳開始時の問題番号を保持
+    const questionNumberAtStart = questionSelector.questionNumber;
+
     // 問題文・選択肢を翻訳
     const translationSubjectChoice: TranslationSubjectChoice =
       await translateSubjectsAndChoices(
@@ -531,6 +534,16 @@ export const fetchTranslationSubjectChoiceAtom = atom(
         instance,
         accountInfo
       );
+
+    // 翻訳完了後、問題番号が変わっていた場合は結果をセットしない
+    const currentQuestionSelector: QuestionSelector = get(questionSelectorAtom);
+    if (
+      !currentQuestionSelector ||
+      currentQuestionSelector.questionNumber !== questionNumberAtStart
+    ) {
+      return;
+    }
+
     set(translationSubjectChoiceAtom, translationSubjectChoice);
   }
 );

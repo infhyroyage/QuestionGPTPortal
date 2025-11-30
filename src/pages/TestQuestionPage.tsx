@@ -138,7 +138,10 @@ export default function TestQuestionPage() {
   // 問題文・選択肢の取得直後に、それらの翻訳文を1度だけ取得
   useEffect(() => {
     if (
+      !questionNumber ||
       !questionSelector ||
+      // questionSelectorが現在の問題番号と一致しない場合はまだAPIレスポンス待ち
+      questionSelector.questionNumber !== questionNumber ||
       translationSubjectChoice ||
       isOccurredTranslationFailed ||
       fetchTranslationSubjectChoiceCalledRef.current
@@ -157,6 +160,7 @@ export default function TestQuestionPage() {
       }
     })();
   }, [
+    questionNumber,
     questionSelector,
     translationSubjectChoice,
     isOccurredTranslationFailed,
