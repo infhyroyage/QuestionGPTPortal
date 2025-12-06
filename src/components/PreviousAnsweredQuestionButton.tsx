@@ -1,4 +1,4 @@
-import { fetchProgressesAtom } from "@/lib/atoms";
+import { fetchAnswerExplanationAtom, fetchProgressesAtom } from "@/lib/atoms";
 import { useAtomValue } from "jotai";
 import { ChevronLeft } from "lucide-react";
 import { useCallback, useMemo } from "react";
@@ -12,23 +12,28 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
  */
 export default function PreviousAnsweredQuestionButton() {
   const { order } = useAtomValue(fetchProgressesAtom);
+  const answerExplanation = useAtomValue(fetchAnswerExplanationAtom);
+
   const navigate = useNavigate();
   const { testId, questionNumber } = useParams();
 
-  // 現在の問題が order の何番目かを取得
+  // 現在の問題がorderの何番目かを取得
   const currentIdx = useMemo(() => {
     if (!order || !questionNumber) return -1;
     return order.indexOf(parseInt(questionNumber));
   }, [order, questionNumber]);
 
-  // 前の問題がない場合は非活性
-  const isDisabled = useMemo(() => {
-    return currentIdx <= 0;
-  }, [currentIdx]);
+  // 以下のいずれかの場合は非活性
+  // - 現在の問題が最初の問題の場合(前の問題がない)
+  // - 回答・解説が生成中の場合
+  const isDisabled = useMemo(
+    () => currentIdx <= 0 || (answerExplanation?.isSubmitting ?? false),
+    [currentIdx, answerExplanation]
+  );
 
+  // ボタン押下時に1つ前の問題に遷移
   const onClick = useCallback(() => {
     if (testId && order && currentIdx > 0) {
-      // 1つ前の問題に遷移
       navigate(`/tests/${testId}/questions/${order[currentIdx - 1]}`);
     }
   }, [testId, order, currentIdx, navigate]);
