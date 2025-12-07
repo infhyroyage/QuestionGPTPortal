@@ -77,13 +77,15 @@ export default function ExplanationSheetContent() {
     }
   };
 
-  // 問題番号が変更された場合、API呼び出しフラグをリセット
+  // 問題番号が変更された場合、API呼び出しフラグとエラーフラグをリセット
   useEffect(() => {
     if (previousQuestionNumberRef.current !== questionNumber) {
       fetchCommunityCalledRef.current = false;
       fetchExplanationsOnlyCalledRef.current = false;
       fetchTranslationExplanationCalledRef.current = false;
       fetchTranslationCommunityCalledRef.current = false;
+      setIsOccurredTranslationFailed(false);
+      setIsOccurredSystemError(false);
       previousQuestionNumberRef.current = questionNumber;
     }
   }, [questionNumber]);
@@ -160,6 +162,7 @@ export default function ExplanationSheetContent() {
   useEffect(() => {
     if (
       !answerExplanation ||
+      !answerExplanation.explanations ||
       translationExplanation ||
       isOccurredTranslationFailed ||
       fetchTranslationExplanationCalledRef.current
