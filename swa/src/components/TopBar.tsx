@@ -37,22 +37,18 @@ export default function TopBar({ title }: TopBarProps) {
     [location.pathname, questionNumber, testId]
   );
 
-  // 問題番号が変更された場合、お気に入り状態とAPI呼び出しフラグをリセット
+  // 問題番号変更時にお気に入り状態を取得
   useEffect(() => {
+    // 問題番号が変更された場合、API呼び出しフラグをリセット
     if (previousQuestionNumberRef.current !== questionNumber) {
-      setIsFavorite(undefined);
       fetchFavoriteCalledRef.current = false;
       previousQuestionNumberRef.current = questionNumber;
     }
-  }, [questionNumber]);
 
-  // 問題番号変更時にお気に入り状態を取得
-  useEffect(() => {
     if (
       !testId ||
       !isTestQuestionPage ||
       !questionNumber ||
-      isFavorite !== undefined ||
       isOccurredSystemError ||
       fetchFavoriteCalledRef.current
     ) {
@@ -77,7 +73,6 @@ export default function TopBar({ title }: TopBarProps) {
     testId,
     isTestQuestionPage,
     questionNumber,
-    isFavorite,
     isOccurredSystemError,
     instance,
     accountInfo,
