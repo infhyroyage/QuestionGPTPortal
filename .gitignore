@@ -1,18 +1,18 @@
 # Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+swa/logs
+swa/*.log
+swa/npm-debug.log*
+swa/yarn-debug.log*
+swa/yarn-error.log*
+swa/pnpm-debug.log*
+swa/lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-.env
-*.tsbuildinfo
+swa/node_modules
+swa/dist
+swa/dist-ssr
+swa/*.local
+swa/.env
+swa/*.tsbuildinfo
 
 # Editor directories and files
 .vscode/*

@@ -6,7 +6,7 @@
 version: 2
 updates:
   - package-ecosystem: "npm"
-    directory: "/"
+    directory: "/swa"
     schedule:
       interval: "weekly"
       day: "monday"

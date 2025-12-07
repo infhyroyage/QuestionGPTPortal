@@ -62,13 +62,13 @@ GitHub Pages を通して React + TypeScript をベースとしたシングル�
 [QuestionGPTTranslator](https://github.com/infhyroyage/QuestionGPTTranslator) を API サーバーとして連携する。
 API 仕様は [QuestionGPTTranslator の Swagger UI](https://infhyroyage.github.io/QuestionGPTTranslator/) を参照。
 API サーバーの URL は、環境変数 `API_URI` で管理する。
-API サーバーへのアクセスは、`src/lib/backend.ts` で統一的に行う。
+API サーバーへのアクセスは、`swa/src/lib/backend.ts` で統一的に行う。
 
 ### 3.2 認証システム
 
-Azure 環境の場合は、Microsoft Entra ID を利用した認証システムを、Microsoft Authentication Library (MSAL)を介して実現する。MSAL の認証プロバイダーは、 React のエントリーポイントである`src/App.tsx`に対し、`src/components/ApplyMSAL.tsx` で適用する。認証後に Microsoft Indentity Platform で払い出されたアクセストークンを、`X-Access-Token`ヘッダーに設定して、QuestionGPTTranslator API サーバーにアクセスする。ローカル環境は、Entra ID 認証をスキップし、`X-User-Id: local` ヘッダーで API アクセスする。
+Azure 環境の場合は、Microsoft Entra ID を利用した認証システムを、Microsoft Authentication Library (MSAL)を介して実現する。MSAL の認証プロバイダーは、 React のエントリーポイントである`swa/src/App.tsx`に対し、`swa/src/components/ApplyMSAL.tsx` で適用する。認証後に Microsoft Indentity Platform で払い出されたアクセストークンを、`X-Access-Token`ヘッダーに設定して、QuestionGPTTranslator API サーバーにアクセスする。ローカル環境は、Entra ID 認証をスキップし、`X-User-Id: local` ヘッダーで API アクセスする。
 
-`src/lib/msal.ts` で、以下の MSAL の設定を定義する。
+`swa/src/lib/msal.ts` で、以下の MSAL の設定を定義する。
 
 - クライアント ID: 環境変数 `AZURE_AD_SP_MSAL_CLIENT_ID` で管理
 - Microsoft Indentity Platform の URL: `https://login.microsoftonline.com/{テナント ID}`
@@ -105,7 +105,7 @@ API アクセスを含む非同期処理は、Atom の write 関数で行う。�
 - コミュニティディスカッション要約
 
 このうち、問題文と選択肢は、両者をまとめて翻訳することで、API 呼び出し回数を最適化している。
-翻訳処理は、`src/lib/translation.ts` で統一的に行う。
+翻訳処理は、`swa/src/lib/translation.ts` で統一的に行う。
 翻訳中でもユーザーの直感的なインタラクションを提供するために、shadcn/ui の`Skeleton`コンポーネントを用いた表示を採用する。
 
 ### 3.5 UI/UX 設計

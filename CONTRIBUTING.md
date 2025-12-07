@@ -24,11 +24,12 @@
 
 - Web アプリケーションは、React を用いた Single Page Application(SPA)として構築する。
 - ルーティング機能を持つ、QuestionGPTTranslator リポジトリで構築した Azure Static Web Apps に SPA をデプロイしてホスティングする。
-- 再利用可能なコンポーネントは src/components に配置し、src/components/ui には shadcn/ui ベースの基本 UI コンポーネントを配置する。
-- ルートごとのページコンポーネントは src/pages に配置する。
-- ユーティリティ関数、API 通信、状態管理などのビジネスロジックは src/lib に配置する。
-- カスタムフックは src/hooks に配置する。
-- TypeScript の型定義は src/types に配置し、以下のファイルに分類する:
+- フロントエンドアプリケーションのすべてのソースコードは、`swa`ディレクトリ配下に配置する。
+- 再利用可能なコンポーネントは swa/src/components に配置し、swa/src/components/ui には shadcn/ui ベースの基本 UI コンポーネントを配置する。
+- ルートごとのページコンポーネントは swa/src/pages に配置する。
+- ユーティリティ関数、API 通信、状態管理などのビジネスロジックは swa/src/lib に配置する。
+- カスタムフックは swa/src/hooks に配置する。
+- TypeScript の型定義は swa/src/types に配置し、以下のファイルに分類する:
   - atoms.ts: Jotai の Atom 関連の型定義
   - backend.ts: バックエンド API の型定義
   - props.ts: コンポーネントの Props 型定義(すべてのコンポーネントで Props の型を明確に定義する)
@@ -39,11 +40,11 @@
 - モバイルファーストで設計し、適切なブレークポイントを使用する。
 - tsconfig.json で厳格な型チェックを有効にし、`any` 型の使用は避ける。
 - TypeScript の型推論を活用し、不要な型注釈は避ける。
-- すべての API アクセスは、src/lib/backend.ts の `accessBackend` 関数を使用する。
+- すべての API アクセスは、swa/src/lib/backend.ts の `accessBackend` 関数を使用する。
 - Azure 環境では MSAL を使用して、API アクセスの認証を行う。ローカル環境では認証をスキップし、`X-User-Id: local` ヘッダーで API アクセスする。
 - 必ず ESLint の警告・エラーを全て解消するように、コード品質を担保する。ESLint の静的解析は、以下のコマンドで実行する:
   ```bash
-  npm run lint
+  cd swa && npm run lint
   ```
 - 以下の CI/CD パイプラインは GitHub Actions によって自動化する:
   - Azure Static Web Apps のデプロイ: .github/workflows/deploy-swa.yaml
@@ -64,11 +65,11 @@
 
 - [ ] 以下のコマンドを実行して、ESLint の警告・エラーをすべて解消する:
   ```bash
-  npm run lint
+  cd swa && npm run lint
   ```
 - [ ] 以下のコマンドで開発サーバーを起動して、実装した機能が正常に動作することを確認する:
   ```bash
-  npm run dev
+  cd swa && npm run dev
   ```
 - [ ] ブラウザの開発者モードを用いて、モバイル/デスクトップでもレイアウトが崩れないレスポンシブデザインになっているか確認する。
 - [ ] ターゲットを main ブランチに設定している。
@@ -81,7 +82,7 @@ GitHub Dependabot は以下の実行方式に従い、`.github/dependabot.yaml` 
 ### npm パッケージ管理
 
 - 実行スケジュール: 毎週月曜日 10:30 (Asia/Tokyo)
-- 対象ファイル: `package.json`, `package-lock.json`
+- 対象ファイル: `swa/package.json`, `swa/package-lock.json`
 - 更新方式: プルリクエストによる自動提案
 - 除外パッケージ: 破壊的変更が多い以下のパッケージは管理対象外
   - `@types/node`
