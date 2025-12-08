@@ -27,6 +27,10 @@ import { Skeleton } from "./ui/skeleton";
  * @returns 解説シートのコンテンツのコンポーネント
  */
 export default function ExplanationSheetContent() {
+  const { testId, questionNumber } = useParams();
+  const { instance, accounts } = useMsal();
+  const accountInfo = useAccount(accounts[0] || {});
+
   const answerExplanation = useAtomValue(fetchAnswerExplanationAtom);
   const [community, fetchCommunity] = useAtom(fetchCommunityAtom);
   const fetchExplanationsOnly = useSetAtom(fetchExplanationsOnlyAtom);
@@ -41,19 +45,18 @@ export default function ExplanationSheetContent() {
     fetchTranslationSubjectChoiceAtom
   );
   const resetCommunity = useSetAtom(resetCommunityAtom);
-  const [isOccurredTranslationFailed, setIsOccurredTranslationFailed] =
-    useState<boolean>(false);
-  const [isOccurredSystemError, setIsOccurredSystemError] =
-    useState<boolean>(false);
+  // エラーが発生した問題番号を保持（問題番号が変わると自動的にエラー状態がリセットされる）
+  const [translationFailedForQuestion, setTranslationFailedForQuestion] =
+    useState<string | null>(null);
+  const [systemErrorForQuestion, setSystemErrorForQuestion] = useState<string | null>(null);
+  // 現在の問題番号でエラーが発生しているかどうかを判定
+  const isOccurredTranslationFailed = translationFailedForQuestion === questionNumber;
+  const isOccurredSystemError = systemErrorForQuestion === questionNumber;
   const fetchCommunityCalledRef = useRef<boolean>(false);
   const fetchExplanationsOnlyCalledRef = useRef<boolean>(false);
   const fetchTranslationExplanationCalledRef = useRef<boolean>(false);
   const fetchTranslationCommunityCalledRef = useRef<boolean>(false);
   const previousQuestionNumberRef = useRef<string | undefined>(undefined);
-
-  const { testId, questionNumber } = useParams();
-  const { instance, accounts } = useMsal();
-  const accountInfo = useAccount(accounts[0] || {});
 
   const translationFailedToast = useTranslationFailedToast();
   const systemErrorToast = useSystemErrorToast();
@@ -70,22 +73,21 @@ export default function ExplanationSheetContent() {
       await fetchCommunity(testId, questionNumber, instance, accountInfo, true);
       // 翻訳も再取得するためにフラグをリセット
       fetchTranslationCommunityCalledRef.current = false;
-      setIsOccurredTranslationFailed(false);
+      setTranslationFailedForQuestion(null);
     } catch (e) {
-      setIsOccurredSystemError(true);
+      setSystemErrorForQuestion(questionNumber ?? null);
       systemErrorToast(e);
     }
   };
 
-  // 問題番号が変更された場合、API呼び出しフラグとエラーフラグをリセット
+  // 問題番号が変更された場合、API呼び出しフラグをリセット
+  // （エラーフラグは問題番号ベースで管理しているため、自動的にリセットされる）
   useEffect(() => {
     if (previousQuestionNumberRef.current !== questionNumber) {
       fetchCommunityCalledRef.current = false;
       fetchExplanationsOnlyCalledRef.current = false;
       fetchTranslationExplanationCalledRef.current = false;
       fetchTranslationCommunityCalledRef.current = false;
-      setIsOccurredTranslationFailed(false);
-      setIsOccurredSystemError(false);
       previousQuestionNumberRef.current = questionNumber;
     }
   }, [questionNumber]);
@@ -106,7 +108,7 @@ export default function ExplanationSheetContent() {
       try {
         await fetchCommunity(testId, questionNumber, instance, accountInfo);
       } catch (e) {
-        setIsOccurredSystemError(true);
+        setSystemErrorForQuestion(questionNumber);
         systemErrorToast(e);
       }
     })();
@@ -143,7 +145,7 @@ export default function ExplanationSheetContent() {
           accountInfo
         );
       } catch (e) {
-        setIsOccurredSystemError(true);
+        setSystemErrorForQuestion(questionNumber);
         systemErrorToast(e);
       }
     })();
@@ -174,13 +176,14 @@ export default function ExplanationSheetContent() {
       try {
         await fetchTranslationExplanation(instance, accountInfo);
       } catch {
-        setIsOccurredTranslationFailed(true);
+        setTranslationFailedForQuestion(questionNumber ?? null);
         translationFailedToast("解説", () =>
-          setIsOccurredTranslationFailed(false)
+          setTranslationFailedForQuestion(null)
         );
       }
     })();
   }, [
+    questionNumber,
     answerExplanation,
     translationExplanation,
     isOccurredTranslationFailed,
@@ -205,13 +208,14 @@ export default function ExplanationSheetContent() {
       try {
         await fetchTranslationCommunity(instance, accountInfo);
       } catch {
-        setIsOccurredTranslationFailed(true);
+        setTranslationFailedForQuestion(questionNumber ?? null);
         translationFailedToast("コミュニティ情報", () =>
-          setIsOccurredTranslationFailed(false)
+          setTranslationFailedForQuestion(null)
         );
       }
     })();
   }, [
+    questionNumber,
     community,
     translationCommunity,
     isOccurredTranslationFailed,
