@@ -27,10 +27,6 @@ import { Skeleton } from "./ui/skeleton";
  * @returns 解説シートのコンテンツのコンポーネント
  */
 export default function ExplanationSheetContent() {
-  const { testId, questionNumber } = useParams();
-  const { instance, accounts } = useMsal();
-  const accountInfo = useAccount(accounts[0] || {});
-
   const answerExplanation = useAtomValue(fetchAnswerExplanationAtom);
   const [community, fetchCommunity] = useAtom(fetchCommunityAtom);
   const fetchExplanationsOnly = useSetAtom(fetchExplanationsOnlyAtom);
@@ -45,18 +41,20 @@ export default function ExplanationSheetContent() {
     fetchTranslationSubjectChoiceAtom
   );
   const resetCommunity = useSetAtom(resetCommunityAtom);
-  // エラーが発生した問題番号を保持（問題番号が変わると自動的にエラー状態がリセットされる）
   const [translationFailedForQuestion, setTranslationFailedForQuestion] =
     useState<string | null>(null);
-  const [systemErrorForQuestion, setSystemErrorForQuestion] = useState<string | null>(null);
-  // 現在の問題番号でエラーが発生しているかどうかを判定
-  const isOccurredTranslationFailed = translationFailedForQuestion === questionNumber;
-  const isOccurredSystemError = systemErrorForQuestion === questionNumber;
+  const [systemErrorForQuestion, setSystemErrorForQuestion] = useState<
+    string | null
+  >(null);
   const fetchCommunityCalledRef = useRef<boolean>(false);
   const fetchExplanationsOnlyCalledRef = useRef<boolean>(false);
   const fetchTranslationExplanationCalledRef = useRef<boolean>(false);
   const fetchTranslationCommunityCalledRef = useRef<boolean>(false);
   const previousQuestionNumberRef = useRef<string | undefined>(undefined);
+
+  const { testId, questionNumber } = useParams();
+  const { instance, accounts } = useMsal();
+  const accountInfo = useAccount(accounts[0] || {});
 
   const translationFailedToast = useTranslationFailedToast();
   const systemErrorToast = useSystemErrorToast();
@@ -73,15 +71,18 @@ export default function ExplanationSheetContent() {
       await fetchCommunity(testId, questionNumber, instance, accountInfo, true);
       // 翻訳も再取得するためにフラグをリセット
       fetchTranslationCommunityCalledRef.current = false;
+      // エラーが発生した問題番号をクリア
       setTranslationFailedForQuestion(null);
+      setSystemErrorForQuestion(null);
     } catch (e) {
+      // エラーが発生した問題番号を設定
       setSystemErrorForQuestion(questionNumber ?? null);
+      // システムエラートーストを表示
       systemErrorToast(e);
     }
   };
 
   // 問題番号が変更された場合、API呼び出しフラグをリセット
-  // （エラーフラグは問題番号ベースで管理しているため、自動的にリセットされる）
   useEffect(() => {
     if (previousQuestionNumberRef.current !== questionNumber) {
       fetchCommunityCalledRef.current = false;
@@ -98,7 +99,7 @@ export default function ExplanationSheetContent() {
       !testId ||
       !questionNumber ||
       community ||
-      isOccurredSystemError ||
+      systemErrorForQuestion === questionNumber ||
       fetchCommunityCalledRef.current
     ) {
       return;
@@ -108,7 +109,9 @@ export default function ExplanationSheetContent() {
       try {
         await fetchCommunity(testId, questionNumber, instance, accountInfo);
       } catch (e) {
+        // エラーが発生した問題番号を設定
         setSystemErrorForQuestion(questionNumber);
+        // システムエラートーストを表示
         systemErrorToast(e);
       }
     })();
@@ -116,10 +119,10 @@ export default function ExplanationSheetContent() {
     testId,
     questionNumber,
     community,
-    isOccurredSystemError,
     fetchCommunity,
     instance,
     accountInfo,
+    systemErrorForQuestion,
     systemErrorToast,
   ]);
 
@@ -130,7 +133,7 @@ export default function ExplanationSheetContent() {
       !questionNumber ||
       !answerExplanation ||
       answerExplanation.explanations ||
-      isOccurredSystemError ||
+      systemErrorForQuestion === questionNumber ||
       fetchExplanationsOnlyCalledRef.current
     ) {
       return;
@@ -145,7 +148,9 @@ export default function ExplanationSheetContent() {
           accountInfo
         );
       } catch (e) {
+        // エラーが発生した問題番号を設定
         setSystemErrorForQuestion(questionNumber);
+        // システムエラートーストを表示
         systemErrorToast(e);
       }
     })();
@@ -153,10 +158,10 @@ export default function ExplanationSheetContent() {
     testId,
     questionNumber,
     answerExplanation,
-    isOccurredSystemError,
     fetchExplanationsOnly,
     instance,
     accountInfo,
+    systemErrorForQuestion,
     systemErrorToast,
   ]);
 
@@ -166,7 +171,7 @@ export default function ExplanationSheetContent() {
       !answerExplanation ||
       !answerExplanation.explanations ||
       translationExplanation ||
-      isOccurredTranslationFailed ||
+      translationFailedForQuestion === questionNumber ||
       fetchTranslationExplanationCalledRef.current
     ) {
       return;
@@ -176,7 +181,9 @@ export default function ExplanationSheetContent() {
       try {
         await fetchTranslationExplanation(instance, accountInfo);
       } catch {
+        // エラーが発生した問題番号を設定
         setTranslationFailedForQuestion(questionNumber ?? null);
+        // 翻訳失敗トーストを表示
         translationFailedToast("解説", () =>
           setTranslationFailedForQuestion(null)
         );
@@ -186,7 +193,7 @@ export default function ExplanationSheetContent() {
     questionNumber,
     answerExplanation,
     translationExplanation,
-    isOccurredTranslationFailed,
+    translationFailedForQuestion,
     fetchTranslationExplanation,
     instance,
     accountInfo,
@@ -198,7 +205,7 @@ export default function ExplanationSheetContent() {
     if (
       !community ||
       translationCommunity ||
-      isOccurredTranslationFailed ||
+      translationFailedForQuestion === questionNumber ||
       fetchTranslationCommunityCalledRef.current
     ) {
       return;
@@ -208,7 +215,9 @@ export default function ExplanationSheetContent() {
       try {
         await fetchTranslationCommunity(instance, accountInfo);
       } catch {
+        // エラーが発生した問題番号を設定
         setTranslationFailedForQuestion(questionNumber ?? null);
+        // 翻訳失敗トーストを表示
         translationFailedToast("コミュニティ情報", () =>
           setTranslationFailedForQuestion(null)
         );
@@ -218,7 +227,7 @@ export default function ExplanationSheetContent() {
     questionNumber,
     community,
     translationCommunity,
-    isOccurredTranslationFailed,
+    translationFailedForQuestion,
     fetchTranslationCommunity,
     instance,
     accountInfo,
