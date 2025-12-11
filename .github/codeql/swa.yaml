@@ -1,0 +1,4 @@
+name: CodeQL Config for Azure Static Web Apps
+
+paths:
+  - swa/**
