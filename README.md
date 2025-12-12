@@ -7,10 +7,6 @@
 
 生成 AI を活用した、英語の IT 資格試験問題の学習支援システムのフロントエンドを提供する。
 
-## API サーバーの API リファレンス
-
-[QuestionGPTTranslator の Swagger UI](https://infhyroyage.github.io/QuestionGPTTranslator/) に準拠する。
-
 ## 技術スタック
 
 [technologystack.md](technologystack.md) 参照。
