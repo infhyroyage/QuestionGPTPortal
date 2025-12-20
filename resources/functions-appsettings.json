@@ -1,0 +1,32 @@
+[
+  {
+    "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+    "slotSetting": false,
+    "value": "@Microsoft.KeyVault(VaultName={vaultName};SecretName=insights-instrumentation-key)"
+  },
+  {
+    "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+    "slotSetting": false,
+    "value": "@Microsoft.KeyVault(VaultName={vaultName};SecretName=insights-connection-string)"
+  },
+  {
+    "name": "COSMOSDB_KEY",
+    "slotSetting": false,
+    "value": "@Microsoft.KeyVault(SecretUri={cosmosdbKey})"
+  },
+  {
+    "name": "COSMOSDB_READONLY_KEY",
+    "slotSetting": false,
+    "value": "@Microsoft.KeyVault(SecretUri={cosmosdbReadonlyKey})"
+  },
+  {
+    "name": "OPENAI_API_KEY",
+    "slotSetting": false,
+    "value": "@Microsoft.KeyVault(VaultName={vaultName};SecretName=openai-api-key)"
+  },
+  {
+    "name": "TRANSLATOR_KEY",
+    "slotSetting": false,
+    "value": "@Microsoft.KeyVault(SecretUri={translatorKey})"
+  }
+]

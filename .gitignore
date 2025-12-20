@@ -1,16 +1,25 @@
-# Logs
-swa/logs
-swa/*.log
-swa/npm-debug.log*
-swa/yarn-debug.log*
-swa/yarn-error.log*
-swa/pnpm-debug.log*
-swa/lerna-debug.log*
+# vscode
+.vscode/
 
+# Azurite
+azurite/
+
+# Azure Functions
+functions/data
+functions/**/__pycache__
+functions/.coverage
+functions/coverage-summary.json
+functions/local.settings.json
+
+# Bicep Parameter Files
+resources/*.parameters.bicepparam
+
+# Python Virtual Environment
+venv/
+
+# SWA
 swa/node_modules
 swa/dist
-swa/dist-ssr
-swa/*.local
 swa/.env
 swa/*.tsbuildinfo
 
