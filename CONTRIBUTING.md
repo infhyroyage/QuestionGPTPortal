@@ -122,7 +122,7 @@
 また、以下のファイルはローカル環境で管理するため、リポジトリにコミットしないこと:
 
 - local.settings.json (ローカル開発時の関数アプリの環境変数)
-- swa/.env、swa/.env.local (ローカル開発時のフロントエンドの環境変数)
+- swa/.env (ローカル開発時のフロントエンドの環境変数)
 - data/(コース名)/(テスト名).json (インポートデータファイル)
 
 ### プルリクエストの要件
@@ -172,6 +172,6 @@ GitHub Dependabot は以下の実行方式に従い、`.github/dependabot.yaml` 
 
 ### GitHub Actions 管理
 
-- 実行スケジュール: 毎週月曜日 11:30 (Asia/Tokyo)
+- 実行スケジュール: 毎週月曜日 11:00 (Asia/Tokyo)
 - 対象ディレクトリ: .github/workflows/
 - 更新方式: プルリクエストによる自動提案
