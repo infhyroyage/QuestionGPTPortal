@@ -163,7 +163,7 @@ json の各キーの説明を、以下に示す。
 
 ### 3.2 認証システム
 
-Azure 環境の場合は、Microsoft Entra ID を利用した認証システムを、Microsoft Authentication Library (MSAL)を介して実現する。MSAL の認証プロバイダーは、 React のエントリーポイントである`swa/src/App.tsx`に対し、`swa/src/components/ApplyMSAL.tsx` で適用する。認証後に Microsoft Indentity Platform で払い出されたアクセストークンを、`X-Access-Token`ヘッダーに設定して、 環境変数 `API_URI` で URL 管理する API サーバーにアクセスする。ローカル環境は、Entra ID 認証をスキップし、`X-User-Id: local` ヘッダーで API アクセスする。
+Azure 環境の場合は、Microsoft Entra ID を利用した認証システムを、Microsoft Authentication Library (MSAL)を介して実現する。MSAL の認証プロバイダーは、 React のエントリーポイントである`swa/src/App.tsx`に対し、`swa/src/components/ApplyMSAL.tsx` で適用する。認証後に Microsoft Indentity Platform で払い出されたアクセストークンを、`X-Access-Token`ヘッダーに設定して、 環境変数 `VITE_API_URI` で URL 管理する API サーバーにアクセスする。一方、ローカル環境は、Entra ID 認証をスキップし、`X-User-Id: local` ヘッダーで API アクセスする。
 
 `swa/src/lib/msal.ts` で、以下の MSAL の設定を定義する。
 

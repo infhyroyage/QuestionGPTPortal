@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - .github/workflows/create-azure-resources.yaml
-      - resources**
+      - resources/**
 
 env:
   LOCATION: japaneast
@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@main
+        uses: actions/checkout@v6
 
       - name: Login Azure as Contributor
         uses: azure/login@v2
@@ -147,7 +147,7 @@ jobs:
     needs: assign-storage-roles
     steps:
       - name: Checkout
-        uses: actions/checkout@main
+        uses: actions/checkout@v6
 
       - name: Login Azure as Contributor
         uses: azure/login@v2
@@ -198,7 +198,7 @@ jobs:
     needs: set-functions-appsettings
     steps:
       - name: Checkout
-        uses: actions/checkout@main
+        uses: actions/checkout@v6
 
       - name: Login Azure as Contributor
         uses: azure/login@v2

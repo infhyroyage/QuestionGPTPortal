@@ -8,6 +8,9 @@ on:
       - .github/workflows/deploy-swa.yaml
       - swa/**
 
+env:
+  RESOURCE_GROUP: qgtranslator-je
+
 jobs:
   deploy-swa:
     runs-on: ubuntu-latest
@@ -25,7 +28,7 @@ jobs:
         run: |
           TOKEN=$(az staticwebapp secrets list \
             -n ${{ vars.SWA_NAME }} \
-            -g ${{ vars.RESOURCE_GROUP_NAME }} \
+            -g ${{ env.RESOURCE_GROUP }} \
             --query 'properties.apiKey' \
             -o tsv)
           echo "token=$TOKEN" >> $GITHUB_OUTPUT
@@ -39,6 +42,6 @@ jobs:
           output_location: "dist"
           repo_token: ${{ secrets.GITHUB_TOKEN }}
         env:
-          VITE_API_URI: ${{ vars.API_URI }}
+          VITE_API_URI: https://${{ vars.APIM_NAME }}.azure-api.net
           VITE_AZURE_AD_SP_MSAL_CLIENT_ID: ${{ vars.AZURE_AD_SP_MSAL_CLIENT_ID }}
           VITE_AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}

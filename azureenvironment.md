@@ -92,7 +92,6 @@ Variables タブから「New repository variable」ボタンを押下して、�
 | 変数名                                  | 変数値                                                                                    |
 | --------------------------------------- | ----------------------------------------------------------------------------------------- |
 | APIM_NAME                               | Azure API Management 名                                                                   |
-| API_URI                                 | API Management の Gateway(TODO:不要) URL                                                  |
 | AZURE_AD_EA_CONTRIBUTOR_OBJECT_ID       | 3.で発行した QGTranslator_Contributor のエンタープライズアプリケーションのオブジェクト ID |
 | AZURE_AD_SP_CONTRIBUTOR_CLIENT_ID       | 3.で発行した QGTranslator_Contributor のクライアント ID                                   |
 | AZURE_AD_SP_USER_ACCESS_ADMIN_CLIENT_ID | 4.で発行した QGTranslator_User_Access_Admin のクライアント ID                             |
@@ -108,7 +107,6 @@ Variables タブから「New repository variable」ボタンを押下して、�
 | OPENAI_MODEL_NAME                       | Azure OpenAI のモデル名                                                                   |
 | OPENAI_MODEL_VERSION                    | Azure OpenAI のモデルのバージョン                                                         |
 | OPENAI_NAME                             | Azure OpenAI 名                                                                           |
-| RESOURCE_GROUP_NAME                     | リソースグループ(TODO:不要)名                                                             |
 | STORAGE_NAME                            | Azure ストレージアカウント名                                                              |
 | SWA_NAME                                | Azure Static Web Apps 名                                                                  |
 | TRANSLATOR_NAME                         | Azure Translator 名                                                                       |
