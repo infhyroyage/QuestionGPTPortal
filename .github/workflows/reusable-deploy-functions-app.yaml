@@ -1,0 +1,93 @@
+name: Deploy Azure Functions Application (Reusable Workflow)
+
+on:
+  workflow_call:
+    inputs:
+      AZURE_AD_SP_CONTRIBUTOR_CLIENT_ID:
+        required: true
+        type: string
+      AZURE_SUBSCRIPTION_ID:
+        required: true
+        type: string
+      AZURE_TENANT_ID:
+        required: true
+        type: string
+      FUNCTIONS_NAME:
+        required: true
+        type: string
+      PYTHON_VERSION:
+        default: "3.12"
+        required: false
+        type: string
+      STORAGE_NAME:
+        required: true
+        type: string
+    secrets:
+      AZURE_AD_SP_CONTRIBUTOR_CLIENT_SECRET:
+        required: true
+
+jobs:
+  deploy-functions-app:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Python ${{ inputs.PYTHON_VERSION }} Environment
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ inputs.PYTHON_VERSION }}
+
+      - name: Install Dependencies in functions directory
+        run: |
+          pushd functions
+          python -m pip install --upgrade pip
+          cp ../requirements.txt .
+          pip install -r requirements.txt --target=".python_packages/lib/site-packages"
+          popd
+
+      - name: Login Azure as Contributor
+        uses: azure/login@v2
+        with:
+          creds: '{"clientId":"${{ inputs.AZURE_AD_SP_CONTRIBUTOR_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_AD_SP_CONTRIBUTOR_CLIENT_SECRET }}","subscriptionId":"${{ inputs.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ inputs.AZURE_TENANT_ID }}"}'
+
+      - name: Deploy Azure Functions Application
+        uses: Azure/functions-action@v1.5.3
+        with:
+          app-name: ${{ inputs.FUNCTIONS_NAME }}
+          package: functions/
+          sku: flexconsumption
+          remote-build: false
+          scm-do-build-during-deployment: false
+          enable-oryx-build: false
+
+      - name: Delete non-latest deployment packages
+        run: |
+          # Get Storage Account Key1
+          STORAGE_ACCOUNT_KEY1=$(
+            az storage account keys list \
+              --account-name ${{ inputs.STORAGE_NAME }} \
+              --query "[0].value" \
+              -o tsv
+          )
+
+          # Get a latest deployment package
+          BLOB_NAMES_TO_DELETE=$(
+            az storage blob list \
+              --account-name ${{ inputs.STORAGE_NAME }} \
+              -c github-actions-deploy \
+              --account-key $STORAGE_ACCOUNT_KEY1 \
+              --query "[].{Name:name, LastModified:properties.lastModified}" \
+              --output tsv | sort -k2 -r | tail -n +2 | cut -f1
+          )
+
+          # Delete the BLOBs
+          for BLOB_NAME in $BLOB_NAMES_TO_DELETE; do
+            echo "Deleting: $BLOB_NAME"
+            az storage blob delete \
+              --account-name ${{ inputs.STORAGE_NAME }} \
+              -c github-actions-deploy \
+              --account-key $STORAGE_ACCOUNT_KEY1 \
+              --name "$BLOB_NAME" \
+              --delete-snapshots include
+          done

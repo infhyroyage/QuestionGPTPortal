@@ -5,6 +5,19 @@
 
 version: 2
 updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:00"
+      timezone: "Asia/Tokyo"
+    assignees:
+      - "infhyroyage"
+    ignore:
+      - dependency-name: "openai"
+    labels: []
+
   - package-ecosystem: "npm"
     directory: "/swa"
     schedule:
@@ -29,7 +42,7 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "11:30"
+      time: "11:00"
       timezone: "Asia/Tokyo"
     assignees:
       - "infhyroyage"
