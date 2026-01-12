@@ -76,54 +76,53 @@ class TestCreateChatCompletionsMessages(unittest.TestCase):
         "# First example\n"
         "Assume that the following question and choices are given:\n"
         "---\n"
-        "A company is launching a new web service on an Amazon Elastic Container Service (Amazon ECS) cluster. The cluster consists of 100 Amazon EC2 instances. Company policy requires the security group on the cluster instances to block all inbound traffic except HTTPS (port 443).\n"
-        "Which solution will meet these requirements?\n\n"
-        "A. Change the SSH port to 2222 on the cluster instances by using a user data script. Log in to each instance by using SSH over port 2222.\n"
-        "B. Change the SSH port to 2222 on the cluster instances by using a user data script. Use AWS Trusted Advisor to remotely manage the cluster instances over port 2222.\n"
-        "C. Launch the cluster instances with no SSH key pairs. Use AWS Systems Manager Run Command to remotely manage the cluster instances.\n"
-        "D. Launch the cluster instances with no SSH key pairs. Use AWS Trusted Advisor to remotely manage the cluster instances.\n"
+        "A company has a legacy API that runs on a fleet of Amazon EC2 instances behind a public Application Load Balancer (ALB). The ALB has access logging enabled and stores the access logs in Amazon S3. The API is available through the hostname api.example.com. The company uses Amazon Route 53 to manage the hostname.\n"
+        "Developers have rebuilt five of the API endpoints by using a different AWS Lambda function for each endpoint. A DevOps engineer wants to test the new versions of the Lambda functions with a limited number of random customers. To ensure compatibility with an existing log processing service, the test must not affect the ALB access logs.\n"
+        "How should the DevOps engineer perform the test to meet these requirements?\n\n"
+        "A. Add the five Lambda functions as targets to the existing target group for the EC2 instances. Set the weight in the target group of each Lambda function target to be less than the EC2 instance targets. Amend the default rule on the ALB to enable target group-level stickiness.\n"
+        "B. Create a single target group that includes all the Lambda functions as individual targets. On the ALB, create a new listener rule that includes a host header condition that matches the API endpoint's hostname. Add the target group to the listener rule. Specify a lower weight for the new target group than the weight of the default rule's target group.\n"
+        "C. Create a new ALB and a new target group for each Lambda function. Create a new listener rule that includes a host header condition that matches each of the endpoints and forwards traffic to the target groups. Create a new Route 53 alias record with a weight of 10. Update the existing Route 53 record for the api.example.com hostname with a weight of 90.\n"
+        "D. Create a new target group for each Lambda function. On the ALB, create new listener rules that include a path condition that matches each of the different endpoints. Set the rules to be weighted between the Lambda function target group for that endpoint and the instance-based target group.\n"
         "---\n"
         "For the question and choices in this first example, generate the JSON format with `correct_indexes` and `explanations`.\n"
         "`correct_indexes` shows an array of indexes of correct options and `explanations` shows an array of explanations of why each option is correct/incorrect.\n"
         "Since there is only one correct answer required for this example, the number of `correct_indexes` is only one, as follows:\n"
         "---\n"
         "{{\n"
-        '    "correct_indexes": [2],\n'
+        '    "correct_indexes": [3],\n'
         '    "explanations": [\n'
-        '        "Option A is incorrect because the requirements state that the only inbound port that should be open is 443.",\n'
-        '        "Option B is incorrect because the requirements state that the only inbound port that should be open is 443.",\n'
-        '        "Option C is correct because AWS Systems Manager Run Command requires no inbound ports to be open. Run Command operates entirely over outbound HTTPS, which is open by default for security groups.",\n'
-        '        "Option D is incorrect because AWS Trusted Advisor does not perform this management function."\n'
+        '        "Option A is incorrect because multiple Lambda functions to a single target group cannot be registered and target group-level stickiness would negate the benefit of weighted routing for limited testing.",\n'
+        '        "Option B is incorrect because multiple Lambda functions to a single target group cannot be registered and weighted rules are assigned at the individual rule level and are not evaluated across multiple rules.",\n'
+        '        "Option C is incorrect because it would affect the ALB access logs by generating different access logs based on the new load balancer ID. Additionally, listener rules that include a host header condition would not be effective for URI level testing.",\n'
+        '        "Option D is correct because this scenario is similar to a blue/green deployment and a canary deployment. Only the existing Application Load Balancer (ALB) is required for this solution. Target groups support a single AWS Lambda function as a registered target. Therefore, this solution requires five target groups, one for each endpoint. With each endpoint having its own path, new path conditions are needed in the listener rules to facilitate the weighted distribution of requests across the existing EC2 target group and the new Lambda function target groups."\n'
         "    ]\n"
         "}}\n"
         "---\n\n"
         "# Second Example\n"
         "Assume that the following question and choices are given:\n"
         "---\n"
-        "A company has deployed a multi-tier web application in the AWS Cloud. The application consists of the following tiers:\n"
-        "* A Windows-based web tier that is hosted on Amazon EC2 instances with Elastic IP addresses\n"
-        "* A Linux-based application tier that is hosted on EC2 instances that run behind an Application Load Balancer (ALB) that uses path-based routing\n"
-        "* A MySQL database that runs on a Linux EC2 instance\n"
-        "All the EC2 instances are using Intel-based x86 CPUs. A solutions architect needs to modernize the infrastructure to achieve better performance. The solution must minimize the operational overhead of the application.\n"
-        "Which combination of actions should the solutions architect take to meet these requirements? (Select TWO.)\n\n"
-        "A. Run the MySQL database on multiple EC2 instances.\n"
-        "B. Place the web tier instances behind an ALB.\n"
-        "C. Migrate the MySQL database to Amazon Aurora Serxverless.\n"
-        "D. Migrate all EC2 instance types to Graviton2.\n"
-        "E. Replace the ALB for the application tier instances with a company-managed load balancer.\n"
+        "A DevOps team has an application that stores critical company assets in an existing Amazon S3 bucket. The team uses a single AWS Region. A new company policy requires the team to deploy the application to multiple Regions. The assets must always be accessible. Users must use the same endpoint to access the assets.\n"
+        "Which combination of steps should the team take to meet these requirements in the MOST operationally efficient way? (Select THREE.)\n\n"
+        "A. Use AWS CloudFormation StackSets to create a new S3 bucket that has versioning enabled in each required Region. Copy the assets from the existing S3 bucket to the new S3 buckets. Create an AWS Lambda function to copy files that are added to the new S3 bucket in the primary Region to the additional Regions.\n"
+        "B. Use AWS CloudFormation StackSets to create a new S3 bucket that has versioning enabled in each required Region. Create multiple S3 replication rules on the new S3 bucket in the primary Region to replicate all its contents to the additional Regions. Copy the assets from the existing S3 bucket to the new S3 bucket in the primary Region.\n"
+        "C. Create an Amazon CloudFront distribution. Configure new origins for each S3 bucket. Create an origin group that contains all the newly created origins. Update the default behavior of the distribution to use the new origin group.\n"
+        "D. Create an Amazon CloudFront distribution. Configure new origins for each S3 bucket. Create a Lambda@Edge function to validate the availability of the origin and to route the viewer request to an available nearby origin.\n"
+        "E. Create an Amazon Route 53 alias record. Configure a failover routing policy that uses the newly created S3 buckets as a target.\n"
+        "F. Create an Amazon Route 53 alias record. Configure a simple routing policy that uses the Amazon CloudFront distribution as a target.\n"
         "---\n"
         "For the question and choices in this second example, generate the JSON format with `correct_indexes` and `explanations`.\n"
         "`correct_indexes` shows an array of indexes of correct options and `explanations` shows an array of explanations of why each option is correct/incorrect.\n"
-        "For this example, since two correct answers are required, the number of `correct_indexes` is two, as follows:\n"
+        "For this example, since three correct answers are required, the number of `correct_indexes` is three, as follows:\n"
         "---\n"
         "{{\n"
-        '    "correct_indexes": [1, 2],\n'
+        '    "correct_indexes": [1, 2, 5],\n'
         '    "explanations": [\n'
-        '        "Option A is incorrect because additional EC2 instances will not minimize operational overhead. A managed service would be a better option.",\n'
-        '        "Option B is correct because you can improve availability and scalability of the web tier by placing the web tier behind an Application Load Balancer (ALB). The ALB serves as the single point of contact for clients and distributes incoming application traffic to the Amazon EC2 instances.",\n'
-        '        "Option C is correct because Amazon Aurora Serverless provides high performance and high availability with reduced operational complexity.",\n'
-        '        "Option D is incorrect because the application includes Windows instances, which are not available for Graviton2.",\n'
-        '        "Option E is incorrect because a company-managed load balancer will not minimize operational overhead."\n'
+        '        "Option A is incorrect because this option is less operationally efficient than option B. The AWS Lambda function is unnecessary because S3 replication can provide the appropriate functionality without custom code.",\n'
+        '        "Option B is correct because AWS CloudFormation StackSets provides an operationally efficient multi-Region deployment strategy for the Region-specific Amazon S3 buckets. S3 replication copies new and existing objects in the primary Region to multiple deployment Regions.",\n'
+        '        "Option C is correct because an Amazon CloudFront distribution can be used to make a single endpoint available to resolve to multiple origins. CloudFront custom origins can be configured to create high availability origin failover that requires a shorter connection timeout, fewer connection attempts, or both.",\n'
+        '        "Option D is incorrect because this option is less operationally efficient than option C. It involves custom code within the Lambda@Edge function, which is unnecessary because of native handling within the origin configurations.",\n'
+        '        "Option E is incorrect because there are not multiple records to benefit from failover routing.",\n'
+        '        "Option F is correct because the CloudFront origin configurations are handling the failover, Route 53 is providing a simple routing policy user-friendly domain name to the CloudFront distribution."\n'
         "    ]\n"
         "}}\n"
         "---\n\n"
