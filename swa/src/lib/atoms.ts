@@ -502,7 +502,7 @@ export const fetchTranslationExplanationAtom = atom(
       return;
     }
 
-    // 翻訳対象の文字列を準備（解説文 + 回答のポイント）
+    // 翻訳対象の文字列を準備(解説文 + 回答のポイント)
     const textsToTranslate: string[] = [...answerExplanation.explanations];
     const hasAnswerKeyPoint = !!answerExplanation.answerKeyPoint;
     if (hasAnswerKeyPoint) {

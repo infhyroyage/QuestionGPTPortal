@@ -72,9 +72,9 @@ class GetAnswerRes(TypedDict, total=False):
     各選択肢の正解/不正解の理由
     """
 
-    answerKeyPoint: Optional[str]
+    answerKeyPoint: str
     """
-    問題文から正しい回答を割り出すための回答のポイント（約300文字）
+    問題文から正しい回答を割り出すための回答のポイント(約300文字)
     """
 
     isExisted: bool
@@ -100,7 +100,7 @@ class PostAnswerRes(TypedDict, total=False):
 
     answerKeyPoint: str
     """
-    問題文から正しい回答を割り出すための回答のポイント（約300文字）
+    問題文から正しい回答を割り出すための回答のポイント(約300文字)
     """
 
 

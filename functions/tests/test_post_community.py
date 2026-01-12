@@ -461,7 +461,7 @@ class TestQueueMessageCommunity(unittest.TestCase):
     def test_queue_message_community_development_storage(
         self, mock_logging, mock_get_queue_client
     ):
-        """ローカル開発環境（Azurite）でキューメッセージを格納する場合のテスト"""
+        """ローカル開発環境(Azurite)でキューメッセージを格納する場合のテスト"""
 
         mock_queue_client = MagicMock()
         mock_get_queue_client.return_value = mock_queue_client

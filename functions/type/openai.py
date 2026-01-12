@@ -22,5 +22,5 @@ class CorrectAnswers(TypedDict):
 
     answer_key_point: str
     """
-    問題文から正しい回答を割り出すための回答のポイント（約300文字）
+    問題文から正しい回答を割り出すための回答のポイント(約300文字)
     """

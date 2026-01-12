@@ -58,9 +58,9 @@ export type GetAnswer = {
   explanations?: string[];
 
   /**
-   * 問題文から正しい回答を割り出すための回答のポイント（約300文字）
+   * 問題文から正しい回答を割り出すための回答のポイント(約300文字)
    */
-  answerKeyPoint?: string;
+  answerKeyPoint: string;
 
   /**
    * 正解の選択肢・正解/不正解の理由が存在する場合はtrue、存在しない場合はfalse
@@ -83,7 +83,7 @@ export type PostAnswerRes = {
   explanations: string[];
 
   /**
-   * 問題文から正しい回答を割り出すための回答のポイント（約300文字）
+   * 問題文から正しい回答を割り出すための回答のポイント(約300文字)
    */
   answerKeyPoint: string;
 };

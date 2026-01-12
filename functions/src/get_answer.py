@@ -76,7 +76,7 @@ def get_answer(req: func.HttpRequest) -> func.HttpResponse:
             body: GetAnswerRes = {
                 "correctIdxes": answer_item["correctIdxes"],
                 "explanations": answer_item["explanations"],
-                "answerKeyPoint": answer_item.get("answerKeyPoint"),
+                "answerKeyPoint": answer_item["answerKeyPoint"],
                 "isExisted": True,
             }
 
