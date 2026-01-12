@@ -38,6 +38,7 @@ class TestQueueTriggeredAnswer(TestCase):
             "answerNum": 1,
             "correctIdxes": [0],
             "explanations": ["Explanation 1"],
+            "answerKeyPoint": "Key point for this question.",
         }
         msg = func.QueueMessage(
             body=json.dumps(message_answer).encode("utf-8"),
@@ -53,6 +54,7 @@ class TestQueueTriggeredAnswer(TestCase):
             "correctIdxes": [0],
             "explanations": ["Explanation 1"],
             "testId": "1",
+            "answerKeyPoint": "Key point for this question.",
         }
         mock_container_answer.upsert_item.assert_called_once_with(expected_answer_item)
         mock_logging.info.assert_has_calls(
@@ -87,6 +89,7 @@ class TestQueueTriggeredAnswer(TestCase):
             "answerNum": 1,
             "correctIdxes": [0],
             "explanations": ["Explanation 1"],
+            "answerKeyPoint": "Key point for this question.",
         }
         msg = func.QueueMessage(
             body=json.dumps(message_answer).encode("utf-8"),

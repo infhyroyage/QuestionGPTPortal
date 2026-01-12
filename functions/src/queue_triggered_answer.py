@@ -56,6 +56,7 @@ def queue_triggered_answer(msg: func.QueueMessage):
             "correctIdxes": message_answer["correctIdxes"],
             "explanations": message_answer["explanations"],
             "testId": message_answer["testId"],
+            "answerKeyPoint": message_answer["answerKeyPoint"],
         }
         logging.info({"answer_item": answer_item})
         container_answer.upsert_item(answer_item)

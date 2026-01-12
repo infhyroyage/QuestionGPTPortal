@@ -57,7 +57,7 @@ class GetTestsRes(TypedDict):
     """
 
 
-class GetAnswerRes(TypedDict):
+class GetAnswerRes(TypedDict, total=False):
     """
     [GET] /tests/{testId}/answers/{questionNumber} のレスポンスボディの型
     """
@@ -70,6 +70,11 @@ class GetAnswerRes(TypedDict):
     explanations: Optional[List[str]]
     """
     各選択肢の正解/不正解の理由
+    """
+
+    answerKeyPoint: Optional[str]
+    """
+    問題文から正しい回答を割り出すための回答のポイント（約300文字）
     """
 
     isExisted: bool
@@ -91,6 +96,11 @@ class PostAnswerRes(TypedDict, total=False):
     explanations: List[str]
     """
     各選択肢の正解/不正解の理由
+    """
+
+    answerKeyPoint: str
+    """
+    問題文から正しい回答を割り出すための回答のポイント（約300文字）
     """
 
 

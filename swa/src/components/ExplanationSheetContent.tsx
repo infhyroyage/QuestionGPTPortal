@@ -282,6 +282,24 @@ export default function ExplanationSheetContent() {
             </Fragment>
           ))}
         </div>
+        {answerExplanation.answerKeyPoint && (
+          <>
+            <Separator className="my-6" />
+            <h4 className="scroll-m-20 text-xl font-semibold tracking-tight my-4">
+              回答のポイント
+            </h4>
+            <div className="space-y-1">
+              <p className="leading-7">{answerExplanation.answerKeyPoint}</p>
+              {translationExplanation && translationExplanation.answerKeyPoint ? (
+                <p className="text-sm text-muted-foreground">
+                  {translationExplanation.answerKeyPoint}
+                </p>
+              ) : (
+                <Skeleton className="h-5 w-full" />
+              )}
+            </div>
+          </>
+        )}
         <Separator className="my-6" />
         <div className="flex items-center justify-between my-4">
           <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">

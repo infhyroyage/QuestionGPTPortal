@@ -3,7 +3,7 @@
 from typing import List, Optional, TypedDict
 
 
-class Answer(TypedDict):
+class Answer(TypedDict, total=False):
     """
     Answerコンテナーの項目の型
     """
@@ -31,6 +31,11 @@ class Answer(TypedDict):
     testId: str
     """
     テストID
+    """
+
+    answerKeyPoint: Optional[str]
+    """
+    問題文から正しい回答を割り出すための回答のポイント（約300文字）
     """
 
 

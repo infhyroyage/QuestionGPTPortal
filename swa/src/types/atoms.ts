@@ -26,6 +26,13 @@ export type AnswerExplanation =
       explanations?: string[];
 
       /**
+       * 問題文から正しい回答を割り出すための回答のポイント（約300文字）
+       * 正解・解説文が生成済みの場合は値が設定される、
+       * 正解・解説文が生成中の場合はundefined
+       */
+      answerKeyPoint?: string;
+
+      /**
        * 正解・解説文が生成済みかつ正解の場合はtrue、
        * 正解・解説文が生成済みかつ不正解の場合はfalse、
        * 正解・解説文が生成中の場合はundefined
@@ -186,6 +193,11 @@ export type TranslationExplanation =
        * 各選択肢の正解/不正解の理由
        */
       explanations: string[];
+
+      /**
+       * 問題文から正しい回答を割り出すための回答のポイントの翻訳
+       */
+      answerKeyPoint?: string;
     }
   | undefined;
 

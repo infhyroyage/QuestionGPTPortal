@@ -129,6 +129,7 @@ export const fetchAnswerExplanationAtom = atom(
 
     let correctIdxes: number[];
     let explanations: string[];
+    let answerKeyPoint: string | undefined;
     if (isResubmit) {
       // 回答・解説再生成の場合、解説文に対する翻訳文を初期化してから、
       // [POST] /tests/{testId}/answers/{questionNumber}にアクセス
@@ -141,6 +142,7 @@ export const fetchAnswerExplanationAtom = atom(
       );
       correctIdxes = postAnswerRes.correctIdxes;
       explanations = postAnswerRes.explanations;
+      answerKeyPoint = postAnswerRes.answerKeyPoint;
     } else {
       // 回答・解説再生成ではない場合、[GET] /tests/{testId}/answers/{questionNumber}にアクセスして事前に生成した回答・解説を取得
       // もし取得できなかった場合、[POST] /tests/{testId}/answers/{questionNumber}にアクセス
@@ -153,6 +155,7 @@ export const fetchAnswerExplanationAtom = atom(
       if (getAnswerRes.isExisted) {
         correctIdxes = getAnswerRes.correctIdxes || [];
         explanations = getAnswerRes.explanations || [];
+        answerKeyPoint = getAnswerRes.answerKeyPoint;
       } else {
         const postAnswerRes: PostAnswerRes = await accessBackend<PostAnswerRes>(
           "POST",
@@ -162,6 +165,7 @@ export const fetchAnswerExplanationAtom = atom(
         );
         correctIdxes = postAnswerRes.correctIdxes;
         explanations = postAnswerRes.explanations;
+        answerKeyPoint = postAnswerRes.answerKeyPoint;
       }
     }
 
@@ -175,6 +179,7 @@ export const fetchAnswerExplanationAtom = atom(
     set(answerExplanationAtom, {
       correctFlags,
       explanations,
+      answerKeyPoint,
       isSubmitting: false,
       isCorrect,
       correctIdxes,
@@ -217,8 +222,10 @@ export const fetchExplanationsOnlyAtom = atom(
     );
 
     let explanations: string[] = [];
+    let answerKeyPoint: string | undefined;
     if (getAnswerRes.isExisted) {
       explanations = getAnswerRes.explanations || [];
+      answerKeyPoint = getAnswerRes.answerKeyPoint;
     } else {
       // 解説がまだ生成されていない場合は、POSTで生成
       const postAnswerRes: PostAnswerRes = await accessBackend<PostAnswerRes>(
@@ -228,12 +235,14 @@ export const fetchExplanationsOnlyAtom = atom(
         accountInfo
       );
       explanations = postAnswerRes.explanations;
+      answerKeyPoint = postAnswerRes.answerKeyPoint;
     }
 
-    // 既存の状態を保持したまま、解説のみを追加
+    // 既存の状態を保持したまま、解説と回答のポイントを追加
     set(answerExplanationAtom, {
       ...answerExplanation,
       explanations,
+      answerKeyPoint,
     });
   }
 );
@@ -493,16 +502,35 @@ export const fetchTranslationExplanationAtom = atom(
       return;
     }
 
+    // 翻訳対象の文字列を準備（解説文 + 回答のポイント）
+    const textsToTranslate: string[] = [...answerExplanation.explanations];
+    const hasAnswerKeyPoint = !!answerExplanation.answerKeyPoint;
+    if (hasAnswerKeyPoint) {
+      textsToTranslate.push(answerExplanation.answerKeyPoint!);
+    }
+
     // [PUT] /en2jaにアクセスして取得した解説文の翻訳文で更新
     const res: PutEn2JaRes = await accessBackend<PutEn2JaRes, PutEn2JaReq>(
       "PUT",
       "/en2ja",
       instance,
       accountInfo,
-      answerExplanation.explanations
+      textsToTranslate
     );
 
-    set(translationExplanationAtom, { explanations: res });
+    // 翻訳結果を分割
+    const explanationsTranslation = res.slice(
+      0,
+      answerExplanation.explanations.length
+    );
+    const answerKeyPointTranslation = hasAnswerKeyPoint
+      ? res[answerExplanation.explanations.length]
+      : undefined;
+
+    set(translationExplanationAtom, {
+      explanations: explanationsTranslation,
+      answerKeyPoint: answerKeyPointTranslation,
+    });
   }
 );
 

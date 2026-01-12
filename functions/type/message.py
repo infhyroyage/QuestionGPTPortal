@@ -43,6 +43,11 @@ class MessageAnswer(TypedDict):
     各選択肢の正解/不正解の理由
     """
 
+    answerKeyPoint: str
+    """
+    問題文から正しい回答を割り出すための回答のポイント（約300文字）
+    """
+
 
 class MessageCommunity(TypedDict):
     """

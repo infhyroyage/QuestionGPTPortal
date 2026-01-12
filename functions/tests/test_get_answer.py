@@ -69,6 +69,7 @@ class TestGetAnswer(TestCase):
         mock_answer_item = {
             "correctIdxes": [1],
             "explanations": ["Option 1 is correct because..."],
+            "answerKeyPoint": "Key point for this question.",
         }
         mock_answer_container.read_item.return_value = mock_answer_item
         mock_get_read_only_container.return_value = mock_answer_container
@@ -90,6 +91,7 @@ class TestGetAnswer(TestCase):
         expected_body = {
             "correctIdxes": [1],
             "explanations": ["Option 1 is correct because..."],
+            "answerKeyPoint": "Key point for this question.",
             "isExisted": True,
         }
         self.assertEqual(json.loads(response.get_body().decode()), expected_body)

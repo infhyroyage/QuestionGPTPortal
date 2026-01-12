@@ -76,6 +76,7 @@ def get_answer(req: func.HttpRequest) -> func.HttpResponse:
             body: GetAnswerRes = {
                 "correctIdxes": answer_item["correctIdxes"],
                 "explanations": answer_item["explanations"],
+                "answerKeyPoint": answer_item.get("answerKeyPoint"),
                 "isExisted": True,
             }
 
@@ -88,7 +89,7 @@ def get_answer(req: func.HttpRequest) -> func.HttpResponse:
             )
         except CosmosResourceNotFoundError:
             # Answerコンテナーから項目を取得できない場合、
-            # 正解の選択肢・正解/不正解の理由を除いてレスポンス
+            # 正解の選択肢・正解/不正解の理由・回答のポイントを除いてレスポンス
             body: GetAnswerRes = {
                 "isExisted": False,
             }

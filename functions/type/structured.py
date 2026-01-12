@@ -23,3 +23,12 @@ class AnswerFormat(BaseModel):
     """
     各選択肢の正解/不正解の理由
     """
+
+    answer_key_point: str = Field(
+        ...,
+        description="A summary of approximately 300 characters explaining "
+        "the key point to derive the correct answer from the question",
+    )
+    """
+    問題文から正しい回答を割り出すための回答のポイント（約300文字）
+    """
