@@ -18,8 +18,6 @@ export const config: Configuration = {
   cache: {
     // アクセストークンの格納先
     cacheLocation: "sessionStorage",
-    // IE11/Edgeでの動作で問題が発生する場合のみtrueに設定
-    storeAuthStateInCookie: false,
   },
 };
 
