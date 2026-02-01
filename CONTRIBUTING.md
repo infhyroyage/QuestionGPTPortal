@@ -5,7 +5,7 @@
 本システムの開発には、以下のツールとテクノロジーを使用する:
 
 - フロントエンド
-  - Node.js (TypeScript ランタイム)
+  - Node.js v24 (TypeScript ランタイム)
   - React + TypeScript (フロントエンドフレームワーク)
   - Vite (ビルドツール・開発サーバー)
   - ESLint (コード静的解析)

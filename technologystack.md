@@ -29,7 +29,7 @@ GitHub Pages を通して React + TailwindCSS をベースとし、レスポン�
 本システムでは、以下の技術スタックを利用して、スケーラブルかつ耐障害性の高いアーキテクチャーを構築する:
 
 - フロントエンド
-  - Node.js (JavaScript ランタイム)
+  - Node.js v24 (JavaScript ランタイム)
   - TypeScript (静的型付け JavaScript)
   - React (JavaScript UI ライブラリ)
   - React Router (クライアントサイドルーティング)
