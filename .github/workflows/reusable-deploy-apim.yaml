@@ -51,7 +51,7 @@ jobs:
             apim/apis-functions-swagger.yaml
 
       - name: Login Azure as Contributor
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           creds: '{"clientId":"${{ inputs.AZURE_AD_SP_CONTRIBUTOR_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_AD_SP_CONTRIBUTOR_CLIENT_SECRET }}","subscriptionId":"${{ inputs.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ inputs.AZURE_TENANT_ID }}"}'
           enable-AzPSSession: true
@@ -110,7 +110,7 @@ jobs:
             apim/apis-healthcheck-functions-swagger.yaml
 
       - name: Login Azure as Contributor
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           creds: '{"clientId":"${{ inputs.AZURE_AD_SP_CONTRIBUTOR_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_AD_SP_CONTRIBUTOR_CLIENT_SECRET }}","subscriptionId":"${{ inputs.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ inputs.AZURE_TENANT_ID }}"}'
           enable-AzPSSession: true
