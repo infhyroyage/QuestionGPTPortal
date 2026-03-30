@@ -85,7 +85,7 @@ jobs:
       # 従量課金のAPI Managementは、ARMテンプレートにポリシーを記述してデプロイできないため、
       # PowershellにてFunctions API全体に対するポリシーを別途設定
       - name: Set API Management Policies
-        uses: azure/powershell@v2
+        uses: azure/powershell@v3
         with:
           inlineScript: |
             $apimContext = New-AzApiManagementContext `
@@ -130,7 +130,7 @@ jobs:
       # PowershellにてFunctions API全体に対するポリシーを別途設定
       # ただし、[GET] /healthcheckのAPIのみ、CORSチェック・JWTトークンチェックを迂回する独自ポリシーを設定
       - name: Set API Management Policies
-        uses: azure/powershell@v2
+        uses: azure/powershell@v3
         with:
           inlineScript: |
             $apimContext = New-AzApiManagementContext `
