@@ -197,7 +197,7 @@ Azure Cosmos DB に格納するデータであるインポートデータファ�
 インポートデータファイルを作成したら、以下のコマンドを実行し、Azure Storage Account の Blob Storage にアップロードする。
 
 ```bash
-az storage blob directory upload --account-name (当リポジトリの変数STORAGE_NAMEの値) -c import-items -s "functions/data/*" -d . -r
+az storage blob upload-batch --destination import-items --source ./functions/data --account-name (当リポジトリの変数STORAGE_NAMEの値)
 ```
 
 ### 9. Azure Static Web Apps への Web アプリケーションのデプロイ
