@@ -244,3 +244,29 @@ jobs:
       SWA_NAME: ${{ vars.SWA_NAME }}
     secrets:
       AZURE_AD_SP_CONTRIBUTOR_CLIENT_SECRET: ${{ secrets.AZURE_AD_SP_CONTRIBUTOR_CLIENT_SECRET }}
+
+  deploy-event-grid-subscription:
+    runs-on: ubuntu-latest
+    needs: use-deploy-functions-app-workflow
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Login Azure as Contributor
+        uses: azure/login@v3
+        with:
+          creds: '{"clientId":"${{ vars.AZURE_AD_SP_CONTRIBUTOR_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_AD_SP_CONTRIBUTOR_CLIENT_SECRET }}","subscriptionId":"${{ vars.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ vars.AZURE_TENANT_ID }}"}'
+
+      - name: Upgrade Bicep
+        run: az bicep upgrade
+
+      - name: Create Resources
+        uses: azure/arm-deploy@v2
+        with:
+          scope: resourcegroup
+          subscriptionId: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          resourceGroupName: ${{ env.RESOURCE_GROUP }}
+          template: ./resources/event-grid-subscription-blob-import.bicep
+          parameters: >-
+            functionsName=${{ vars.FUNCTIONS_NAME }}
+            eventGridName=${{ vars.EVENT_GRID_NAME }}

@@ -3,6 +3,7 @@ param azureAdEAContributorObjectId string
 @secure()
 param azureApimPublisherEmail string
 param cosmosDBName string
+param eventGridName string
 param functionsName string
 param githubRepoUrl string
 param location string = resourceGroup().location
@@ -279,6 +280,16 @@ resource cosmosDBDatabaseUsersContainerTest 'Microsoft.DocumentDb/databaseAccoun
         paths: ['/courseName']
       }
     }
+  }
+}
+
+// Event Grid System Topic
+resource eventGridSystemTopic 'Microsoft.EventGrid/systemTopics@2023-12-15-preview' = {
+  name: eventGridName
+  location: location
+  properties: {
+    source: storage.id
+    topicType: 'Microsoft.Storage.StorageAccounts'
   }
 }
 
