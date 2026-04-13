@@ -99,6 +99,7 @@ Variables タブから「New repository variable」ボタンを押下して、�
 | AZURE_SUBSCRIPTION_ID                   | 1.で新規作成した Azure サブスクリプションのサブスクリプション ID                          |
 | AZURE_TENANT_ID                         | Azure ディレクトリ ID                                                                     |
 | COSMOSDB_NAME                           | Azure Cosmos DB 名                                                                        |
+| EVENT_GRID_NAME                         | Azure Event Grid システムトピック/サブスクリプション名                                    |
 | FUNCTIONS_NAME                          | Azure Functions 名                                                                        |
 | OPENAI_API_VERSION                      | Azure OpenAI の API バージョン                                                            |
 | OPENAI_CAPACITY                         | Azure OpenAI の Capacity 数                                                               |

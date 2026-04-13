@@ -34,6 +34,7 @@
   - Azure API Management
   - Azure Functions・App Service Plan
   - Azure Storage Account (Blob Storage・Queue Storage)
+  - Azure Event Grid
   - Azure Cosmos DB
   - Azure Key Vault
   - Azure Application Insights

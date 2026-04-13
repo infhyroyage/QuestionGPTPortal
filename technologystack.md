@@ -14,7 +14,7 @@ GitHub Pages を通して React + TailwindCSS をベースとし、レスポン�
 
 システム全体の処理フローは以下の通りである:
 
-1. ユーザーがインポートデータファイルを Azure Blob Storage にアップロードし、Azure Storage Blob トリガーの関数アプリが Azure Cosmos DB にテスト・問題のデータをインポートする。
+1. ユーザーがインポートデータファイルを Azure Blob Storage にアップロードし、Azure Event Grid 経由の Blob トリガーの関数アプリが Azure Cosmos DB にテスト・問題のデータをインポートする。
 2. ユーザーが Entra ID 認証でアプリケーションにログインし、MSAL によりアクセストークンを取得する。
 3. フロントエンドアプリケーションが API Management 経由で関数アプリにアクセスし、Azure Cosmos DB で管理するテスト・問題・選択肢・学習履歴・お気に入り情報を取得・表示する。
 4. 関数アプリが Azure Translator で翻訳を実行し、英語の問題文・選択肢を日本語で表示する。
@@ -50,6 +50,7 @@ GitHub Pages を通して React + TailwindCSS をベースとし、レスポン�
   - Azure Storage Account
     - Blob Storage (インポートデータファイル格納)
     - Queue Storage (非同期処理メッセージキュー)
+  - Azure Event Grid（Blob Storageから Functions の Blob 拡張 Webhook へのイベント配信）
   - Azure Cosmos DB (NoSQL データベース・学習データ管理)
   - Azure Key Vault (シークレット・API キー管理)
   - Azure Application Insights (ログ記録・モニタリング)
@@ -80,6 +81,7 @@ GitHub Pages を通して React + TailwindCSS をベースとし、レスポン�
 | (ユーザー指定)             | Azure Functions            | API Management からアクセスする Functions                | japaneast      |
 | `qgtranslator-je-funcplan` | Azure App Service Plan     | Functions のプラン                                       | japaneast      |
 | (ユーザー指定)             | Azure Storage Account      | Functions から参照するストレージアカウント               | japaneast      |
+| (ユーザー指定)             | Azure Event Grid           | `import-items` の Blob 作成イベントを Functions に配信   | japaneast      |
 | (ユーザー指定)             | Azure Cosmos DB            | Functions からアクセスする Cosmos DB                     | japaneast      |
 | (ユーザー指定)             | Azure Key Vault            | シークレットを管理する Key Vault                         | japaneast      |
 | `qgtranslator-je-insights` | Azure Application Insights | API Management/Functions を監視する Application Insights | japaneast      |
@@ -157,7 +159,7 @@ json の各キーの説明を、以下に示す。
 | `upvotedNum`     | 賛成票数                 |    o     |
 | `selectedAnswer` | ユーザーが選択した選択肢 |          |
 
-インポートデータファイルに記載したテスト・問題のデータは、Azure 環境では Blob Storage に`import-items/{courseName}/{testName}.json` パスでアップロードすることで、データインポートされる。そのアップロードをもとに、Azure Storage Blob トリガーの関数アプリが Azure Cosmos DB にテスト・問題のデータを非同期でインポートする。
+インポートデータファイルに記載したテスト・問題のデータは、Azure 環境では Blob Storage に`import-items/{courseName}/{testName}.json` パスでアップロードすることで、データインポートされる。そのアップロードをもとに、Azure Event Grid 経由の Blob トリガーの関数アプリが Azure Cosmos DB にテスト・問題のデータを非同期でインポートする。
 
 また、ローカル環境では専用のインポート処理を行う Python ファイル `functions/import_local.py`を実行することで、データインポートされる。
 
