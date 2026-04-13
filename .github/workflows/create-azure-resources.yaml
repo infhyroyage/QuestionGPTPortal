@@ -45,6 +45,7 @@ jobs:
             azureAdEAContributorObjectId=${{ vars.AZURE_AD_EA_CONTRIBUTOR_OBJECT_ID }}
             azureApimPublisherEmail=${{ secrets.AZURE_APIM_PUBLISHER_EMAIL }}
             cosmosDBName=${{ vars.COSMOSDB_NAME }}
+            eventGridName=${{ vars.EVENT_GRID_NAME }}
             functionsName=${{ vars.FUNCTIONS_NAME }}
             githubRepoUrl=${{ github.server_url }}/${{ github.repository }}
             openAIApiVersion=${{ vars.OPENAI_API_VERSION }}
