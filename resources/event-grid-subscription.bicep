@@ -19,7 +19,7 @@ resource eventGridSubscription 'Microsoft.EventGrid/systemTopics/eventSubscripti
     destination: {
       endpointType: 'WebHook'
       properties: {
-        endpointUrl: 'https://${functions.properties.defaultHostName}/runtime/webhooks/blobs?functionName=Host.Functions.blob_triggered_import&code=${uriComponent(listKeys(resourceId('Microsoft.Web/sites/host', functionsName, 'default'), '2023-12-01').functionKeys.default)}'
+        endpointUrl: 'https://${functions.properties.defaultHostName}/runtime/webhooks/blobs?functionName=Host.Functions.blob_triggered_import&code=${uriComponent(listKeys('${functions.id}/host/default', '2023-12-01').systemKeys.blobs_extension)}'
       }
     }
     filter: {
