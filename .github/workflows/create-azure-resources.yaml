@@ -267,7 +267,7 @@ jobs:
           scope: resourcegroup
           subscriptionId: ${{ vars.AZURE_SUBSCRIPTION_ID }}
           resourceGroupName: ${{ env.RESOURCE_GROUP }}
-          template: ./resources/event-grid-subscription-blob-import.bicep
+          template: ./resources/event-grid-subscription.bicep
           parameters: >-
             functionsName=${{ vars.FUNCTIONS_NAME }}
             eventGridName=${{ vars.EVENT_GRID_NAME }}
