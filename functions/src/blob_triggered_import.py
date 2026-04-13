@@ -155,6 +155,7 @@ bp_blob_triggered_import = func.Blueprint()
 @bp_blob_triggered_import.blob_trigger(
     arg_name="blob",
     connection="AzureWebJobsStorage",
+    source="EventGrid",
     path="import-items/{courseName}/{testName}.json",
 )
 def blob_triggered_import(blob: func.InputStream):
