@@ -12,18 +12,22 @@ export default defineConfig(() => ({
   },
   // 大きなサイズのライブラリ(MSAL、React Router、Radix UI)を個別チャンクに分割
   build: {
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        manualChunks: {
-          msal: ["@azure/msal-browser", "@azure/msal-react"],
-          router: ["react-router"],
-          radix: [
-            "@radix-ui/react-accordion",
-            "@radix-ui/react-dialog",
-            "@radix-ui/react-separator",
-            "@radix-ui/react-slot",
-            "@radix-ui/react-toast",
-            "@radix-ui/react-tooltip",
+        codeSplitting: {
+          groups: [
+            {
+              name: "msal",
+              test: /node_modules\/@azure\/msal-(browser|react)\//,
+            },
+            {
+              name: "radix",
+              test: /node_modules\/@radix-ui\//,
+            },
+            {
+              name: "router",
+              test: /node_modules\/react-router\//,
+            },
           ],
         },
       },
