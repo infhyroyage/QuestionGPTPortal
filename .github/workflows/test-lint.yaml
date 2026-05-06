@@ -98,7 +98,7 @@ jobs:
           popd
 
       - name: Get Cover
-        uses: orgoro/coverage@v3.2
+        uses: orgoro/coverage@v3.3
         with:
           coverageFile: functions/coverage.xml
           thresholdAll: 0.8
