@@ -6,4 +6,4 @@ coverage==7.14.0
 openai==1.58.1
 pydantic==2.13.4
 pylint==4.0.5
-requests==2.33.1
+requests==2.34.2
