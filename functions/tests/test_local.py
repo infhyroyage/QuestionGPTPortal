@@ -8,6 +8,7 @@ from azure.core.exceptions import ResourceExistsError
 from azure.cosmos import PartitionKey
 from type.cosmos import Question, Test
 from type.importing import ImportData
+from util.cosmos import sanitize_document_strings
 from util.local import (
     create_databases_and_containers,
     create_import_data,
@@ -448,5 +449,8 @@ class TestImportQuestionItems(unittest.TestCase):
 
         mock_print.assert_has_calls([call("1th Response OK"), call("2th Response OK")])
         mock_container.upsert_item.assert_has_calls(
-            [call(question_items[0]), call(question_items[1])]
+            [
+                call(sanitize_document_strings(question_items[0])),
+                call(sanitize_document_strings(question_items[1])),
+            ]
         )

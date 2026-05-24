@@ -9,7 +9,7 @@ import azure.functions as func
 from azure.cosmos import ContainerProxy
 from type.cosmos import Question, Test
 from type.importing import ImportItem
-from util.cosmos import get_read_write_container
+from util.cosmos import get_read_write_container, sanitize_document_strings
 
 
 def upsert_test_item(
@@ -145,7 +145,7 @@ def upsert_question_items(
                 "testId": test_id,
             }
             logging.info({"question_item": question_item})
-            container.upsert_item(question_item)
+            container.upsert_item(sanitize_document_strings(question_item))
             time.sleep(3)
 
 

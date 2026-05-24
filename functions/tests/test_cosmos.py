@@ -1,74 +1,59 @@
-"""Cosmos DBのユーティリティ関数のテスト"""
+"""Cosmos DBユーティリティ関数のテスト"""
 
-import os
-from unittest import TestCase
-from unittest.mock import MagicMock, patch
+import unittest
 
-from azure.cosmos import ContainerProxy
-from util.cosmos import get_read_only_container, get_read_write_container
+from util.cosmos import normalize_unicode_punctuation, sanitize_document_strings
 
 
-class TestGetReadOnlyContainer(TestCase):
-    """get_read_only_container関数のテストケース"""
+class TestNormalizeUnicodePunctuation(unittest.TestCase):
+    """normalize_unicode_punctuation関数のテストケース"""
 
-    @patch("util.cosmos.CosmosClient")
-    @patch.dict(
-        os.environ,
-        {
-            "COSMOSDB_URI": "https://fake-uri",
-            "COSMOSDB_READONLY_KEY": "fake-readonly-key",
-            "COSMOSDB_KEY": "fake-key",
-        },
-    )
-    def test_get_read_only_container(self, mock_cosmos_client):
-        """get_read_only_container関数のテスト"""
+    def test_replaces_typographic_apostrophe(self):
+        # Given: Typographic な右シングルクォートを含む文字列
+        value = "node group\u2019s Auto Scaling"
 
-        mock_container = MagicMock(spec=ContainerProxy)
-        mock_database_client = MagicMock()
-        mock_database_client.get_container_client.return_value = mock_container
-        mock_cosmos_client.return_value.get_database_client.return_value = (
-            mock_database_client
-        )
+        # When: 正規化を実行
+        result = normalize_unicode_punctuation(value)
 
-        container = get_read_only_container("TestDB", "TestContainer")
+        # Then: ASCII のアポストロフィへ置換される
+        self.assertEqual(result, "node group's Auto Scaling")
 
-        mock_cosmos_client.assert_called_once_with(
-            url="https://fake-uri", credential="fake-readonly-key"
-        )
-        mock_database_client.get_container_client.assert_called_once_with(
-            "TestContainer"
-        )
-        self.assertEqual(container, mock_container)
+    def test_leaves_ascii_unchanged(self):
+        # Given: ASCII のみの文字列
+        value = "node group's Auto Scaling"
+
+        # When: 正規化を実行
+        result = normalize_unicode_punctuation(value)
+
+        # Then: 変更されない
+        self.assertEqual(result, value)
 
 
-class TestGetReadWriteContainer(TestCase):
-    """get_read_write_container関数のテストケース"""
+class TestSanitizeDocumentStrings(unittest.TestCase):
+    """sanitize_document_strings関数のテストケース"""
 
-    @patch("util.cosmos.CosmosClient")
-    @patch.dict(
-        os.environ,
-        {
-            "COSMOSDB_URI": "https://fake-uri",
-            "COSMOSDB_READONLY_KEY": "fake-readonly-key",
-            "COSMOSDB_KEY": "fake-key",
-        },
-    )
-    def test_get_read_write_container(self, mock_cosmos_client):
-        """get_read_write_container関数のテスト"""
+    def test_sanitizes_nested_document(self):
+        # Given: ネストしたドキュメントに Typographic 文字が含まれる
+        document = {
+            "subjects": ["company\u2019s VPC"],
+            "choices": ["option A"],
+            "answerNum": 1,
+        }
 
-        mock_container = MagicMock(spec=ContainerProxy)
-        mock_database_client = MagicMock()
-        mock_database_client.get_container_client.return_value = mock_container
-        mock_cosmos_client.return_value.get_database_client.return_value = (
-            mock_database_client
-        )
+        # When: ドキュメント全体を正規化
+        result = sanitize_document_strings(document)
 
-        container = get_read_write_container("TestDB", "TestContainer")
+        # Then: 文字列フィールドのみ置換され、構造と数値は保持される
+        self.assertEqual(result["subjects"], ["company's VPC"])
+        self.assertEqual(result["choices"], ["option A"])
+        self.assertEqual(result["answerNum"], 1)
 
-        mock_cosmos_client.assert_called_once_with(
-            url="https://fake-uri", credential="fake-key"
-        )
-        mock_database_client.get_container_client.assert_called_once_with(
-            "TestContainer"
-        )
-        self.assertEqual(container, mock_container)
+    def test_returns_non_string_values_unchanged(self):
+        # Given: 文字列以外の値
+        document = {"answerNum": 2, "flags": [True, None]}
+
+        # When: 正規化を実行
+        result = sanitize_document_strings(document)
+
+        # Then: 非文字列はそのまま
+        self.assertEqual(result, document)

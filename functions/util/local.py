@@ -9,7 +9,7 @@ from azure.cosmos import CosmosClient, PartitionKey
 from azure.storage.queue import QueueClient
 from type.cosmos import Question, Test
 from type.importing import ImportData, ImportDatabaseData, ImportItem
-from util.cosmos import get_read_write_container
+from util.cosmos import get_read_write_container, sanitize_document_strings
 from util.queue import AZURITE_QUEUE_STORAGE_CONNECTION_STRING
 
 
@@ -240,5 +240,5 @@ def import_question_items(question_items: list[Question]) -> None:
 
     container = get_read_write_container("Users", "Question")
     for i, item in enumerate(question_items):
-        container.upsert_item(item)
+        container.upsert_item(sanitize_document_strings(item))
         print(f"{i + 1}th Response OK")
