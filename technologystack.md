@@ -35,7 +35,7 @@ GitHub Pages を通して React + TailwindCSS をベースとし、レスポン�
   - React Router (クライアントサイドルーティング)
   - Vite (ビルドツール・開発サーバー)
   - Tailwind CSS (ユーティリティファースト CSS フレームワーク)
-  - shadcn/ui (高品質な UI コンポーネントライブラリ)
+  - daisyUI (Tailwind CSS 向け UI コンポーネントライブラリ)
   - Lucide React (アイコンライブラリ)
   - Jotai (アトミックな状態管理)
   - Axios (HTTP クライアント)
@@ -196,7 +196,7 @@ Azure OpenAI を用いて、問題文や選択肢の文章から正解の選択�
 
 このうち、問題文と選択肢は、両者をまとめて翻訳することで、API 呼び出し回数を最適化している。
 翻訳処理は、`swa/src/lib/translation.ts` で統一的に行う。
-翻訳中でもユーザーの直感的なインタラクションを提供するために、shadcn/ui の`Skeleton`コンポーネントを用いた表示を採用する。
+翻訳中でもユーザーの直感的なインタラクションを提供するために、daisyUI の `skeleton` クラスを用いた表示を採用する。
 
 なお、インポートデータファイルで問題文・選択肢ごとに `isEscapedTranslation` フラグを設定すると、翻訳不要な文章(コマンド、コード等)をスキップすることができる。
 
@@ -222,5 +222,5 @@ API アクセスを含む非同期処理は、Atom の write 関数で行う。�
 ### 3.5 UI/UX 設計
 
 レスポンシブデザインに対応した Web アプリケーションを実現するために、Tailwind CSS によるモバイルファースト設計を採用する。
-Tailwind CSS ベースな UI を統一的に提供するために、shadcn/ui、Lucide React を採用する。
-システム設定と連動したダークモードも用意しており、ユーザーが柔軟に切替できる。
+Tailwind CSS ベースな UI を統一的に提供するために、daisyUI、Lucide React を採用する。
+daisyUI の `light` / `dark` テーマと `data-theme` 属性によりダークモードを切り替え、ユーザーが柔軟に表示を変更できる。

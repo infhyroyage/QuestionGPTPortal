@@ -6,7 +6,7 @@
 
 QuestionGPTPortal は、Azure OpenAI を活用した英語IT資格試験の学習支援Webアプリケーション。
 
-- **フロントエンド**: `swa/` — React 19 + TypeScript + Vite (ポート 5173)
+- **フロントエンド**: `swa/` — React 19 + TypeScript + Vite + Tailwind CSS + daisyUI (ポート 5173)
 - **バックエンド**: `functions/` — Python 3.12 Azure Functions (ポート 9229)
 - **インフラ**: Docker Compose で CosmosDB Emulator (ポート 8081) + Azurite (ポート 10000-10002)
 
