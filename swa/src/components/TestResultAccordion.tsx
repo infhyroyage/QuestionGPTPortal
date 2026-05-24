@@ -10,7 +10,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import FavoriteButton from "./FavoriteButton";
 import TestResultAccordionContent from "./TestResultAccordionContent";
-import { Accordion, AccordionItem, AccordionTrigger } from "./ui/accordion";
 
 /**
  * テスト結果アコーディオンのコンポーネント
@@ -101,33 +100,33 @@ export default function TestResultAccordion() {
   );
 
   // 新しく開かれたアコーディオンのみに対応する問題文・選択肢を取得
-  const handleValueChange = useCallback(
-    async (historyIdxes: string[]) => {
-      if (testId && order) {
-        // 問題文・選択肢を取得する前に、アコーディオンを開いておく
-        setOpenHistoryIdxes(historyIdxes);
+  const handleToggle = useCallback(
+    async (historyIdx: string, isOpen: boolean) => {
+      if (!testId || !order) {
+        return;
+      }
 
-        // 今まで一度も問題文・選択肢を取得していない場合のみ、
-        // [GET] /tests/{testId}/questions/{questionNumber}にアクセスして取得
-        const newOpenHistoryIdxes: string[] = historyIdxes.filter(
-          (historyIdx: string) => !openHistoryIdxes.includes(historyIdx)
+      const historyIdxes = isOpen
+        ? [...openHistoryIdxes, historyIdx]
+        : openHistoryIdxes.filter((idx) => idx !== historyIdx);
+
+      setOpenHistoryIdxes(historyIdxes);
+
+      if (!isOpen) {
+        return;
+      }
+
+      if (!getQuestions[historyIdx]) {
+        const res: GetQuestion = await accessBackend<GetQuestion>(
+          "GET",
+          `/tests/${testId}/questions/${order[parseInt(historyIdx)]}`,
+          instance,
+          accountInfo
         );
-        for (const newOpenHistoryIdx of newOpenHistoryIdxes) {
-          if (!getQuestions[newOpenHistoryIdx]) {
-            const res: GetQuestion = await accessBackend<GetQuestion>(
-              "GET",
-              `/tests/${testId}/questions/${
-                order[parseInt(newOpenHistoryIdx)]
-              }`,
-              instance,
-              accountInfo
-            );
-            setGetQuestions((prev) => ({
-              ...prev,
-              [newOpenHistoryIdx]: res,
-            }));
-          }
-        }
+        setGetQuestions((prev) => ({
+          ...prev,
+          [historyIdx]: res,
+        }));
       }
     },
     [accountInfo, getQuestions, instance, openHistoryIdxes, order, testId]
@@ -136,46 +135,51 @@ export default function TestResultAccordion() {
   return (
     histories &&
     order && (
-      <Accordion
-        type="multiple"
-        value={openHistoryIdxes}
-        onValueChange={handleValueChange}
-      >
-        {histories.map((history: History, historyIdx: number) => (
-          <AccordionItem key={historyIdx} value={`${historyIdx}`}>
-            <div className="flex items-center">
-              <div className="pl-4 flex items-center">
-                <FavoriteButton
-                  isFavorite={!!favorites && favorites[historyIdx]}
-                  isLoading={favorites === undefined}
-                  onFavoriteChange={(newIsFavorite: boolean) =>
-                    handleFavoriteChange(historyIdx, newIsFavorite)
-                  }
-                  questionNumber={String(order[historyIdx])}
-                />
+      <div>
+        {histories.map((history: History, historyIdx: number) => {
+          const historyKey = `${historyIdx}`;
+          const isOpen = openHistoryIdxes.includes(historyKey);
+
+          return (
+            <div
+              key={historyIdx}
+              className="collapse collapse-arrow border-b border-base-300"
+            >
+              <input
+                type="checkbox"
+                checked={isOpen}
+                onChange={(e) => handleToggle(historyKey, e.target.checked)}
+              />
+              <div className="collapse-title flex items-center gap-2 pr-4">
+                <div className="pl-2 flex items-center shrink-0">
+                  <FavoriteButton
+                    isFavorite={!!favorites && favorites[historyIdx]}
+                    isLoading={favorites === undefined}
+                    onFavoriteChange={(newIsFavorite: boolean) =>
+                      handleFavoriteChange(historyIdx, newIsFavorite)
+                    }
+                    questionNumber={String(order[historyIdx])}
+                  />
+                </div>
+                <h4 className="scroll-m-20 text-xl font-semibold tracking-tight flex-1">
+                  {`${historyIdx + 1}問目`}
+                </h4>
+                <div className="shrink-0">
+                  {history.isCorrect ? (
+                    <Check className="size-7 text-green-500" />
+                  ) : (
+                    <X className="size-7 text-red-500" />
+                  )}
+                </div>
               </div>
-              <div className="flex-1">
-                <AccordionTrigger className="px-4">
-                  <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-                    {`${historyIdx + 1}問目`}
-                  </h4>
-                  <div className="transform-none">
-                    {history.isCorrect ? (
-                      <Check className="size-7 text-green-500" />
-                    ) : (
-                      <X className="size-7 text-red-500" />
-                    )}
-                  </div>
-                </AccordionTrigger>
-              </div>
+              <TestResultAccordionContent
+                getQuestion={getQuestions[historyKey]}
+                history={history}
+              />
             </div>
-            <TestResultAccordionContent
-              getQuestion={getQuestions[`${historyIdx}`]}
-              history={history}
-            />
-          </AccordionItem>
-        ))}
-      </Accordion>
+          );
+        })}
+      </div>
     )
   );
 }

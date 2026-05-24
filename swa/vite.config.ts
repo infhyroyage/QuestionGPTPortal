@@ -10,7 +10,7 @@ export default defineConfig(() => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // 大きなサイズのライブラリ(MSAL、React Router、Radix UI)を個別チャンクに分割
+  // 大きなサイズのライブラリ(MSAL、React Router)を個別チャンクに分割
   build: {
     rolldownOptions: {
       output: {
@@ -19,10 +19,6 @@ export default defineConfig(() => ({
             {
               name: "msal",
               test: /node_modules\/@azure\/msal-(browser|react)\//,
-            },
-            {
-              name: "radix",
-              test: /node_modules\/@radix-ui\//,
             },
             {
               name: "router",

@@ -3,7 +3,7 @@ import Selector from "@/components/Selector";
 import SubjectDisplay from "@/components/SubjectDisplay";
 import TestQuestionResizableHandle from "@/components/TestQuestionResizableHandle";
 import TopBar from "@/components/TopBar";
-import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import { ResizablePanel, ResizablePanelGroup } from "@/components/Resizable";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import useTranslationFailedToast from "@/hooks/useTranslationFailedToast";
 import {

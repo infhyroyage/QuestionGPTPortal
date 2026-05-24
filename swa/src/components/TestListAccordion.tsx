@@ -4,13 +4,7 @@ import { useAtomValue } from "jotai";
 import { ScrollText } from "lucide-react";
 import { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "./ui/accordion";
-import { Button } from "./ui/button";
+import { Button } from "./Button";
 
 /**
  * 全テストのアコーディオンのコンポーネント
@@ -42,15 +36,19 @@ export default function TestListAccordion() {
 
   return (
     testDetails && (
-      <Accordion type="multiple">
+      <div>
         {courseNames.map((courseName: string, i: number) => (
-          <AccordionItem key={i} value={`${i}`} className="px-4">
-            <AccordionTrigger>
+          <div
+            key={i}
+            className="collapse collapse-arrow border-b border-base-300 px-4"
+          >
+            <input type="checkbox" />
+            <div className="collapse-title">
               <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight text-left">
                 {courseName}
               </h3>
-            </AccordionTrigger>
-            <AccordionContent>
+            </div>
+            <div className="collapse-content">
               {testDetails
                 .filter(
                   (testDetail: TestDetail) =>
@@ -69,10 +67,10 @@ export default function TestListAccordion() {
                     </h4>
                   </Button>
                 ))}
-            </AccordionContent>
-          </AccordionItem>
+            </div>
+          </div>
         ))}
-      </Accordion>
+      </div>
     )
   );
 }

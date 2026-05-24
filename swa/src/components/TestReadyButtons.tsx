@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/Button";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import { fetchProgressesAtom, initializeProgressesAtom } from "@/lib/atoms";
 import { TestReadyButtonsProps } from "@/types/props";

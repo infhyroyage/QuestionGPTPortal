@@ -17,10 +17,7 @@ import { Info, RefreshCw } from "lucide-react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import SelectorButton from "./SelectorButton";
-import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
-import { Separator } from "./ui/separator";
-import { Skeleton } from "./ui/skeleton";
+import { Button } from "./Button";
 
 /**
  * 解説シートのコンテンツのコンポーネント
@@ -247,14 +244,14 @@ export default function ExplanationSheetContent() {
             <div className="space-y-1">
               <p className="leading-7">{answerExplanation.answerKeyPoint}</p>
               {translationExplanation && translationExplanation.answerKeyPoint ? (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-base-content/60">
                   {translationExplanation.answerKeyPoint}
                 </p>
               ) : (
-                <Skeleton className="h-5 w-full" />
+                <div className="skeleton h-5 w-full" />
               )}
             </div>
-            <Separator className="my-6" />
+            <div className="divider my-6" />
           </>
         )}
         <h4 className="scroll-m-20 text-xl font-semibold tracking-tight my-4">
@@ -263,7 +260,7 @@ export default function ExplanationSheetContent() {
         <div className="mb-4">
           {questionSelector.choices.map((choice: Choice, idx: number) => (
             <Fragment key={idx}>
-              {idx > 0 && <Separator className="my-6" />}
+              {idx > 0 && <div className="divider my-6" />}
               <div className="space-y-4">
                 <SelectorButton
                   className={
@@ -289,18 +286,18 @@ export default function ExplanationSheetContent() {
                   </p>
                   {translationExplanation &&
                   translationExplanation.explanations[idx] ? (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-base-content/60">
                       {translationExplanation.explanations[idx]}
                     </p>
                   ) : (
-                    <Skeleton className="h-5 w-full" />
+                    <div className="skeleton h-5 w-full" />
                   )}
                 </div>
               </div>
             </Fragment>
           ))}
         </div>
-        <Separator className="my-6" />
+        <div className="divider my-6" />
         <div className="flex items-center justify-between my-4">
           <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
             コミュニティ回答要約
@@ -321,8 +318,8 @@ export default function ExplanationSheetContent() {
         {community === undefined ? (
           <>
             <div className="space-y-1">
-              <Skeleton className="h-7 w-full" />
-              <Skeleton className="h-5 w-full" />
+              <div className="skeleton h-7 w-full" />
+              <div className="skeleton h-5 w-full" />
             </div>
           </>
         ) : community.votes === undefined &&
@@ -336,7 +333,9 @@ export default function ExplanationSheetContent() {
             {community.votes && (
               <div className="flex space-x-4 mb-4">
                 {community.votes.map((vote: string, idx: number) => (
-                  <Badge key={idx}>{vote}</Badge>
+                  <span key={idx} className="badge badge-neutral">
+                    {vote}
+                  </span>
                 ))}
               </div>
             )}
@@ -345,11 +344,11 @@ export default function ExplanationSheetContent() {
                 <p className="leading-7">{community.discussionsSummary}</p>
                 {translationCommunity &&
                 translationCommunity.discussionsSummary ? (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-base-content/60">
                     {translationCommunity.discussionsSummary}
                   </p>
                 ) : (
-                  <Skeleton className="h-5 w-full" />
+                  <div className="skeleton h-5 w-full" />
                 )}
               </div>
             )}

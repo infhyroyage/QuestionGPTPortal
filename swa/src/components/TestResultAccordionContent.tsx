@@ -6,8 +6,6 @@ import { useAccount, useMsal } from "@azure/msal-react";
 import { useEffect, useState } from "react";
 import SelectorButton from "./SelectorButton";
 import SubjectDisplay from "./SubjectDisplay";
-import { AccordionContent } from "./ui/accordion";
-import { Skeleton } from "./ui/skeleton";
 
 /**
  * テスト結果アコーディオンのコンテンツのコンポーネント
@@ -57,7 +55,7 @@ export default function TestResultAccordionContent({
   ]);
 
   return (
-    <AccordionContent>
+    <div className="collapse-content">
       <div className="mx-8 my-4 space-y-8">
         <div className="space-y-4">
           <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
@@ -86,7 +84,7 @@ export default function TestResultAccordionContent({
                 />
               ))
             ) : (
-              <Skeleton className="h-[86px] w-full rounded-lg" />
+              <div className="skeleton h-[86px] w-full rounded-lg" />
             )}
           </div>
         </div>
@@ -106,11 +104,11 @@ export default function TestResultAccordionContent({
                 />
               ))
             ) : (
-              <Skeleton className="h-[86px] w-full rounded-lg" />
+              <div className="skeleton h-[86px] w-full rounded-lg" />
             )}
           </div>
         </div>
       </div>
-    </AccordionContent>
+    </div>
   );
 }

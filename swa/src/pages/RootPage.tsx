@@ -1,6 +1,5 @@
 import TestListAccordion from "@/components/TestListAccordion";
 import TopBar from "@/components/TopBar";
-import { Skeleton } from "@/components/ui/skeleton";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import {
   fetchTestDetailsAtom,
@@ -65,9 +64,9 @@ export default function RootPage() {
       <div className="pt-[52px]">
         {!testDetails ? (
           <div className="space-y-2">
-            <Skeleton className="px-6 py-8 w-full rounded-md" />
-            <Skeleton className="px-6 py-8 w-full rounded-md" />
-            <Skeleton className="px-6 py-8 w-full rounded-md" />
+            <div className="skeleton px-6 py-8 w-full rounded-md h-16" />
+            <div className="skeleton px-6 py-8 w-full rounded-md h-16" />
+            <div className="skeleton px-6 py-8 w-full rounded-md h-16" />
           </div>
         ) : Object.keys(testDetails).length === 0 ? (
           <div className="flex items-center justify-center min-h-screen flex-col space-y-4">

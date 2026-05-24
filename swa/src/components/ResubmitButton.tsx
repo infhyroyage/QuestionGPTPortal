@@ -5,8 +5,8 @@ import { useAtom } from "jotai";
 import { RefreshCcw } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useParams } from "react-router";
-import { Button } from "./ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { Button } from "./Button";
+import Tooltip from "./Tooltip";
 
 /**
  * 回答・解説再生成ボタンのコンポーネント
@@ -59,19 +59,14 @@ export default function ResubmitButton() {
   ]);
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          size="icon"
-          disabled={isDisabledResubmitButton}
-          onClick={onClickResubmit}
-        >
-          <RefreshCcw />
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent side="bottom" align="center">
-        回答・解説再生成
-      </TooltipContent>
+    <Tooltip tip="回答・解説再生成">
+      <Button
+        size="icon"
+        disabled={isDisabledResubmitButton}
+        onClick={onClickResubmit}
+      >
+        <RefreshCcw />
+      </Button>
     </Tooltip>
   );
 }

@@ -6,7 +6,7 @@ import { useAccount, useMsal } from "@azure/msal-react";
 import { Star } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useParams } from "react-router";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import Tooltip from "./Tooltip";
 
 /**
  * お気に入り切替ボタンのコンポーネント
@@ -60,30 +60,25 @@ export default function FavoriteButton({
   ]);
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          className={`bg-transparent border-none p-0 ml-1 cursor-pointer hover:opacity-80 transition-all duration-300 focus:outline-hidden ${
-            isLoading ? "opacity-50" : ""
+    <Tooltip tip={isFavorite ? "お気に入り解除" : "お気に入り登録"}>
+      <button
+        className={`bg-transparent border-none p-0 ml-1 cursor-pointer hover:opacity-80 transition-all duration-300 focus:outline-hidden ${
+          isLoading ? "opacity-50" : ""
+        }`}
+        onClick={onClick}
+        aria-label={isFavorite ? "お気に入り解除" : "お気に入り登録"}
+        disabled={isLoading}
+      >
+        <Star
+          className={`size-7 transition-all duration-300 ${
+            isLoading
+              ? "animate-pulse"
+              : isFavorite
+              ? "fill-yellow-400 text-yellow-400 scale-110 animate-[bounce_0.3s_ease-in-out]"
+              : "text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-100"
           }`}
-          onClick={onClick}
-          aria-label={isFavorite ? "お気に入り解除" : "お気に入り登録"}
-          disabled={isLoading}
-        >
-          <Star
-            className={`size-7 transition-all duration-300 ${
-              isLoading
-                ? "animate-pulse"
-                : isFavorite
-                ? "fill-yellow-400 text-yellow-400 scale-110 animate-[bounce_0.3s_ease-in-out]"
-                : "text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-100"
-            }`}
-          />
-        </button>
-      </TooltipTrigger>
-      <TooltipContent side="bottom" align="center">
-        {isFavorite ? "お気に入り解除" : "お気に入り登録"}
-      </TooltipContent>
+        />
+      </button>
     </Tooltip>
   );
 }
