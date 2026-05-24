@@ -59,7 +59,7 @@ export default function ResubmitButton() {
   ]);
 
   return (
-    <Tooltip tip="回答・解説再生成">
+    <Tooltip tip="回答・解説再生成" position="top">
       <Button
         size="icon"
         disabled={isDisabledResubmitButton}

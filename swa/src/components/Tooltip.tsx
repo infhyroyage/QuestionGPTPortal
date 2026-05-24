@@ -19,6 +19,7 @@ type TooltipProps = {
 
 /**
  * daisyUI の tooltip ラッパー
+ * 親要素の overflow で隠れないよう z-index を付与する
  */
 export default function Tooltip({
   tip,
@@ -28,7 +29,11 @@ export default function Tooltip({
 }: TooltipProps) {
   return (
     <div
-      className={cn("tooltip", positionClasses[position], className)}
+      className={cn(
+        "tooltip z-50 before:z-50 after:z-50",
+        positionClasses[position],
+        className
+      )}
       data-tip={tip}
     >
       {children}

@@ -9,3 +9,11 @@
 body {
   min-height: 100vh;
 }
+
+/* リサイズパネル内でも tooltip が隠れないようにする */
+@layer components {
+  .tooltip::before,
+  .tooltip::after {
+    z-index: 100;
+  }
+}

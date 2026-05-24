@@ -185,8 +185,8 @@ export default function TestQuestionPage() {
           direction="vertical"
           className="pt-[52px] min-h-screen w-full"
         >
-          <ResizablePanel defaultSize={60}>
-            <div className="relative h-full">
+          <ResizablePanel defaultSize={60} className="!overflow-visible z-10">
+            <div className="relative h-full overflow-visible">
               <div className="p-4 h-full min-h-0 overflow-y-auto">
                 <SubjectDisplay
                   subjects={questionSelector && questionSelector.subjects}

@@ -72,7 +72,7 @@ export default function NextQuestionButton() {
   return (
     histories &&
     order && (
-      <Tooltip tip={tooltipTip}>
+      <Tooltip tip={tooltipTip} position="top">
         <Button
           size="icon"
           disabled={isDisabledOpenExplanationButton}

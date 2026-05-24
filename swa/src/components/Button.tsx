@@ -7,7 +7,8 @@ export type ButtonVariant =
   | "outline"
   | "secondary"
   | "ghost"
-  | "link";
+  | "link"
+  | "custom";
 
 export type ButtonSize = "default" | "sm" | "lg" | "icon";
 
@@ -18,6 +19,7 @@ const variantClasses: Record<ButtonVariant, string> = {
   secondary: "btn-secondary",
   ghost: "btn-ghost",
   link: "btn-link",
+  custom: "",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {

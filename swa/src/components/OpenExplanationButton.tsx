@@ -25,7 +25,7 @@ export default function OpenExplanationButton() {
     <div className="drawer drawer-bottom">
       <input id={drawerId} type="checkbox" className="drawer-toggle" />
       <div className="drawer-content">
-        <Tooltip tip="解説表示">
+        <Tooltip tip="解説表示" position="top">
           <label
             htmlFor={drawerId}
             className={`btn btn-square ${isDisabledOpenExplanationButton ? "btn-disabled" : ""}`}
