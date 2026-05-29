@@ -9,7 +9,7 @@
   - React + TypeScript (フロントエンドフレームワーク)
   - Vite (ビルドツール・開発サーバー)
   - ESLint (コード静的解析)
-  - Tailwind CSS + shadcn/ui (UI フレームワーク)
+  - Tailwind CSS + daisyUI (UI コンポーネントライブラリ)
   - Jotai (状態管理)
   - React Router (ルーティング)
   - Axios (HTTP クライアント)
@@ -74,7 +74,9 @@
   - props.ts: コンポーネントの props の型定義
 - フロントエンドアプリケーションで再利用可能なコンポーネントは、swa/src/components ディレクトリに配置する。
 - フロントエンドのスタイリングは Tailwind CSS のユーティリティクラスを使用でき、レスポンシブなレイアウトにするようにする。
-- フロントエンドのベースとなる UI コンポーネントとして、必要に応じてカスタマイズ可能な shadcn/ui を採用する。shadcn/ui の基本 UI コンポーネントは、swa/src/components/ui ディレクトリに配置する。
+- フロントエンドの UI コンポーネントライブラリとして daisyUI を採用する。Tailwind CSS v4 の `swa/src/index.css` で `@plugin "daisyui"` を有効化し、`light` / `dark` テーマを利用する。
+- daisyUI のユーティリティクラス（`btn`、`modal`、`drawer`、`collapse`、`skeleton` など）は各コンポーネントから直接利用する。React 向けの薄いラッパー（`Button`、`Tooltip`、`Toaster`、`Resizable` など）は `swa/src/components` ディレクトリに配置する。
+- ダークモード切替は `html` 要素の `data-theme` 属性（`light` / `dark`）で制御する。
 - フロントエンドの React Router で定義するルート単位のページコンポーネントは swa/src/pages ディレクトリに配置する。
 - フロントエンドのユーティリティ関数、API 通信、状態管理に要する処理などは swa/src/lib ディレクトリに配置する。
 - フロントエンドの React のカスタムフックは swa/src/hooks ディレクトリに配置する。

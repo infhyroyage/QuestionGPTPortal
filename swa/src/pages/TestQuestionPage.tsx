@@ -3,7 +3,7 @@ import Selector from "@/components/Selector";
 import SubjectDisplay from "@/components/SubjectDisplay";
 import TestQuestionResizableHandle from "@/components/TestQuestionResizableHandle";
 import TopBar from "@/components/TopBar";
-import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import { ResizablePanel, ResizablePanelGroup } from "@/components/Resizable";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import useTranslationFailedToast from "@/hooks/useTranslationFailedToast";
 import {
@@ -185,8 +185,8 @@ export default function TestQuestionPage() {
           direction="vertical"
           className="pt-[52px] min-h-screen w-full"
         >
-          <ResizablePanel defaultSize={60}>
-            <div className="relative h-full">
+          <ResizablePanel defaultSize={60} className="!overflow-visible z-10">
+            <div className="relative h-full overflow-visible">
               <div className="p-4 h-full min-h-0 overflow-y-auto">
                 <SubjectDisplay
                   subjects={questionSelector && questionSelector.subjects}

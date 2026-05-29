@@ -1,8 +1,7 @@
 import { SelectorButtonProps } from "@/types/props";
 import { useMemo } from "react";
 import ImageDialog from "./ImageDialog";
-import { Button } from "./ui/button";
-import { Skeleton } from "./ui/skeleton";
+import { Button } from "./Button";
 
 /**
  * 選択肢のボタンのコンポーネント
@@ -34,7 +33,7 @@ export default function SelectorButton({
     >
       {alphabet && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <span className="text-8xl font-bold text-muted-foreground/25 select-none">
+          <span className="text-8xl font-bold text-base-content/25 select-none">
             {alphabet}
           </span>
         </div>
@@ -44,9 +43,9 @@ export default function SelectorButton({
           <>
             <p className="leading-7">{sentence}</p>
             {translation ? (
-              <p className="text-sm text-muted-foreground">{translation}</p>
+              <p className="text-sm text-base-content/60">{translation}</p>
             ) : (
-              <Skeleton className="h-5 w-full" />
+              <div className="skeleton h-5 w-full" />
             )}
           </>
         )}

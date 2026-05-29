@@ -8,8 +8,8 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { ChevronRight, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
-import { Button } from "./ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { Button } from "./Button";
+import Tooltip from "./Tooltip";
 
 /**
  * 次問題遷移ボタンのコンポーネント
@@ -64,28 +64,28 @@ export default function NextQuestionButton() {
     }
   }, [histories, navigate, order, testId]);
 
+  const tooltipTip =
+    histories && order && histories.length === order.length
+      ? "テスト結果へ"
+      : "次の問題へ";
+
   return (
     histories &&
     order && (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            size="icon"
-            disabled={isDisabledOpenExplanationButton}
-            onClick={onClick}
-          >
-            {answerExplanation &&
-            !answerExplanation.isSubmitting &&
-            !answerExplanation.isSavedProgress ? (
-              <Loader2 className="animate-spin" />
-            ) : (
-              <ChevronRight />
-            )}
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="bottom" align="center">
-          {histories.length === order.length ? "テスト結果へ" : "次の問題へ"}
-        </TooltipContent>
+      <Tooltip tip={tooltipTip} position="top">
+        <Button
+          size="icon"
+          disabled={isDisabledOpenExplanationButton}
+          onClick={onClick}
+        >
+          {answerExplanation &&
+          !answerExplanation.isSubmitting &&
+          !answerExplanation.isSavedProgress ? (
+            <Loader2 className="animate-spin" />
+          ) : (
+            <ChevronRight />
+          )}
+        </Button>
       </Tooltip>
     )
   );

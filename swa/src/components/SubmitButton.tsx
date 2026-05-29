@@ -1,15 +1,16 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/Button";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import {
   fetchAnswerExplanationAtom,
   fetchQuestionSelectorAtom,
 } from "@/lib/atoms";
+import { cn } from "@/lib/utils";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom, useAtomValue } from "jotai";
 import { Check, Loader2, SendHorizontal, X } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useParams } from "react-router";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import Tooltip from "./Tooltip";
 
 /**
  * 回答・解説生成ボタンのコンポーネント
@@ -40,6 +41,24 @@ export default function SubmitButton() {
       (!!answerExplanation && answerExplanation.isSubmitting),
     [answerExplanation, questionSelector]
   );
+
+  const resultButtonClassName = useMemo(() => {
+    if (!answerExplanation || answerExplanation.isSubmitting) {
+      return undefined;
+    }
+    if (answerExplanation.isCorrect) {
+      return cn(
+        "border-green-500 bg-green-500 text-white",
+        "hover:border-green-600 hover:bg-green-600",
+        "shadow-none outline-none focus-visible:outline-none focus-visible:ring-0"
+      );
+    }
+    return cn(
+      "border-red-500 bg-red-500 text-white",
+      "hover:border-red-600 hover:bg-red-600",
+      "shadow-none outline-none focus-visible:outline-none focus-visible:ring-0"
+    );
+  }, [answerExplanation]);
 
   // 回答・解説生成ボタン押下時に、回答・解説を1度だけ生成/取得
   const onClickSubmit = useCallback(async () => {
@@ -73,34 +92,24 @@ export default function SubmitButton() {
   ]);
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          className={
-            !answerExplanation || answerExplanation.isSubmitting
-              ? ""
-              : answerExplanation.isCorrect
-              ? " bg-green-500 hover:bg-green-600"
-              : " bg-red-500 hover:bg-red-600"
-          }
-          size="icon"
-          disabled={isDisabledSubmitButton}
-          onClick={onClickSubmit}
-        >
-          {!answerExplanation ? (
-            <SendHorizontal />
-          ) : answerExplanation.isSubmitting ? (
-            <Loader2 className="animate-spin" />
-          ) : answerExplanation.isCorrect ? (
-            <Check />
-          ) : (
-            <X />
-          )}
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent side="bottom" align="center">
-        回答・解説生成
-      </TooltipContent>
+    <Tooltip tip="回答・解説生成" position="top">
+      <Button
+        variant={resultButtonClassName ? "custom" : "default"}
+        className={resultButtonClassName}
+        size="icon"
+        disabled={isDisabledSubmitButton}
+        onClick={onClickSubmit}
+      >
+        {!answerExplanation ? (
+          <SendHorizontal />
+        ) : answerExplanation.isSubmitting ? (
+          <Loader2 className="animate-spin" />
+        ) : answerExplanation.isCorrect ? (
+          <Check />
+        ) : (
+          <X />
+        )}
+      </Button>
     </Tooltip>
   );
 }

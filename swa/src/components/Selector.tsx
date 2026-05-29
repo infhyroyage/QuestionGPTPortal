@@ -8,7 +8,6 @@ import { Choice } from "@/types/backend";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useMemo } from "react";
 import SelectorButton from "./SelectorButton";
-import { Skeleton } from "./ui/skeleton";
 
 /**
  * テストページの下半分の選択肢のコンポーネント
@@ -84,7 +83,7 @@ export default function Selector() {
             />
           ))
         : Array.from({ length: 4 }).map((_, idx: number) => (
-            <Skeleton key={idx} className="h-[86px] w-full rounded-lg" />
+            <div key={idx} className="skeleton h-[86px] w-full rounded-lg" />
           ))}
     </div>
   );

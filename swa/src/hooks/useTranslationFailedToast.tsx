@@ -1,5 +1,4 @@
-import { ToastAction } from "@/components/ui/toast";
-import { useToast } from "@/hooks/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 /**
  * 翻訳失敗用のトーストのカスタムフック
@@ -13,9 +12,9 @@ export default function useTranslationFailedToast() {
       title: "翻訳失敗",
       description: <p>{`${message}を翻訳できません`}</p>,
       action: (
-        <ToastAction altText="やり直す" onClick={onClick}>
+        <button type="button" className="btn btn-sm" onClick={onClick}>
           やり直す
-        </ToastAction>
+        </button>
       ),
     });
   };
