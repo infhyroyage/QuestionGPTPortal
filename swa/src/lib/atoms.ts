@@ -50,7 +50,11 @@ const historiesAtom = atom<Histories>(undefined);
  * ダークモードの場合はtrue、ライトモードの場合はfalseのatom
  * toggleDarkModeAtomで隠蔽するためexportしない
  */
-const isDarkModeAtom = atom<boolean>(false);
+const isDarkModeAtom = atom<boolean>(
+  typeof window === "undefined"
+    ? false
+    : window.matchMedia("(prefers-color-scheme: dark)").matches,
+);
 
 /**
  * テストを解く問題番号の順番を管理するatom
