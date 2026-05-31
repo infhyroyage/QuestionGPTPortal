@@ -16,8 +16,8 @@ import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { Info, RefreshCw } from "lucide-react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
-import SelectorButton from "./SelectorButton";
 import { Button } from "./Button";
+import SelectorButton from "./SelectorButton";
 
 /**
  * 解説シートのコンテンツのコンポーネント
@@ -29,13 +29,13 @@ export default function ExplanationSheetContent() {
   const fetchExplanationsOnly = useSetAtom(fetchExplanationsOnlyAtom);
   const questionSelector = useAtomValue(fetchQuestionSelectorAtom);
   const [translationCommunity, fetchTranslationCommunity] = useAtom(
-    fetchTranslationCommunityAtom
+    fetchTranslationCommunityAtom,
   );
   const [translationExplanation, fetchTranslationExplanation] = useAtom(
-    fetchTranslationExplanationAtom
+    fetchTranslationExplanationAtom,
   );
   const translationSubjectChoice = useAtomValue(
-    fetchTranslationSubjectChoiceAtom
+    fetchTranslationSubjectChoiceAtom,
   );
   const resetCommunity = useSetAtom(resetCommunityAtom);
   const [translationFailedForQuestion, setTranslationFailedForQuestion] =
@@ -124,11 +124,17 @@ export default function ExplanationSheetContent() {
   ]);
 
   // 解説がない場合(回答済みの問題に遷移した場合)、解説を取得
+  // ただし、以下のいずれかの場合は対象外とする
+  // * SubmitButton による回答・解説生成中
+  // * 今回のセッションで新規回答した直後
+  // * 既に解説が存在する
   useEffect(() => {
     if (
       !testId ||
       !questionNumber ||
       !answerExplanation ||
+      answerExplanation.isSubmitting ||
+      !answerExplanation.isSavedProgress ||
       answerExplanation.explanations ||
       systemErrorForQuestion === questionNumber ||
       fetchExplanationsOnlyCalledRef.current
@@ -142,7 +148,7 @@ export default function ExplanationSheetContent() {
           testId,
           questionNumber,
           instance,
-          accountInfo
+          accountInfo,
         );
       } catch (e) {
         // エラーが発生した問題番号を設定
@@ -182,7 +188,7 @@ export default function ExplanationSheetContent() {
         setTranslationFailedForQuestion(questionNumber ?? null);
         // 翻訳失敗トーストを表示
         translationFailedToast("解説", () =>
-          setTranslationFailedForQuestion(null)
+          setTranslationFailedForQuestion(null),
         );
       }
     })();
@@ -216,7 +222,7 @@ export default function ExplanationSheetContent() {
         setTranslationFailedForQuestion(questionNumber ?? null);
         // 翻訳失敗トーストを表示
         translationFailedToast("コミュニティ情報", () =>
-          setTranslationFailedForQuestion(null)
+          setTranslationFailedForQuestion(null),
         );
       }
     })();
@@ -243,7 +249,8 @@ export default function ExplanationSheetContent() {
             </h4>
             <div className="space-y-1">
               <p className="leading-7">{answerExplanation.answerKeyPoint}</p>
-              {translationExplanation && translationExplanation.answerKeyPoint ? (
+              {translationExplanation &&
+              translationExplanation.answerKeyPoint ? (
                 <p className="text-sm text-base-content/60">
                   {translationExplanation.answerKeyPoint}
                 </p>

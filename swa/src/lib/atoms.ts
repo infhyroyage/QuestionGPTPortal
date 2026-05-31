@@ -94,7 +94,7 @@ export const fetchAnswerExplanationAtom = atom(
     questionNumber: string,
     instance: IPublicClientApplication,
     accountInfo: AccountInfo | null,
-    isResubmit: boolean = false
+    isResubmit: boolean = false,
   ) => {
     // テスト詳細情報がまだ存在しない場合は何も取得・更新しない
     const testDetails: TestDetails = get(testDetailsAtom);
@@ -102,7 +102,7 @@ export const fetchAnswerExplanationAtom = atom(
       return;
     }
     const testDetail: TestDetail | undefined = testDetails.find(
-      (testDetail) => testDetail.testId === testId
+      (testDetail) => testDetail.testId === testId,
     );
     if (!testDetail) {
       return;
@@ -116,7 +116,7 @@ export const fetchAnswerExplanationAtom = atom(
 
     // 選択肢がいずれも選択していない場合は何も取得・更新しない
     const selectedFlags: boolean[] = questionSelector.choices.map(
-      (choice: ChoiceAndSelect) => choice.isSelected
+      (choice: ChoiceAndSelect) => choice.isSelected,
     );
     if (selectedFlags.every((flag) => !flag)) {
       return;
@@ -138,7 +138,7 @@ export const fetchAnswerExplanationAtom = atom(
         "POST",
         `/tests/${testId}/answers/${questionNumber}`,
         instance,
-        accountInfo
+        accountInfo,
       );
       correctIdxes = postAnswerRes.correctIdxes;
       explanations = postAnswerRes.explanations;
@@ -150,7 +150,7 @@ export const fetchAnswerExplanationAtom = atom(
         "GET",
         `/tests/${testId}/answers/${questionNumber}`,
         instance,
-        accountInfo
+        accountInfo,
       );
       if (getAnswerRes.isExisted) {
         correctIdxes = getAnswerRes.correctIdxes || [];
@@ -161,7 +161,7 @@ export const fetchAnswerExplanationAtom = atom(
           "POST",
           `/tests/${testId}/answers/${questionNumber}`,
           instance,
-          accountInfo
+          accountInfo,
         );
         correctIdxes = postAnswerRes.correctIdxes;
         explanations = postAnswerRes.explanations;
@@ -174,7 +174,7 @@ export const fetchAnswerExplanationAtom = atom(
       ...Array(questionSelector.choices.length),
     ].map((_, idx: number) => correctIdxes.includes(idx));
     const isCorrect: boolean = selectedFlags.every(
-      (selectedFlag, idx) => selectedFlag === correctFlags[idx]
+      (selectedFlag, idx) => selectedFlag === correctFlags[idx],
     );
     set(answerExplanationAtom, {
       correctFlags,
@@ -185,7 +185,7 @@ export const fetchAnswerExplanationAtom = atom(
       correctIdxes,
       isSavedProgress: false,
     });
-  }
+  },
 );
 
 /**
@@ -200,11 +200,16 @@ export const fetchExplanationsOnlyAtom = atom(
     testId: string,
     questionNumber: string,
     instance: IPublicClientApplication,
-    accountInfo: AccountInfo | null
+    accountInfo: AccountInfo | null,
   ) => {
     // 既存のanswerExplanationを取得
     const answerExplanation: AnswerExplanation = get(answerExplanationAtom);
     if (!answerExplanation) {
+      return;
+    }
+
+    // 回答・解説生成中、または今回のセッションで新規回答した直後は何もしない
+    if (answerExplanation.isSubmitting || !answerExplanation.isSavedProgress) {
       return;
     }
 
@@ -218,7 +223,7 @@ export const fetchExplanationsOnlyAtom = atom(
       "GET",
       `/tests/${testId}/answers/${questionNumber}`,
       instance,
-      accountInfo
+      accountInfo,
     );
 
     let explanations: string[] = [];
@@ -232,7 +237,7 @@ export const fetchExplanationsOnlyAtom = atom(
         "POST",
         `/tests/${testId}/answers/${questionNumber}`,
         instance,
-        accountInfo
+        accountInfo,
       );
       explanations = postAnswerRes.explanations;
       answerKeyPoint = postAnswerRes.answerKeyPoint;
@@ -244,7 +249,7 @@ export const fetchExplanationsOnlyAtom = atom(
       explanations,
       answerKeyPoint,
     });
-  }
+  },
 );
 
 /**
@@ -259,7 +264,7 @@ export const fetchCommunityAtom = atom(
     questionNumber: string,
     instance: IPublicClientApplication,
     accountInfo: AccountInfo | null,
-    isRefresh: boolean = false
+    isRefresh: boolean = false,
   ) => {
     // テスト詳細情報がまだ存在しない場合は何も取得・更新しない
     const testDetails: TestDetails = get(testDetailsAtom);
@@ -267,7 +272,7 @@ export const fetchCommunityAtom = atom(
       return;
     }
     const testDetail: TestDetail | undefined = testDetails.find(
-      (testDetail) => testDetail.testId === testId
+      (testDetail) => testDetail.testId === testId,
     );
     if (!testDetail) {
       return;
@@ -296,7 +301,7 @@ export const fetchCommunityAtom = atom(
           "POST",
           `/tests/${testId}/communities/${questionNumber}`,
           instance,
-          accountInfo
+          accountInfo,
         );
       discussionsSummary = postCommunityRes.discussionsSummary;
       votes = postCommunityRes.votes;
@@ -308,7 +313,7 @@ export const fetchCommunityAtom = atom(
           "GET",
           `/tests/${testId}/communities/${questionNumber}`,
           instance,
-          accountInfo
+          accountInfo,
         );
       if (getCommunityRes.isExisted) {
         discussionsSummary = getCommunityRes.discussionsSummary;
@@ -319,7 +324,7 @@ export const fetchCommunityAtom = atom(
             "POST",
             `/tests/${testId}/communities/${questionNumber}`,
             instance,
-            accountInfo
+            accountInfo,
           );
         discussionsSummary = postCommunityRes.discussionsSummary;
         votes = postCommunityRes.votes;
@@ -329,7 +334,7 @@ export const fetchCommunityAtom = atom(
       discussionsSummary,
       votes,
     });
-  }
+  },
 );
 
 /**
@@ -345,7 +350,7 @@ export const fetchProgressesAtom = atom(
     set,
     testId: string,
     instance: IPublicClientApplication,
-    accountInfo: AccountInfo | null
+    accountInfo: AccountInfo | null,
   ) => {
     // [GET] /tests/{testId}/progressesにアクセスして取得した進捗項目から
     // 回答履歴とテストを解く問題番号の順番を組み立てて更新
@@ -353,11 +358,11 @@ export const fetchProgressesAtom = atom(
       "GET",
       `/tests/${testId}/progresses`,
       instance,
-      accountInfo
+      accountInfo,
     );
     set(historiesAtom, res.progresses);
     set(orderAtom, res.order);
-  }
+  },
 );
 
 /**
@@ -371,14 +376,14 @@ export const fetchQuestionSelectorAtom = atom(
     testId: string,
     questionNumber: string,
     instance: IPublicClientApplication,
-    accountInfo: AccountInfo | null
+    accountInfo: AccountInfo | null,
   ) => {
     // [GET] /tests/{testId}/questions/{questionNumber}にアクセスして取得した問題文で更新
     const res: GetQuestion = await accessBackend<GetQuestion>(
       "GET",
       `/tests/${testId}/questions/${questionNumber}`,
       instance,
-      accountInfo
+      accountInfo,
     );
 
     // 回答履歴とテストを解く問題番号の順番を取得
@@ -413,7 +418,7 @@ export const fetchQuestionSelectorAtom = atom(
     // 回答済みの場合は正解情報も復元
     if (isAnswered && history) {
       const correctFlags: boolean[] = res.choices.map((_, idx: number) =>
-        history!.correctIdxes.includes(idx)
+        history!.correctIdxes.includes(idx),
       );
       set(answerExplanationAtom, {
         isSubmitting: false,
@@ -423,7 +428,7 @@ export const fetchQuestionSelectorAtom = atom(
         isSavedProgress: true,
       });
     }
-  }
+  },
 );
 
 /**
@@ -435,24 +440,24 @@ export const fetchTestDetailsAtom = atom(
     _,
     set,
     instance: IPublicClientApplication,
-    accountInfo: AccountInfo | null
+    accountInfo: AccountInfo | null,
   ) => {
     // [GET] /testsにアクセス
     const res: GetTests = await accessBackend<GetTests>(
       "GET",
       `/tests`,
       instance,
-      accountInfo
+      accountInfo,
     );
 
     // テスト詳細情報の組み立て
     const testDetails: TestDetail[] = Object.entries(res).flatMap(
       ([courseName, tests]) =>
-        tests.map((test) => ({ courseName, ...test, testId: test.id }))
+        tests.map((test) => ({ courseName, ...test, testId: test.id })),
     );
 
     set(testDetailsAtom, testDetails);
-  }
+  },
 );
 
 /**
@@ -464,7 +469,7 @@ export const fetchTranslationCommunityAtom = atom(
     get,
     set,
     instance: IPublicClientApplication,
-    accountInfo: AccountInfo | null
+    accountInfo: AccountInfo | null,
   ) => {
     // 翻訳対象のコミュニティ情報がまだ存在しない場合は何も翻訳しない
     const community: Community = get(communityAtom);
@@ -478,11 +483,11 @@ export const fetchTranslationCommunityAtom = atom(
       "/en2ja",
       instance,
       accountInfo,
-      [community.discussionsSummary]
+      [community.discussionsSummary],
     );
 
     set(translationCommunityAtom, { discussionsSummary: res[0] });
-  }
+  },
 );
 
 /**
@@ -494,7 +499,7 @@ export const fetchTranslationExplanationAtom = atom(
     get,
     set,
     instance: IPublicClientApplication,
-    accountInfo: AccountInfo | null
+    accountInfo: AccountInfo | null,
   ) => {
     // 翻訳対象の解説文がまだ存在しない場合は何も翻訳しない
     const answerExplanation: AnswerExplanation = get(answerExplanationAtom);
@@ -515,13 +520,13 @@ export const fetchTranslationExplanationAtom = atom(
       "/en2ja",
       instance,
       accountInfo,
-      textsToTranslate
+      textsToTranslate,
     );
 
     // 翻訳結果を分割
     const explanationsTranslation = res.slice(
       0,
-      answerExplanation.explanations.length
+      answerExplanation.explanations.length,
     );
     const answerKeyPointTranslation = hasAnswerKeyPoint
       ? res[answerExplanation.explanations.length]
@@ -531,7 +536,7 @@ export const fetchTranslationExplanationAtom = atom(
       explanations: explanationsTranslation,
       answerKeyPoint: answerKeyPointTranslation,
     });
-  }
+  },
 );
 
 /**
@@ -543,7 +548,7 @@ export const fetchTranslationSubjectChoiceAtom = atom(
     get,
     set,
     instance: IPublicClientApplication,
-    accountInfo: AccountInfo | null
+    accountInfo: AccountInfo | null,
   ) => {
     // 翻訳対象の問題文・選択肢がまだ存在しない場合は何も翻訳しない
     const questionSelector: QuestionSelector = get(questionSelectorAtom);
@@ -560,7 +565,7 @@ export const fetchTranslationSubjectChoiceAtom = atom(
         questionSelector.subjects,
         questionSelector.choices,
         instance,
-        accountInfo
+        accountInfo,
       );
 
     // 翻訳完了後、問題番号が変わっていた場合は結果をセットしない
@@ -573,7 +578,7 @@ export const fetchTranslationSubjectChoiceAtom = atom(
     }
 
     set(translationSubjectChoiceAtom, translationSubjectChoice);
-  }
+  },
 );
 
 /**
@@ -587,7 +592,7 @@ export const initializeProgressesAtom = atom(
     testId: string,
     instance: IPublicClientApplication,
     accountInfo: AccountInfo | null,
-    favoriteQuestionNumbers?: number[]
+    favoriteQuestionNumbers?: number[],
   ) => {
     // テスト詳細情報がまだ存在しない場合は何も取得・更新しない
     const testDetails: TestDetails = get(testDetailsAtom);
@@ -595,7 +600,7 @@ export const initializeProgressesAtom = atom(
       return;
     }
     const testDetail: TestDetail | undefined = testDetails.find(
-      (testDetail) => testDetail.testId === testId
+      (testDetail) => testDetail.testId === testId,
     );
     if (!testDetail) {
       return;
@@ -612,7 +617,7 @@ export const initializeProgressesAtom = atom(
       "DELETE",
       `/tests/${testId}/progresses`,
       instance,
-      accountInfo
+      accountInfo,
     );
 
     // お気に入り登録した問題のみテストを解く場合はその問題番号の順番を、
@@ -628,14 +633,14 @@ export const initializeProgressesAtom = atom(
       `/tests/${testId}/progresses`,
       instance,
       accountInfo,
-      { order }
+      { order },
     );
 
     set(historiesAtom, []);
     set(orderAtom, order);
 
     return order[0];
-  }
+  },
 );
 
 /**
@@ -683,7 +688,7 @@ export const saveProgressAtom = atom(
     testId: string,
     questionNumber: string,
     instance: IPublicClientApplication,
-    accountInfo: AccountInfo | null
+    accountInfo: AccountInfo | null,
   ) => {
     // 問題文・選択肢がまだ存在しない場合は回答履歴を保存しない
     const questionSelector: QuestionSelector = get(questionSelectorAtom);
@@ -712,7 +717,7 @@ export const saveProgressAtom = atom(
           }
           return prev;
         },
-        []
+        [],
       ),
       correctIdxes: answerExplanation.correctIdxes,
     };
@@ -726,7 +731,7 @@ export const saveProgressAtom = atom(
       `/tests/${testId}/progresses/${questionNumber}`,
       instance,
       accountInfo,
-      progress
+      progress,
     );
 
     // 回答履歴が保存済みであることを記録
@@ -741,9 +746,9 @@ export const saveProgressAtom = atom(
         isCorrect: progress.isCorrect,
         selectedIdxes: progress.selectedIdxes,
         correctIdxes: progress.correctIdxes,
-      }))
+      })),
     );
-  }
+  },
 );
 
 /**
@@ -754,7 +759,7 @@ export const toggleDarkModeAtom = atom(
   (get, set) => {
     const isDarkMode = get(isDarkModeAtom);
     set(isDarkModeAtom, !isDarkMode);
-  }
+  },
 );
 
 /**
@@ -798,13 +803,13 @@ export const restoreAnsweredQuestionAtom = atom(
         (choice: ChoiceAndSelect, idx: number) => ({
           ...choice,
           isSelected: history.selectedIdxes.includes(idx),
-        })
+        }),
       ),
     });
 
     // 正解情報を復元
     const correctFlags: boolean[] = questionSelector.choices.map(
-      (_, idx: number) => history.correctIdxes.includes(idx)
+      (_, idx: number) => history.correctIdxes.includes(idx),
     );
     set(answerExplanationAtom, {
       isSubmitting: false,
@@ -815,7 +820,7 @@ export const restoreAnsweredQuestionAtom = atom(
     });
 
     return true;
-  }
+  },
 );
 
 /**
@@ -839,7 +844,7 @@ export const toggleSelectedChoiceAtom = atom(null, (get, set, idx: number) => {
           i === idx
             ? !choice.isSelected
             : questionSelector.isMultiplied && choice.isSelected,
-      })
+      }),
     ),
   });
 });
