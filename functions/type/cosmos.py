@@ -64,11 +64,6 @@ class Community(TypedDict):
     コミュニティでのディスカッションの要約
     """
 
-    votes: List[str]
-    """
-    コミュニティでの回答の割合
-    """
-
 
 class Favorite(TypedDict):
     """

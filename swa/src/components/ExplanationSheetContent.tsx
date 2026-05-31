@@ -8,6 +8,7 @@ import {
   fetchTranslationCommunityAtom,
   fetchTranslationExplanationAtom,
   fetchTranslationSubjectChoiceAtom,
+  fetchVotesAtom,
   resetCommunityAtom,
 } from "@/lib/atoms";
 import { Choice } from "@/types/backend";
@@ -26,6 +27,7 @@ import SelectorButton from "./SelectorButton";
 export default function ExplanationSheetContent() {
   const answerExplanation = useAtomValue(fetchAnswerExplanationAtom);
   const [community, fetchCommunity] = useAtom(fetchCommunityAtom);
+  const [votes, fetchVotes] = useAtom(fetchVotesAtom);
   const fetchExplanationsOnly = useSetAtom(fetchExplanationsOnlyAtom);
   const questionSelector = useAtomValue(fetchQuestionSelectorAtom);
   const [translationCommunity, fetchTranslationCommunity] = useAtom(
@@ -58,14 +60,22 @@ export default function ExplanationSheetContent() {
 
   // コミュニティ情報を再取得する関数
   const handleRefreshCommunity = async () => {
-    if (!testId || !questionNumber || community === undefined) {
+    if (
+      !testId ||
+      !questionNumber ||
+      community === undefined ||
+      votes === undefined
+    ) {
       return;
     }
     try {
       // コミュニティ情報と翻訳をクリア(ローディング表示にするため)
       resetCommunity();
-      // コミュニティ情報を再生成(isRefresh: trueでPOSTのみ実行)
-      await fetchCommunity(testId, questionNumber, instance, accountInfo, true);
+      // コミュニティ情報を再生成(isRefresh: trueでPOSTのみ実行)し、votesを並列取得
+      await Promise.all([
+        fetchCommunity(testId, questionNumber, instance, accountInfo, true),
+        fetchVotes(testId, questionNumber, instance, accountInfo),
+      ]);
       // 翻訳も再取得するためにフラグをリセット
       fetchTranslationCommunityCalledRef.current = false;
       // エラーが発生した問題番号をクリア
@@ -95,7 +105,8 @@ export default function ExplanationSheetContent() {
     if (
       !testId ||
       !questionNumber ||
-      community ||
+      community !== undefined ||
+      votes !== undefined ||
       systemErrorForQuestion === questionNumber ||
       fetchCommunityCalledRef.current
     ) {
@@ -104,7 +115,10 @@ export default function ExplanationSheetContent() {
     fetchCommunityCalledRef.current = true;
     (async () => {
       try {
-        await fetchCommunity(testId, questionNumber, instance, accountInfo);
+        await Promise.all([
+          fetchCommunity(testId, questionNumber, instance, accountInfo),
+          fetchVotes(testId, questionNumber, instance, accountInfo),
+        ]);
       } catch (e) {
         // エラーが発生した問題番号を設定
         setSystemErrorForQuestion(questionNumber);
@@ -116,7 +130,9 @@ export default function ExplanationSheetContent() {
     testId,
     questionNumber,
     community,
+    votes,
     fetchCommunity,
+    fetchVotes,
     instance,
     accountInfo,
     systemErrorForQuestion,
@@ -313,33 +329,36 @@ export default function ExplanationSheetContent() {
             variant="ghost"
             size="icon"
             onClick={handleRefreshCommunity}
-            disabled={community === undefined}
+            disabled={community === undefined || votes === undefined}
             title="コミュニティ情報を再取得"
           >
             <RefreshCw
-              className={community === undefined ? "animate-spin" : ""}
+              className={
+                community === undefined || votes === undefined
+                  ? "animate-spin"
+                  : ""
+              }
               size={20}
             />
           </Button>
         </div>
-        {community === undefined ? (
+        {community === undefined || votes === undefined ? (
           <>
             <div className="space-y-1">
               <div className="skeleton h-7 w-full" />
               <div className="skeleton h-5 w-full" />
             </div>
           </>
-        ) : community.votes === undefined &&
-          community.discussionsSummary === undefined ? (
+        ) : votes.length === 0 && !community.discussionsSummary ? (
           <div className="flex items-center justify-center flex-col space-y-4">
             <Info size={50} />
             <div>コミュニティ回答要約はありません</div>
           </div>
         ) : (
           <>
-            {community.votes && (
+            {votes.length > 0 && (
               <div className="flex space-x-4 mb-4">
-                {community.votes.map((vote: string, idx: number) => (
+                {votes.map((vote: string, idx: number) => (
                   <span key={idx} className="badge badge-neutral">
                     {vote}
                   </span>

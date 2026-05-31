@@ -19,7 +19,7 @@ GitHub Pages を通して React + TailwindCSS をベースとし、レスポン�
 3. フロントエンドアプリケーションが API Management 経由で関数アプリにアクセスし、Azure Cosmos DB で管理するテスト・問題・選択肢・学習履歴・お気に入り情報を取得・表示する。
 4. 関数アプリが Azure Translator で翻訳を実行し、英語の問題文・選択肢を日本語で表示する。
 5. ユーザーが問題を解答し、Azure OpenAI が正解の選択肢と各選択肢の正解/不正解理由を生成・表示しつつ、Azure Storage Queue トリガーの関数アプリが Azure Cosmos DB に非同期で保存する。
-6. Azure OpenAI がコミュニティのディスカッションの内容要約および回答投票割合を生成・表示しつつ、Azure Storage Queue トリガーの関数アプリが Azure Cosmos DB に非同期で保存する。
+6. Azure OpenAI がコミュニティのディスカッションの内容要約を生成・表示しつつ、Azure Storage Queue トリガーの関数アプリが Azure Cosmos DB に非同期で保存する。
 7. 学習進捗機能により、学習履歴・お気に入り情報を Azure Cosmos DB に保存する。
 
 ## 2. アーキテクチャ

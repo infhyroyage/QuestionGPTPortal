@@ -10,6 +10,7 @@ import {
   TranslationCommunity,
   TranslationExplanation,
   TranslationSubjectChoice,
+  Votes,
 } from "@/types/atoms";
 import {
   Choice,
@@ -18,6 +19,7 @@ import {
   GetProgressesRes,
   GetQuestion,
   GetTests,
+  GetVotesRes,
   PostAnswerRes,
   PostCommunityRes,
   PostProgressesReq,
@@ -85,6 +87,11 @@ const translationExplanationAtom = atom<TranslationExplanation>(undefined);
  * 問題文・選択肢に対する翻訳文を管理するatom
  */
 const translationSubjectChoiceAtom = atom<TranslationSubjectChoice>(undefined);
+
+/**
+ * コミュニティでの回答の割合を管理するatom
+ */
+const votesAtom = atom<Votes>(undefined);
 
 /**
  * 正解・解説文を取得するatom
@@ -295,7 +302,6 @@ export const fetchCommunityAtom = atom(
     }
 
     let discussionsSummary: string | undefined = undefined;
-    let votes: string[] | undefined = undefined;
     if (isRefresh) {
       // コミュニティ情報再取得の場合、コミュニティ情報に対する翻訳文を初期化してから、
       // [POST] /tests/{testId}/communities/{questionNumber}にアクセス
@@ -308,7 +314,6 @@ export const fetchCommunityAtom = atom(
           accountInfo,
         );
       discussionsSummary = postCommunityRes.discussionsSummary;
-      votes = postCommunityRes.votes;
     } else {
       // コミュニティ情報再取得ではない場合、[GET] /tests/{testId}/communities/{questionNumber}にアクセスして事前に生成したコミュニティ情報を取得
       // もし取得できなかった場合、[POST] /tests/{testId}/communities/{questionNumber}にアクセス
@@ -321,7 +326,6 @@ export const fetchCommunityAtom = atom(
         );
       if (getCommunityRes.isExisted) {
         discussionsSummary = getCommunityRes.discussionsSummary;
-        votes = getCommunityRes.votes;
       } else {
         const postCommunityRes: PostCommunityRes =
           await accessBackend<PostCommunityRes>(
@@ -331,12 +335,10 @@ export const fetchCommunityAtom = atom(
             accountInfo,
           );
         discussionsSummary = postCommunityRes.discussionsSummary;
-        votes = postCommunityRes.votes;
       }
     }
     set(communityAtom, {
       discussionsSummary,
-      votes,
     });
   },
 );
@@ -586,6 +588,53 @@ export const fetchTranslationSubjectChoiceAtom = atom(
 );
 
 /**
+ * コミュニティでの回答の割合を取得するatom
+ */
+export const fetchVotesAtom = atom(
+  (get) => get(votesAtom),
+  async (
+    get,
+    set,
+    testId: string,
+    questionNumber: string,
+    instance: IPublicClientApplication,
+    accountInfo: AccountInfo | null,
+  ) => {
+    // テスト詳細情報がまだ存在しない場合は何も取得・更新しない
+    const testDetails: TestDetails = get(testDetailsAtom);
+    if (!testDetails) {
+      return;
+    }
+    const testDetail: TestDetail | undefined = testDetails.find(
+      (testDetail) => testDetail.testId === testId,
+    );
+    if (!testDetail) {
+      return;
+    }
+
+    // 問題文・選択肢がまだ存在しない場合は何も取得・更新しない
+    const questionSelector: QuestionSelector = get(questionSelectorAtom);
+    if (!questionSelector) {
+      return;
+    }
+
+    // 正解・解説文がまだ存在しない場合は何も取得・更新しない
+    const answerExplanation: AnswerExplanation = get(answerExplanationAtom);
+    if (!answerExplanation) {
+      return;
+    }
+
+    const votesRes: GetVotesRes = await accessBackend<GetVotesRes>(
+      "GET",
+      `/tests/${testId}/votes/${questionNumber}`,
+      instance,
+      accountInfo,
+    );
+    set(votesAtom, votesRes);
+  },
+);
+
+/**
  * 回答履歴とテストを解く問題番号の順番を初期化し、初期化後の最初の問題番号を返すatom(write only)
  */
 export const initializeProgressesAtom = atom(
@@ -659,6 +708,7 @@ export const resetAtomsForAllTestPagesAtom = atom(null, (_, set) => {
   set(translationCommunityAtom, undefined);
   set(translationSubjectChoiceAtom, undefined);
   set(translationExplanationAtom, undefined);
+  set(votesAtom, undefined);
 });
 
 /**
@@ -671,6 +721,7 @@ export const resetAtomsForTestQuestionAtom = atom(null, (_, set) => {
   set(translationCommunityAtom, undefined);
   set(translationSubjectChoiceAtom, undefined);
   set(translationExplanationAtom, undefined);
+  set(votesAtom, undefined);
 });
 
 /**
@@ -679,6 +730,7 @@ export const resetAtomsForTestQuestionAtom = atom(null, (_, set) => {
 export const resetCommunityAtom = atom(null, (_, set) => {
   set(communityAtom, undefined);
   set(translationCommunityAtom, undefined);
+  set(votesAtom, undefined);
 });
 
 /**

@@ -68,8 +68,3 @@ class MessageCommunity(TypedDict):
     """
     コミュニティでのディスカッションの要約
     """
-
-    votes: List[str]
-    """
-    コミュニティでの回答の割合
-    """

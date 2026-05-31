@@ -98,11 +98,6 @@ export type GetCommunityRes = {
   discussionsSummary: string;
 
   /**
-   * コミュニティでの回答の割合
-   */
-  votes?: string[];
-
-  /**
    * コミュニティでのディスカッションの要約が存在する場合はtrue、存在しない場合はfalse
    */
   isExisted: boolean;
@@ -116,11 +111,6 @@ export type PostCommunityRes = {
    * コミュニティでのディスカッションの要約
    */
   discussionsSummary: string;
-
-  /**
-   * コミュニティでの回答の割合
-   */
-  votes?: string[];
 
   /**
    * コミュニティでのディスカッションの要約が存在する場合はtrue、存在しない場合はfalse
@@ -277,3 +267,8 @@ export type GetQuestion = {
    */
   isMultiplied: boolean;
 };
+
+/**
+ * [GET] /tests/{testId}/votes/{questionNumber} のレスポンスボディの型
+ */
+export type GetVotesRes = string[];
