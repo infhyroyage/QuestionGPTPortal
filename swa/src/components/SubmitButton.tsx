@@ -4,7 +4,6 @@ import {
   fetchAnswerExplanationAtom,
   fetchQuestionSelectorAtom,
 } from "@/lib/atoms";
-import { cn } from "@/lib/utils";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom, useAtomValue } from "jotai";
 import { Check, Loader2, SendHorizontal, X } from "lucide-react";
@@ -47,17 +46,9 @@ export default function SubmitButton() {
       return undefined;
     }
     if (answerExplanation.isCorrect) {
-      return cn(
-        "border-green-500 bg-green-500 text-white",
-        "hover:border-green-600 hover:bg-green-600",
-        "shadow-none outline-none focus-visible:outline-none focus-visible:ring-0"
-      );
+      return "border-green-500 bg-green-500 text-white hover:border-green-600 hover:bg-green-600 shadow-none outline-none focus-visible:outline-none focus-visible:ring-0";
     }
-    return cn(
-      "border-red-500 bg-red-500 text-white",
-      "hover:border-red-600 hover:bg-red-600",
-      "shadow-none outline-none focus-visible:outline-none focus-visible:ring-0"
-    );
+    return "border-red-500 bg-red-500 text-white hover:border-red-600 hover:bg-red-600 shadow-none outline-none focus-visible:outline-none focus-visible:ring-0";
   }, [answerExplanation]);
 
   // 回答・解説生成ボタン押下時に、回答・解説を1度だけ生成/取得

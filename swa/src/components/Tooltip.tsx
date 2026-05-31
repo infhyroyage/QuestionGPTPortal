@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { type ReactNode } from "react";
 
 type TooltipPosition = "top" | "bottom" | "left" | "right";
@@ -29,11 +28,13 @@ export default function Tooltip({
 }: TooltipProps) {
   return (
     <div
-      className={cn(
+      className={[
         "tooltip z-50 before:z-50 after:z-50",
         positionClasses[position],
-        className
-      )}
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
       data-tip={tip}
     >
       {children}

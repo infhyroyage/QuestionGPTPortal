@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { forwardRef, type ButtonHTMLAttributes } from "react";
 
 export type ButtonVariant =
@@ -38,7 +37,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "default", size = "default", ...props }, ref) => (
     <button
       ref={ref}
-      className={cn("btn", variantClasses[variant], sizeClasses[size], className)}
+      className={["btn", variantClasses[variant], sizeClasses[size], className]
+        .filter(Boolean)
+        .join(" ")}
       {...props}
     />
   )

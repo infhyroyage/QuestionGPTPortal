@@ -1,6 +1,5 @@
 import { GripVertical } from "lucide-react";
 
-import { cn } from "@/lib/utils";
 import { PanelResizeHandle } from "react-resizable-panels";
 
 const TestQuestionResizableHandle = ({
@@ -11,10 +10,12 @@ const TestQuestionResizableHandle = ({
   withHandle?: boolean;
 }) => (
   <PanelResizeHandle
-    className={cn(
+    className={[
       "relative flex w-px items-center justify-center bg-base-300 hover:bg-sky-500 transition-colors duration-200 after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2 focus-visible:outline-hidden data-[panel-group-direction=vertical]:h-px data-[panel-group-direction=vertical]:w-full data-[panel-group-direction=vertical]:after:left-0 data-[panel-group-direction=vertical]:after:h-1 data-[panel-group-direction=vertical]:after:w-full data-[panel-group-direction=vertical]:after:-translate-y-1/2 data-[panel-group-direction=vertical]:after:translate-x-0 [&[data-panel-group-direction=vertical]>div]:rotate-90",
-      className
-    )}
+      className,
+    ]
+      .filter(Boolean)
+      .join(" ")}
     {...props}
   >
     {withHandle && (

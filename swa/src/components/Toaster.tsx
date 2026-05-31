@@ -1,5 +1,4 @@
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
 
 /**
  * daisyUI の toast / alert で通知を表示する
@@ -14,10 +13,10 @@ export function Toaster() {
         .map((toast) => (
           <div
             key={toast.id}
-            className={cn(
+            className={[
               "alert shadow-lg max-w-md",
-              toast.variant === "destructive" ? "alert-error" : "alert-info"
-            )}
+              toast.variant === "destructive" ? "alert-error" : "alert-info",
+            ].join(" ")}
           >
             <div className="flex flex-col gap-1">
               {toast.title && <div className="font-bold">{toast.title}</div>}
