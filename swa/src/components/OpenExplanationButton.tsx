@@ -1,7 +1,9 @@
 import { fetchAnswerExplanationAtom } from "@/lib/atoms";
 import { useAtomValue } from "jotai";
 import { Info } from "lucide-react";
-import { useId, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
+import { Button } from "./Button";
 import ExplanationSheetContent from "./ExplanationSheetContent";
 import Tooltip from "./Tooltip";
 
@@ -11,7 +13,7 @@ import Tooltip from "./Tooltip";
  */
 export default function OpenExplanationButton() {
   const answerExplanation = useAtomValue(fetchAnswerExplanationAtom);
-  const drawerId = useId();
+  const [open, setOpen] = useState(false);
 
   // 回答・解説を生成していない場合、または生成中の場合は、解説表示ボタンを非活性とする
   // 回答済みの問題に遷移した場合は、explanationsが存在しなくてもanswerExplanationが存在すれば活性にする
@@ -21,31 +23,52 @@ export default function OpenExplanationButton() {
     [answerExplanation]
   );
 
+  const close = useCallback(() => setOpen(false), []);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        close();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [close, open]);
+
   return (
-    <div className="drawer drawer-bottom">
-      <input id={drawerId} type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content">
-        <Tooltip tip="解説表示" position="top">
-          <label
-            htmlFor={drawerId}
-            className={`btn btn-square ${isDisabledOpenExplanationButton ? "btn-disabled" : ""}`}
-            aria-disabled={isDisabledOpenExplanationButton}
-            onClick={(e) => {
-              if (isDisabledOpenExplanationButton) {
-                e.preventDefault();
-              }
-            }}
-          >
-            <Info />
-          </label>
-        </Tooltip>
-      </div>
-      <div className="drawer-side z-50">
-        <label htmlFor={drawerId} className="drawer-overlay" aria-label="閉じる" />
-        <div className="menu bg-base-100 text-base-content min-h-[20vh] max-h-[80vh] w-full p-4 overflow-y-auto rounded-t-2xl">
-          <ExplanationSheetContent />
-        </div>
-      </div>
-    </div>
+    <>
+      <Tooltip tip="解説表示" position="top">
+        <Button
+          size="icon"
+          disabled={isDisabledOpenExplanationButton}
+          onClick={() => setOpen(true)}
+        >
+          <Info />
+        </Button>
+      </Tooltip>
+      {open &&
+        createPortal(
+          <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true">
+            <button
+              type="button"
+              className="fixed inset-0 bg-black/80"
+              aria-label="閉じる"
+              onClick={close}
+            />
+            <div className="fixed inset-x-0 bottom-0 z-[101] max-h-[80vh] w-full min-h-[20vh] overflow-y-auto rounded-t-2xl border-t border-base-300 bg-base-100 p-4 text-base-content shadow-lg">
+              <ExplanationSheetContent />
+            </div>
+          </div>,
+          document.body
+        )}
+    </>
   );
 }
