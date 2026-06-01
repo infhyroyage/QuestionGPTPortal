@@ -477,6 +477,10 @@ resource functions 'Microsoft.Web/sites@2023-12-01' = {
           value: openAIModelName
         }
         {
+          name: 'WEB_SEARCH_ENABLED'
+          value: 'true'
+        }
+        {
           name: 'WEBSITE_ENABLE_SYNC_UPDATE_SITE'
           value: 'true'
         }

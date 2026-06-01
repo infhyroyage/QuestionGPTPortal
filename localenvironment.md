@@ -44,6 +44,7 @@ Azure 環境構築後に、以下のサーバーをすべて起動すると、�
        "OPENAI_DEPLOYMENT_NAME": "(Azure OpenAIのデプロイ名)",
        "OPENAI_ENDPOINT": "(Azure OpenAIのエンドポイント)",
        "OPENAI_MODEL_NAME": "(Azure OpenAIのモデル名)",
+       "WEB_SEARCH_ENABLED": "true",
        "PYTHON_PATH": "./venv/bin/python",
        "TRANSLATOR_KEY": "(TranslatorのAPIキー)"
      },
