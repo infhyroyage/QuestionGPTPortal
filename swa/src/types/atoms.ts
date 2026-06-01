@@ -58,13 +58,13 @@ export type AnswerExplanation =
  * コミュニティ情報を管理するatomの型
  * 初期値の場合はundefined
  */
-export type Community =
+export type Discussion =
   | {
       /**
        * コミュニティでのディスカッションの要約
        * コミュニティ情報が生成中、またはデータが存在しない場合はundefined
        */
-      discussionsSummary?: string;
+      summary?: string;
     }
   | undefined;
 
@@ -168,12 +168,12 @@ export type TestDetails = TestDetail[] | undefined;
  * コミュニティ情報に対する翻訳文を管理するatomの型
  * 初期値の場合はundefined
  */
-export type TranslationCommunity =
+export type TranslationDiscussion =
   | {
       /**
        * コミュニティでのディスカッションの要約
        */
-      discussionsSummary: string;
+      summary: string;
     }
   | undefined;
 

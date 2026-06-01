@@ -1,4 +1,4 @@
-"""[POST] /tests/{testId}/communities/{questionNumber} のモジュール"""
+"""[POST] /tests/{testId}/discussions/{questionNumber} のモジュール"""
 
 import json
 import logging
@@ -10,8 +10,8 @@ from azure.cosmos import ContainerProxy
 from azure.cosmos.exceptions import CosmosResourceNotFoundError
 from openai import AzureOpenAI
 from type.cosmos import Question, QuestionDiscussion
-from type.message import MessageCommunity
-from type.response import PostCommunityRes
+from type.message import MessageDiscussion
+from type.response import PostDiscussionRes
 from util.cosmos import get_read_only_container
 from util.queue import get_queue_client
 
@@ -148,28 +148,28 @@ def generate_discussion_summary(discussions: list[QuestionDiscussion]) -> str | 
     return None
 
 
-def queue_message_community(message_community: MessageCommunity) -> None:
+def queue_message_discussion(message_discussion: MessageDiscussion) -> None:
     """
     キューストレージにCommunityコンテナーの項目用のメッセージを格納する
 
     Args:
-        message_community (MessageCommunity): Communityコンテナーの項目用のメッセージ
+        message_discussion (MessageDiscussion): Communityコンテナーの項目用のメッセージ
     """
 
-    queue_client = get_queue_client("communities")
-    logging.info({"message_community": message_community})
-    queue_client.send_message(json.dumps(message_community).encode("utf-8"))
+    queue_client = get_queue_client("discussions")
+    logging.info({"message_discussion": message_discussion})
+    queue_client.send_message(json.dumps(message_discussion).encode("utf-8"))
 
 
-bp_post_community = func.Blueprint()
+bp_post_discussion = func.Blueprint()
 
 
-@bp_post_community.route(
-    route="tests/{testId}/communities/{questionNumber}",
+@bp_post_discussion.route(
+    route="tests/{testId}/discussions/{questionNumber}",
     methods=["POST"],
     auth_level=func.AuthLevel.FUNCTION,
 )
-def post_community(req: func.HttpRequest) -> func.HttpResponse:
+def post_discussion(req: func.HttpRequest) -> func.HttpResponse:
     """
     コミュニティディスカッションの要約を生成します
     """
@@ -205,7 +205,7 @@ def post_community(req: func.HttpRequest) -> func.HttpResponse:
 
         # discussionsフィールドが存在する場合はディスカッション要約を生成(存在しない場合は空文字列)
         discussions: list[QuestionDiscussion] | None = item.get("discussions")
-        body: PostCommunityRes = {
+        body: PostDiscussionRes = {
             "isExisted": False,
         }
 
@@ -214,15 +214,15 @@ def post_community(req: func.HttpRequest) -> func.HttpResponse:
             summary: str | None = generate_discussion_summary(discussions)
             if summary is None:
                 raise ValueError("Failed to generate discussion summary")
-            body["discussionsSummary"] = summary
+            body["summary"] = summary
             body["isExisted"] = True
 
             # キューストレージにメッセージを格納
-            queue_message_community(
+            queue_message_discussion(
                 {
                     "testId": test_id,
                     "questionNumber": int(question_number),
-                    "discussionsSummary": summary,
+                    "summary": summary,
                 }
             )
 

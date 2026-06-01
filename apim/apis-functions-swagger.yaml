@@ -234,11 +234,11 @@ paths:
             application/json:
               schema:
                 type: string
-  /tests/{testId}/communities/{questionNumber}:
+  /tests/{testId}/discussions/{questionNumber}:
     get:
       summary: コミュニティディスカッション要約取得API
       description: 指定したテストID・問題番号でのコミュニティディスカッションの要約を取得します
-      operationId: get-community
+      operationId: get-discussion
       parameters:
         - name: testId
           in: path
@@ -266,7 +266,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  discussionsSummary:
+                  summary:
                     type: string
                     description: コミュニティでのディスカッションの要約
                     nullable: true
@@ -296,7 +296,7 @@ paths:
     post:
       summary: コミュニティディスカッション要約生成API
       description: コミュニティディスカッションの要約を生成します
-      operationId: post-community
+      operationId: post-discussion
       parameters:
         - name: testId
           in: path
@@ -324,7 +324,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  discussionsSummary:
+                  summary:
                     type: string
                     description: コミュニティでのディスカッションの要約
                     nullable: true

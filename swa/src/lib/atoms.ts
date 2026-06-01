@@ -1,13 +1,13 @@
 import {
   AnswerExplanation,
   ChoiceAndSelect,
-  Community,
+  Discussion,
   Histories,
   Order,
   QuestionSelector,
   TestDetail,
   TestDetails,
-  TranslationCommunity,
+  TranslationDiscussion,
   TranslationExplanation,
   TranslationSubjectChoice,
   Votes,
@@ -15,13 +15,13 @@ import {
 import {
   Choice,
   GetAnswer,
-  GetCommunityRes,
+  GetDiscussionRes,
   GetProgressesRes,
   GetQuestion,
   GetTests,
   GetVotesRes,
   PostAnswerRes,
-  PostCommunityRes,
+  PostDiscussionRes,
   PostProgressesReq,
   PostProgressReq,
   PostProgressRes,
@@ -41,7 +41,7 @@ const answerExplanationAtom = atom<AnswerExplanation>(undefined);
 /**
  * コミュニティ情報を管理するatom
  */
-const communityAtom = atom<Community>(undefined);
+const discussionAtom = atom<Discussion>(undefined);
 
 /**
  * 回答履歴を管理するatom
@@ -76,7 +76,7 @@ const testDetailsAtom = atom<TestDetails>(undefined);
 /**
  * コミュニティ情報に対する翻訳文を管理するatom
  */
-const translationCommunityAtom = atom<TranslationCommunity>(undefined);
+const translationDiscussionAtom = atom<TranslationDiscussion>(undefined);
 
 /**
  * 解説文に対する翻訳文を管理するatom
@@ -266,8 +266,8 @@ export const fetchExplanationsOnlyAtom = atom(
 /**
  * コミュニティ情報を取得するatom
  */
-export const fetchCommunityAtom = atom(
-  (get) => get(communityAtom),
+export const fetchDiscussionAtom = atom(
+  (get) => get(discussionAtom),
   async (
     get,
     set,
@@ -301,44 +301,44 @@ export const fetchCommunityAtom = atom(
       return;
     }
 
-    let discussionsSummary: string | undefined = undefined;
+    let summary: string | undefined = undefined;
     if (isRefresh) {
       // コミュニティ情報再取得の場合、コミュニティ情報に対する翻訳文を初期化してから、
-      // [POST] /tests/{testId}/communities/{questionNumber}にアクセス
-      set(translationCommunityAtom, undefined);
-      const postCommunityRes: PostCommunityRes =
-        await accessBackend<PostCommunityRes>(
+      // [POST] /tests/{testId}/discussions/{questionNumber}にアクセス
+      set(translationDiscussionAtom, undefined);
+      const postDiscussionRes: PostDiscussionRes =
+        await accessBackend<PostDiscussionRes>(
           "POST",
-          `/tests/${testId}/communities/${questionNumber}`,
+          `/tests/${testId}/discussions/${questionNumber}`,
           instance,
           accountInfo,
         );
-      discussionsSummary = postCommunityRes.discussionsSummary;
+      summary = postDiscussionRes.summary;
     } else {
-      // コミュニティ情報再取得ではない場合、[GET] /tests/{testId}/communities/{questionNumber}にアクセスして事前に生成したコミュニティ情報を取得
-      // もし取得できなかった場合、[POST] /tests/{testId}/communities/{questionNumber}にアクセス
-      const getCommunityRes: GetCommunityRes =
-        await accessBackend<GetCommunityRes>(
+      // コミュニティ情報再取得ではない場合、[GET] /tests/{testId}/discussions/{questionNumber}にアクセスして事前に生成したコミュニティ情報を取得
+      // もし取得できなかった場合、[POST] /tests/{testId}/discussions/{questionNumber}にアクセス
+      const getDiscussionRes: GetDiscussionRes =
+        await accessBackend<GetDiscussionRes>(
           "GET",
-          `/tests/${testId}/communities/${questionNumber}`,
+          `/tests/${testId}/discussions/${questionNumber}`,
           instance,
           accountInfo,
         );
-      if (getCommunityRes.isExisted) {
-        discussionsSummary = getCommunityRes.discussionsSummary;
+      if (getDiscussionRes.isExisted) {
+        summary = getDiscussionRes.summary;
       } else {
-        const postCommunityRes: PostCommunityRes =
-          await accessBackend<PostCommunityRes>(
+        const postDiscussionRes: PostDiscussionRes =
+          await accessBackend<PostDiscussionRes>(
             "POST",
-            `/tests/${testId}/communities/${questionNumber}`,
+            `/tests/${testId}/discussions/${questionNumber}`,
             instance,
             accountInfo,
           );
-        discussionsSummary = postCommunityRes.discussionsSummary;
+        summary = postDiscussionRes.summary;
       }
     }
-    set(communityAtom, {
-      discussionsSummary,
+    set(discussionAtom, {
+      summary,
     });
   },
 );
@@ -469,8 +469,8 @@ export const fetchTestDetailsAtom = atom(
 /**
  * コミュニティ情報に対する翻訳文を取得するatom
  */
-export const fetchTranslationCommunityAtom = atom(
-  (get) => get(translationCommunityAtom),
+export const fetchTranslationDiscussionAtom = atom(
+  (get) => get(translationDiscussionAtom),
   async (
     get,
     set,
@@ -478,8 +478,8 @@ export const fetchTranslationCommunityAtom = atom(
     accountInfo: AccountInfo | null,
   ) => {
     // 翻訳対象のコミュニティ情報がまだ存在しない場合は何も翻訳しない
-    const community: Community = get(communityAtom);
-    if (!community || !community.discussionsSummary) {
+    const discussion: Discussion = get(discussionAtom);
+    if (!discussion || !discussion.summary) {
       return;
     }
 
@@ -489,10 +489,10 @@ export const fetchTranslationCommunityAtom = atom(
       "/en2ja",
       instance,
       accountInfo,
-      [community.discussionsSummary],
+      [discussion.summary],
     );
 
-    set(translationCommunityAtom, { discussionsSummary: res[0] });
+    set(translationDiscussionAtom, { summary: res[0] });
   },
 );
 
@@ -701,11 +701,11 @@ export const initializeProgressesAtom = atom(
  */
 export const resetAtomsForAllTestPagesAtom = atom(null, (_, set) => {
   set(answerExplanationAtom, undefined);
-  set(communityAtom, undefined);
+  set(discussionAtom, undefined);
   set(historiesAtom, undefined);
   set(orderAtom, undefined);
   set(questionSelectorAtom, undefined);
-  set(translationCommunityAtom, undefined);
+  set(translationDiscussionAtom, undefined);
   set(translationSubjectChoiceAtom, undefined);
   set(translationExplanationAtom, undefined);
   set(votesAtom, undefined);
@@ -716,9 +716,9 @@ export const resetAtomsForAllTestPagesAtom = atom(null, (_, set) => {
  */
 export const resetAtomsForTestQuestionAtom = atom(null, (_, set) => {
   set(answerExplanationAtom, undefined);
-  set(communityAtom, undefined);
+  set(discussionAtom, undefined);
   set(questionSelectorAtom, undefined);
-  set(translationCommunityAtom, undefined);
+  set(translationDiscussionAtom, undefined);
   set(translationSubjectChoiceAtom, undefined);
   set(translationExplanationAtom, undefined);
   set(votesAtom, undefined);
@@ -727,9 +727,9 @@ export const resetAtomsForTestQuestionAtom = atom(null, (_, set) => {
 /**
  * コミュニティ情報と翻訳を初期値に戻すatom(write only)
  */
-export const resetCommunityAtom = atom(null, (_, set) => {
-  set(communityAtom, undefined);
-  set(translationCommunityAtom, undefined);
+export const resetDiscussionAtom = atom(null, (_, set) => {
+  set(discussionAtom, undefined);
+  set(translationDiscussionAtom, undefined);
   set(votesAtom, undefined);
 });
 

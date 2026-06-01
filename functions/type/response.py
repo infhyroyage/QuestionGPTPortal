@@ -104,12 +104,12 @@ class PostAnswerRes(TypedDict, total=False):
     """
 
 
-class GetCommunityRes(TypedDict):
+class GetDiscussionRes(TypedDict):
     """
-    [GET] /tests/{testId}/communities/{questionNumber} のレスポンスボディの型
+    [GET] /tests/{testId}/discussions/{questionNumber} のレスポンスボディの型
     """
 
-    discussionsSummary: Optional[str]
+    summary: Optional[str]
     """
     コミュニティでのディスカッションの要約
     """
@@ -120,12 +120,12 @@ class GetCommunityRes(TypedDict):
     """
 
 
-class PostCommunityRes(TypedDict):
+class PostDiscussionRes(TypedDict):
     """
-    [POST] /tests/{testId}/communities/{questionNumber} のレスポンスボディの型
+    [POST] /tests/{testId}/discussions/{questionNumber} のレスポンスボディの型
     """
 
-    discussionsSummary: Optional[str]
+    summary: Optional[str]
     """
     コミュニティでのディスカッションの要約
     """

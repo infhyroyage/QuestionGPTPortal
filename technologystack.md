@@ -204,18 +204,19 @@ Azure OpenAI を用いて、問題文や選択肢の文章から正解の選択�
 
 以下の Jotai での Atom を用いた状態管理により、コンポーネント間でのデータ共有を実現する。
 
-| Atom 名                        | 説明                             |
-| ------------------------------ | -------------------------------- |
-| `testDetailsAtom`              | テスト一覧情報                   |
-| `questionSelectorAtom`         | 問題文・選択肢・選択状態         |
-| `answerExplanationAtom`        | 正解・解説・回答状態             |
-| `communityAtom`                | コミュニティディスカッション情報 |
-| `historiesAtom`                | 回答履歴                         |
-| `orderAtom`                    | 問題解答順序                     |
-| `translationSubjectChoiceAtom` | 問題文・選択肢の翻訳             |
-| `translationExplanationAtom`   | 解説の翻訳                       |
-| `translationCommunityAtom`     | コミュニティ情報の翻訳           |
-| `toggleDarkModeAtom`           | ダークモード切り替え             |
+| Atom 名                        | Atom で管理する状態        |
+| ------------------------------ | -------------------------- |
+| `answerExplanationAtom`        | 正解・解説文               |
+| `discussionAtom`               | コミュニティ情報           |
+| `historiesAtom`                | 回答履歴                   |
+| `isDarkModeAtom`               | ダークモードかのフラグ     |
+| `orderAtom`                    | テストを解く問題番号の順序 |
+| `questionSelectorAtom`         | 問題文・選択肢             |
+| `testDetailsAtom`              | テスト詳細情報             |
+| `translationDiscussionAtom`    | コミュニティ情報の翻訳文   |
+| `translationExplanationAtom`   | 解説文の翻訳文             |
+| `translationSubjectChoiceAtom` | 問題文・選択肢の翻訳文     |
+| `votesAtom`                    | コミュニティでの回答の割合 |
 
 API アクセスを含む非同期処理は、Atom の write 関数で行う。この非同期処理のエラーハンドリングは、Atom の write 関数の呼び出し元コンポーネントで行う。
 

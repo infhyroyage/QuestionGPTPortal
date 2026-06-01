@@ -1,4 +1,4 @@
-"""[POST] /tests/{testId}/communities/{questionNumber} のテスト"""
+"""[POST] /tests/{testId}/discussions/{questionNumber} のテスト"""
 
 import json
 import os
@@ -7,13 +7,13 @@ from unittest.mock import MagicMock, call, patch
 
 import azure.functions as func
 from azure.cosmos.exceptions import CosmosResourceNotFoundError
-from src.post_community import (
+from src.post_discussion import (
     MAX_RETRY_NUMBER,
     SYSTEM_PROMPT,
     create_discussion_summary_prompt,
     generate_discussion_summary,
-    post_community,
-    queue_message_community,
+    post_discussion,
+    queue_message_discussion,
     validate_request,
 )
 from type.cosmos import Question
@@ -169,9 +169,9 @@ Summary (approximately 300 characters):"""
 class TestGenerateDiscussionSummary(unittest.TestCase):
     """generate_discussion_summary関数のテストケース"""
 
-    @patch("src.post_community.AzureOpenAI")
-    @patch("src.post_community.create_discussion_summary_prompt")
-    @patch("src.post_community.logging")
+    @patch("src.post_discussion.AzureOpenAI")
+    @patch("src.post_discussion.create_discussion_summary_prompt")
+    @patch("src.post_discussion.logging")
     @patch.dict(
         os.environ,
         {
@@ -249,9 +249,9 @@ class TestGenerateDiscussionSummary(unittest.TestCase):
         )
         mock_logging.warning.assert_not_called()
 
-    @patch("src.post_community.AzureOpenAI")
-    @patch("src.post_community.create_discussion_summary_prompt")
-    @patch("src.post_community.logging")
+    @patch("src.post_discussion.AzureOpenAI")
+    @patch("src.post_discussion.create_discussion_summary_prompt")
+    @patch("src.post_discussion.logging")
     @patch.dict(
         os.environ,
         {
@@ -301,9 +301,9 @@ class TestGenerateDiscussionSummary(unittest.TestCase):
         mock_logging.info.assert_has_calls(expected_calls)
         mock_logging.warning.assert_not_called()
 
-    @patch("src.post_community.AzureOpenAI")
-    @patch("src.post_community.create_discussion_summary_prompt")
-    @patch("src.post_community.logging")
+    @patch("src.post_discussion.AzureOpenAI")
+    @patch("src.post_discussion.create_discussion_summary_prompt")
+    @patch("src.post_discussion.logging")
     @patch.dict(
         os.environ,
         {
@@ -343,34 +343,34 @@ class TestGenerateDiscussionSummary(unittest.TestCase):
         mock_logging.warning.assert_called_once()
 
 
-class TestQueueMessageCommunity(unittest.TestCase):
-    """queue_message_community関数のテストケース"""
+class TestQueueMessageDiscussion(unittest.TestCase):
+    """queue_message_discussion関数のテストケース"""
 
-    @patch("src.post_community.get_queue_client")
-    @patch("src.post_community.logging")
-    def test_queue_message_community_normal(self, mock_logging, mock_get_queue_client):
+    @patch("src.post_discussion.get_queue_client")
+    @patch("src.post_discussion.logging")
+    def test_queue_message_discussion_normal(self, mock_logging, mock_get_queue_client):
         """正常にキューメッセージを格納する場合のテスト"""
 
         mock_queue_client = MagicMock()
         mock_get_queue_client.return_value = mock_queue_client
 
-        message_community = {
+        message_discussion = {
             "testId": "test123",
             "questionNumber": 1,
-            "discussionsSummary": "Test summary",
+            "summary": "Test summary",
         }
 
-        queue_message_community(message_community)
+        queue_message_discussion(message_discussion)
 
-        mock_get_queue_client.assert_called_once_with("communities")
+        mock_get_queue_client.assert_called_once_with("discussions")
         mock_queue_client.send_message.assert_called_once()
         mock_logging.info.assert_called_once_with(
-            {"message_community": message_community}
+            {"message_discussion": message_discussion}
         )
 
-    @patch("src.post_community.get_queue_client")
-    @patch("src.post_community.logging")
-    def test_queue_message_community_development_storage(
+    @patch("src.post_discussion.get_queue_client")
+    @patch("src.post_discussion.logging")
+    def test_queue_message_discussion_development_storage(
         self, mock_logging, mock_get_queue_client
     ):
         """ローカル開発環境(Azurite)でキューメッセージを格納する場合のテスト"""
@@ -378,33 +378,33 @@ class TestQueueMessageCommunity(unittest.TestCase):
         mock_queue_client = MagicMock()
         mock_get_queue_client.return_value = mock_queue_client
 
-        message_community = {
+        message_discussion = {
             "testId": "test123",
             "questionNumber": 1,
-            "discussionsSummary": "Test summary",
+            "summary": "Test summary",
         }
 
-        queue_message_community(message_community)
+        queue_message_discussion(message_discussion)
 
-        mock_get_queue_client.assert_called_once_with("communities")
+        mock_get_queue_client.assert_called_once_with("discussions")
         mock_queue_client.send_message.assert_called_once()
         mock_logging.info.assert_called_once_with(
-            {"message_community": message_community}
+            {"message_discussion": message_discussion}
         )
 
 
 class TestPostDiscussion(unittest.TestCase):
-    """post_community関数のテストケース"""
+    """post_discussion関数のテストケース"""
 
-    @patch("src.post_community.validate_request")
-    @patch("src.post_community.get_read_only_container")
-    @patch("src.post_community.generate_discussion_summary")
-    @patch("src.post_community.queue_message_community")
-    @patch("src.post_community.logging")
-    def test_post_community(  # pylint: disable=R0913,R0917
+    @patch("src.post_discussion.validate_request")
+    @patch("src.post_discussion.get_read_only_container")
+    @patch("src.post_discussion.generate_discussion_summary")
+    @patch("src.post_discussion.queue_message_discussion")
+    @patch("src.post_discussion.logging")
+    def test_post_discussion(  # pylint: disable=R0913,R0917
         self,
         mock_logging,
-        mock_queue_message_community,
+        mock_queue_message_discussion,
         mock_generate_discussion_summary,
         mock_get_read_only_container,
         mock_validate_request,
@@ -447,13 +447,13 @@ class TestPostDiscussion(unittest.TestCase):
         req: func.HttpRequest = MagicMock(spec=func.HttpRequest)
         req.route_params = {"testId": "1", "questionNumber": "1"}
 
-        response = post_community(req)
+        response = post_discussion(req)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.mimetype, "application/json")
 
         expected_body = {
-            "discussionsSummary": "Community agrees B is correct with strong consensus.",
+            "summary": "Community agrees B is correct with strong consensus.",
             "isExisted": True,
         }
         actual_body = response.get_body().decode()
@@ -474,18 +474,18 @@ class TestPostDiscussion(unittest.TestCase):
                 call({"item": mock_item}),
             ]
         )
-        mock_queue_message_community.assert_called_once_with(
+        mock_queue_message_discussion.assert_called_once_with(
             {
                 "testId": "1",
                 "questionNumber": 1,
-                "discussionsSummary": "Community agrees B is correct with strong consensus.",
+                "summary": "Community agrees B is correct with strong consensus.",
             }
         )
         mock_logging.error.assert_not_called()
 
-    @patch("src.post_community.validate_request")
-    @patch("src.post_community.logging")
-    def test_post_community_validation_error(
+    @patch("src.post_discussion.validate_request")
+    @patch("src.post_discussion.logging")
+    def test_post_discussion_validation_error(
         self,
         mock_logging,
         mock_validate_request,
@@ -497,7 +497,7 @@ class TestPostDiscussion(unittest.TestCase):
         req: func.HttpRequest = MagicMock(spec=func.HttpRequest)
         req.route_params = {"questionNumber": "1"}
 
-        response = post_community(req)
+        response = post_discussion(req)
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.get_body().decode(), "testId is Empty")
@@ -506,10 +506,10 @@ class TestPostDiscussion(unittest.TestCase):
         mock_logging.info.assert_not_called()
         mock_logging.error.assert_not_called()
 
-    @patch("src.post_community.validate_request")
-    @patch("src.post_community.get_read_only_container")
-    @patch("src.post_community.logging")
-    def test_post_community_not_found_question_error(
+    @patch("src.post_discussion.validate_request")
+    @patch("src.post_discussion.get_read_only_container")
+    @patch("src.post_discussion.logging")
+    def test_post_discussion_not_found_question_error(
         self,
         mock_logging,
         mock_get_read_only_container,
@@ -527,7 +527,7 @@ class TestPostDiscussion(unittest.TestCase):
         req: func.HttpRequest = MagicMock(spec=func.HttpRequest)
         req.route_params = {"testId": "1", "questionNumber": "1"}
 
-        response = post_community(req)
+        response = post_discussion(req)
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.get_body().decode(), "Not Found Question")
@@ -543,10 +543,10 @@ class TestPostDiscussion(unittest.TestCase):
         )
         mock_logging.error.assert_not_called()
 
-    @patch("src.post_community.validate_request")
-    @patch("src.post_community.get_read_only_container")
-    @patch("src.post_community.logging")
-    def test_post_community_no_discussions_success(  # pylint: disable=R0913,R0917
+    @patch("src.post_discussion.validate_request")
+    @patch("src.post_discussion.get_read_only_container")
+    @patch("src.post_discussion.logging")
+    def test_post_discussion_no_discussions_success(  # pylint: disable=R0913,R0917
         self,
         mock_logging,
         mock_get_read_only_container,
@@ -571,7 +571,7 @@ class TestPostDiscussion(unittest.TestCase):
         req: func.HttpRequest = MagicMock(spec=func.HttpRequest)
         req.route_params = {"testId": "1", "questionNumber": "1"}
 
-        response = post_community(req)
+        response = post_discussion(req)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.mimetype, "application/json")
@@ -596,11 +596,11 @@ class TestPostDiscussion(unittest.TestCase):
         )
         mock_logging.error.assert_not_called()
 
-    @patch("src.post_community.validate_request")
-    @patch("src.post_community.get_read_only_container")
-    @patch("src.post_community.generate_discussion_summary")
-    @patch("src.post_community.logging")
-    def test_post_community_generate_summary_error(  # pylint: disable=R0913,R0917
+    @patch("src.post_discussion.validate_request")
+    @patch("src.post_discussion.get_read_only_container")
+    @patch("src.post_discussion.generate_discussion_summary")
+    @patch("src.post_discussion.logging")
+    def test_post_discussion_generate_summary_error(  # pylint: disable=R0913,R0917
         self,
         mock_logging,
         mock_generate_discussion_summary,
@@ -633,7 +633,7 @@ class TestPostDiscussion(unittest.TestCase):
         req: func.HttpRequest = MagicMock(spec=func.HttpRequest)
         req.route_params = {"testId": "1", "questionNumber": "1"}
 
-        response = post_community(req)
+        response = post_discussion(req)
 
         self.assertEqual(response.status_code, 500)
         self.assertEqual(response.get_body().decode(), "Internal Server Error")
@@ -655,10 +655,10 @@ class TestPostDiscussion(unittest.TestCase):
         )
         mock_logging.error.assert_called_once()
 
-    @patch("src.post_community.validate_request")
-    @patch("src.post_community.get_read_only_container")
-    @patch("src.post_community.logging")
-    def test_post_community_unexpected_exception(
+    @patch("src.post_discussion.validate_request")
+    @patch("src.post_discussion.get_read_only_container")
+    @patch("src.post_discussion.logging")
+    def test_post_discussion_unexpected_exception(
         self,
         mock_logging,
         mock_get_read_only_container,
@@ -675,7 +675,7 @@ class TestPostDiscussion(unittest.TestCase):
         req: func.HttpRequest = MagicMock(spec=func.HttpRequest)
         req.route_params = {"testId": "1", "questionNumber": "1"}
 
-        response = post_community(req)
+        response = post_discussion(req)
 
         self.assertEqual(response.status_code, 500)
         self.assertEqual(response.get_body().decode(), "Internal Server Error")
