@@ -104,19 +104,14 @@ class PostAnswerRes(TypedDict, total=False):
     """
 
 
-class GetCommunityRes(TypedDict):
+class GetDiscussionRes(TypedDict):
     """
-    [GET] /tests/{testId}/communities/{questionNumber} のレスポンスボディの型
+    [GET] /tests/{testId}/discussions/{questionNumber} のレスポンスボディの型
     """
 
-    discussionsSummary: Optional[str]
+    summary: Optional[str]
     """
     コミュニティでのディスカッションの要約
-    """
-
-    votes: Optional[List[str]]
-    """
-    コミュニティでの回答の割合
     """
 
     isExisted: bool
@@ -125,19 +120,14 @@ class GetCommunityRes(TypedDict):
     """
 
 
-class PostCommunityRes(TypedDict):
+class PostDiscussionRes(TypedDict):
     """
-    [POST] /tests/{testId}/communities/{questionNumber} のレスポンスボディの型
+    [POST] /tests/{testId}/discussions/{questionNumber} のレスポンスボディの型
     """
 
-    discussionsSummary: Optional[str]
+    summary: Optional[str]
     """
     コミュニティでのディスカッションの要約
-    """
-
-    votes: Optional[List[str]]
-    """
-    コミュニティでの回答の割合
     """
 
     isExisted: bool
@@ -292,4 +282,15 @@ class GetQuestionRes(TypedDict):
     isMultiplied: bool
     """
     回答が複数個の場合はtrue、回答が1個の場合はfalse
+    """
+
+
+class GetVotesRes(TypedDict):
+    """
+    [GET] /tests/{testId}/votes/{questionNumber} のレスポンスボディの型
+    """
+
+    __root__: List[str]
+    """
+    コミュニティでの回答の割合
     """

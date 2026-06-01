@@ -49,7 +49,7 @@ class MessageAnswer(TypedDict):
     """
 
 
-class MessageCommunity(TypedDict):
+class MessageDiscussion(TypedDict):
     """
     Communityコンテナーの項目用のメッセージの型
     """
@@ -64,12 +64,7 @@ class MessageCommunity(TypedDict):
     テストID
     """
 
-    discussionsSummary: str
+    summary: str
     """
     コミュニティでのディスカッションの要約
-    """
-
-    votes: List[str]
-    """
-    コミュニティでの回答の割合
     """

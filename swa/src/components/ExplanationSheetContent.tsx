@@ -2,13 +2,14 @@ import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import useTranslationFailedToast from "@/hooks/useTranslationFailedToast";
 import {
   fetchAnswerExplanationAtom,
-  fetchCommunityAtom,
+  fetchDiscussionAtom,
   fetchExplanationsOnlyAtom,
   fetchQuestionSelectorAtom,
-  fetchTranslationCommunityAtom,
+  fetchTranslationDiscussionAtom,
   fetchTranslationExplanationAtom,
   fetchTranslationSubjectChoiceAtom,
-  resetCommunityAtom,
+  fetchVotesAtom,
+  resetDiscussionAtom,
 } from "@/lib/atoms";
 import { Choice } from "@/types/backend";
 import { useAccount, useMsal } from "@azure/msal-react";
@@ -25,11 +26,12 @@ import SelectorButton from "./SelectorButton";
  */
 export default function ExplanationSheetContent() {
   const answerExplanation = useAtomValue(fetchAnswerExplanationAtom);
-  const [community, fetchCommunity] = useAtom(fetchCommunityAtom);
+  const [discussion, fetchDiscussion] = useAtom(fetchDiscussionAtom);
+  const [votes, fetchVotes] = useAtom(fetchVotesAtom);
   const fetchExplanationsOnly = useSetAtom(fetchExplanationsOnlyAtom);
   const questionSelector = useAtomValue(fetchQuestionSelectorAtom);
-  const [translationCommunity, fetchTranslationCommunity] = useAtom(
-    fetchTranslationCommunityAtom,
+  const [translationDiscussion, fetchTranslationDiscussion] = useAtom(
+    fetchTranslationDiscussionAtom,
   );
   const [translationExplanation, fetchTranslationExplanation] = useAtom(
     fetchTranslationExplanationAtom,
@@ -37,16 +39,16 @@ export default function ExplanationSheetContent() {
   const translationSubjectChoice = useAtomValue(
     fetchTranslationSubjectChoiceAtom,
   );
-  const resetCommunity = useSetAtom(resetCommunityAtom);
+  const resetDiscussion = useSetAtom(resetDiscussionAtom);
   const [translationFailedForQuestion, setTranslationFailedForQuestion] =
     useState<string | null>(null);
   const [systemErrorForQuestion, setSystemErrorForQuestion] = useState<
     string | null
   >(null);
-  const fetchCommunityCalledRef = useRef<boolean>(false);
+  const fetchDiscussionCalledRef = useRef<boolean>(false);
   const fetchExplanationsOnlyCalledRef = useRef<boolean>(false);
   const fetchTranslationExplanationCalledRef = useRef<boolean>(false);
-  const fetchTranslationCommunityCalledRef = useRef<boolean>(false);
+  const fetchTranslationDiscussionCalledRef = useRef<boolean>(false);
   const previousQuestionNumberRef = useRef<string | undefined>(undefined);
 
   const { testId, questionNumber } = useParams();
@@ -57,17 +59,25 @@ export default function ExplanationSheetContent() {
   const systemErrorToast = useSystemErrorToast();
 
   // コミュニティ情報を再取得する関数
-  const handleRefreshCommunity = async () => {
-    if (!testId || !questionNumber || community === undefined) {
+  const handleRefreshDiscussion = async () => {
+    if (
+      !testId ||
+      !questionNumber ||
+      discussion === undefined ||
+      votes === undefined
+    ) {
       return;
     }
     try {
       // コミュニティ情報と翻訳をクリア(ローディング表示にするため)
-      resetCommunity();
-      // コミュニティ情報を再生成(isRefresh: trueでPOSTのみ実行)
-      await fetchCommunity(testId, questionNumber, instance, accountInfo, true);
+      resetDiscussion();
+      // コミュニティ情報を再生成(isRefresh: trueでPOSTのみ実行)し、votesを並列取得
+      await Promise.all([
+        fetchDiscussion(testId, questionNumber, instance, accountInfo, true),
+        fetchVotes(testId, questionNumber, instance, accountInfo),
+      ]);
       // 翻訳も再取得するためにフラグをリセット
-      fetchTranslationCommunityCalledRef.current = false;
+      fetchTranslationDiscussionCalledRef.current = false;
       // エラーが発生した問題番号をクリア
       setTranslationFailedForQuestion(null);
       setSystemErrorForQuestion(null);
@@ -82,10 +92,10 @@ export default function ExplanationSheetContent() {
   // 問題番号が変更された場合、API呼び出しフラグをリセット
   useEffect(() => {
     if (previousQuestionNumberRef.current !== questionNumber) {
-      fetchCommunityCalledRef.current = false;
+      fetchDiscussionCalledRef.current = false;
       fetchExplanationsOnlyCalledRef.current = false;
       fetchTranslationExplanationCalledRef.current = false;
-      fetchTranslationCommunityCalledRef.current = false;
+      fetchTranslationDiscussionCalledRef.current = false;
       previousQuestionNumberRef.current = questionNumber;
     }
   }, [questionNumber]);
@@ -95,16 +105,20 @@ export default function ExplanationSheetContent() {
     if (
       !testId ||
       !questionNumber ||
-      community ||
+      discussion !== undefined ||
+      votes !== undefined ||
       systemErrorForQuestion === questionNumber ||
-      fetchCommunityCalledRef.current
+      fetchDiscussionCalledRef.current
     ) {
       return;
     }
-    fetchCommunityCalledRef.current = true;
+    fetchDiscussionCalledRef.current = true;
     (async () => {
       try {
-        await fetchCommunity(testId, questionNumber, instance, accountInfo);
+        await Promise.all([
+          fetchDiscussion(testId, questionNumber, instance, accountInfo),
+          fetchVotes(testId, questionNumber, instance, accountInfo),
+        ]);
       } catch (e) {
         // エラーが発生した問題番号を設定
         setSystemErrorForQuestion(questionNumber);
@@ -115,8 +129,10 @@ export default function ExplanationSheetContent() {
   }, [
     testId,
     questionNumber,
-    community,
-    fetchCommunity,
+    discussion,
+    votes,
+    fetchDiscussion,
+    fetchVotes,
     instance,
     accountInfo,
     systemErrorForQuestion,
@@ -206,17 +222,17 @@ export default function ExplanationSheetContent() {
   // コミュニティ情報の取得直後に、コミュニティ情報の翻訳文を1度だけ取得
   useEffect(() => {
     if (
-      !community ||
-      translationCommunity ||
+      !discussion ||
+      translationDiscussion ||
       translationFailedForQuestion === questionNumber ||
-      fetchTranslationCommunityCalledRef.current
+      fetchTranslationDiscussionCalledRef.current
     ) {
       return;
     }
-    fetchTranslationCommunityCalledRef.current = true;
+    fetchTranslationDiscussionCalledRef.current = true;
     (async () => {
       try {
-        await fetchTranslationCommunity(instance, accountInfo);
+        await fetchTranslationDiscussion(instance, accountInfo);
       } catch {
         // エラーが発生した問題番号を設定
         setTranslationFailedForQuestion(questionNumber ?? null);
@@ -228,10 +244,10 @@ export default function ExplanationSheetContent() {
     })();
   }, [
     questionNumber,
-    community,
-    translationCommunity,
+    discussion,
+    translationDiscussion,
     translationFailedForQuestion,
-    fetchTranslationCommunity,
+    fetchTranslationDiscussion,
     instance,
     accountInfo,
     translationFailedToast,
@@ -312,47 +328,49 @@ export default function ExplanationSheetContent() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={handleRefreshCommunity}
-            disabled={community === undefined}
+            onClick={handleRefreshDiscussion}
+            disabled={discussion === undefined || votes === undefined}
             title="コミュニティ情報を再取得"
           >
             <RefreshCw
-              className={community === undefined ? "animate-spin" : ""}
+              className={
+                discussion === undefined || votes === undefined
+                  ? "animate-spin"
+                  : ""
+              }
               size={20}
             />
           </Button>
         </div>
-        {community === undefined ? (
+        {discussion === undefined || votes === undefined ? (
           <>
             <div className="space-y-1">
               <div className="skeleton h-7 w-full" />
               <div className="skeleton h-5 w-full" />
             </div>
           </>
-        ) : community.votes === undefined &&
-          community.discussionsSummary === undefined ? (
+        ) : votes.length === 0 && !discussion.summary ? (
           <div className="flex items-center justify-center flex-col space-y-4">
             <Info size={50} />
             <div>コミュニティ回答要約はありません</div>
           </div>
         ) : (
           <>
-            {community.votes && (
+            {votes.length > 0 && (
               <div className="flex space-x-4 mb-4">
-                {community.votes.map((vote: string, idx: number) => (
+                {votes.map((vote: string, idx: number) => (
                   <span key={idx} className="badge badge-neutral">
                     {vote}
                   </span>
                 ))}
               </div>
             )}
-            {community.discussionsSummary && (
+            {discussion.summary && (
               <div className="space-y-1">
-                <p className="leading-7">{community.discussionsSummary}</p>
-                {translationCommunity &&
-                translationCommunity.discussionsSummary ? (
+                <p className="leading-7">{discussion.summary}</p>
+                {translationDiscussion && translationDiscussion.summary ? (
                   <p className="text-sm text-base-content/60">
-                    {translationCommunity.discussionsSummary}
+                    {translationDiscussion.summary}
                   </p>
                 ) : (
                   <div className="skeleton h-5 w-full" />

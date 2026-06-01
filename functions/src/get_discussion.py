@@ -1,4 +1,4 @@
-"""[GET] /tests/{testId}/communities/{questionNumber} のモジュール"""
+"""[GET] /tests/{testId}/discussions/{questionNumber} のモジュール"""
 
 import json
 import logging
@@ -8,10 +8,10 @@ import azure.functions as func
 from azure.cosmos import ContainerProxy
 from azure.cosmos.exceptions import CosmosResourceNotFoundError
 from type.cosmos import Community
-from type.response import GetCommunityRes
+from type.response import GetDiscussionRes
 from util.cosmos import get_read_only_container
 
-bp_get_community = func.Blueprint()
+bp_get_discussion = func.Blueprint()
 
 
 def validate_request(req: func.HttpRequest) -> str | None:
@@ -40,12 +40,12 @@ def validate_request(req: func.HttpRequest) -> str | None:
     return errors[0] if errors else None
 
 
-@bp_get_community.route(
-    route="tests/{testId}/communities/{questionNumber}",
+@bp_get_discussion.route(
+    route="tests/{testId}/discussions/{questionNumber}",
     methods=["GET"],
     auth_level=func.AuthLevel.FUNCTION,
 )
-def get_community(req: func.HttpRequest) -> func.HttpResponse:
+def get_discussion(req: func.HttpRequest) -> func.HttpResponse:
     """
     指定したテストID・問題番号でのコミュニティディスカッションの要約を取得します
     """
@@ -73,9 +73,8 @@ def get_community(req: func.HttpRequest) -> func.HttpResponse:
             logging.info({"item": item})
 
             # レスポンス整形
-            body: GetCommunityRes = {
-                "discussionsSummary": item["discussionsSummary"],
-                "votes": item["votes"],
+            body: GetDiscussionRes = {
+                "summary": item["discussionsSummary"],
                 "isExisted": True,
             }
 
@@ -89,7 +88,7 @@ def get_community(req: func.HttpRequest) -> func.HttpResponse:
         except CosmosResourceNotFoundError:
             # Communityコンテナーから項目を取得できない場合、
             # コミュニティでのディスカッションの要約を除いてレスポンス
-            body: GetCommunityRes = {
+            body: GetDiscussionRes = {
                 "isExisted": False,
             }
             return func.HttpResponse(
