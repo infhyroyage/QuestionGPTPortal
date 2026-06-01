@@ -58,19 +58,13 @@ export type AnswerExplanation =
  * コミュニティ情報を管理するatomの型
  * 初期値の場合はundefined
  */
-export type Community =
+export type Discussion =
   | {
       /**
        * コミュニティでのディスカッションの要約
        * コミュニティ情報が生成中、またはデータが存在しない場合はundefined
        */
-      discussionsSummary?: string;
-
-      /**
-       * コミュニティでの回答の割合
-       * コミュニティ情報が生成中、またはデータが存在しない場合はundefined
-       */
-      votes?: string[];
+      summary?: string;
     }
   | undefined;
 
@@ -174,12 +168,12 @@ export type TestDetails = TestDetail[] | undefined;
  * コミュニティ情報に対する翻訳文を管理するatomの型
  * 初期値の場合はundefined
  */
-export type TranslationCommunity =
+export type TranslationDiscussion =
   | {
       /**
        * コミュニティでのディスカッションの要約
        */
-      discussionsSummary: string;
+      summary: string;
     }
   | undefined;
 
@@ -218,3 +212,9 @@ export type TranslationSubjectChoice =
       choices: (string | null)[];
     }
   | undefined;
+
+/**
+ * コミュニティでの回答の割合を管理するatomの型
+ * 取得前(ローディング中)の場合はundefined
+ */
+export type Votes = string[] | undefined;

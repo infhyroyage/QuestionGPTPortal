@@ -1,4 +1,4 @@
-"""[POST] /tests/{testId}/communities/{questionNumber} のモジュール"""
+"""[POST] /tests/{testId}/discussions/{questionNumber} のモジュール"""
 
 import json
 import logging
@@ -10,8 +10,8 @@ from azure.cosmos import ContainerProxy
 from azure.cosmos.exceptions import CosmosResourceNotFoundError
 from openai import AzureOpenAI
 from type.cosmos import Question, QuestionDiscussion
-from type.message import MessageCommunity
-from type.response import PostCommunityRes
+from type.message import MessageDiscussion
+from type.response import PostDiscussionRes
 from util.cosmos import get_read_only_container
 from util.queue import get_queue_client
 
@@ -20,39 +20,6 @@ SYSTEM_PROMPT: str = (
     "You are a professional content summarizer who creates concise summaries "
     "of community discussions."
 )
-
-
-def calculate_community_votes(discussions: list[QuestionDiscussion]) -> list[str]:
-    """
-    コミュニティのディスカッションからユーザーが選択した選択肢を集計し、
-    コミュニティでの回答の割合の文字列配列を生成する
-
-    Args:
-        discussions (list[QuestionDiscussion]): コミュニティのディスカッション
-
-    Returns:
-        list[str]: コミュニティでの回答の割合の文字列配列(例：["A (60%)", "B (40%)"]、ユーザーが選択した選択肢がすべてNoneの場合は空配列)
-    """
-
-    # ユーザーが選択した選択肢(selectedAnswer)を集計
-    answer_counts = {}
-    total_votes = 0
-    for discussion in discussions:
-        selected_answer = discussion.get("selectedAnswer")
-        if selected_answer:
-            answer_counts[selected_answer] = answer_counts.get(selected_answer, 0) + 1
-            total_votes += 1
-
-    if total_votes == 0:
-        return []
-
-    # 割合を計算してコミュニティでの回答の割合の文字列配列を生成
-    community_votes = []
-    for answer, count in sorted(answer_counts.items()):
-        percentage = round((count / total_votes) * 100)
-        community_votes.append(f"{answer} ({percentage}%)")
-
-    return community_votes
 
 
 def validate_request(req: func.HttpRequest) -> str | None:
@@ -181,28 +148,28 @@ def generate_discussion_summary(discussions: list[QuestionDiscussion]) -> str | 
     return None
 
 
-def queue_message_community(message_community: MessageCommunity) -> None:
+def queue_message_discussion(message_discussion: MessageDiscussion) -> None:
     """
     キューストレージにCommunityコンテナーの項目用のメッセージを格納する
 
     Args:
-        message_community (MessageCommunity): Communityコンテナーの項目用のメッセージ
+        message_discussion (MessageDiscussion): Communityコンテナーの項目用のメッセージ
     """
 
-    queue_client = get_queue_client("communities")
-    logging.info({"message_community": message_community})
-    queue_client.send_message(json.dumps(message_community).encode("utf-8"))
+    queue_client = get_queue_client("discussions")
+    logging.info({"message_discussion": message_discussion})
+    queue_client.send_message(json.dumps(message_discussion).encode("utf-8"))
 
 
-bp_post_community = func.Blueprint()
+bp_post_discussion = func.Blueprint()
 
 
-@bp_post_community.route(
-    route="tests/{testId}/communities/{questionNumber}",
+@bp_post_discussion.route(
+    route="tests/{testId}/discussions/{questionNumber}",
     methods=["POST"],
     auth_level=func.AuthLevel.FUNCTION,
 )
-def post_community(req: func.HttpRequest) -> func.HttpResponse:
+def post_discussion(req: func.HttpRequest) -> func.HttpResponse:
     """
     コミュニティディスカッションの要約を生成します
     """
@@ -238,28 +205,24 @@ def post_community(req: func.HttpRequest) -> func.HttpResponse:
 
         # discussionsフィールドが存在する場合はディスカッション要約を生成(存在しない場合は空文字列)
         discussions: list[QuestionDiscussion] | None = item.get("discussions")
-        body: PostCommunityRes = {
+        body: PostDiscussionRes = {
             "isExisted": False,
         }
 
         if discussions and len(discussions) > 0:
             # ディスカッション要約を生成
             summary: str | None = generate_discussion_summary(discussions)
-            # コミュニティでの回答の割合を動的算出
-            votes: list[str] = calculate_community_votes(discussions)
             if summary is None:
                 raise ValueError("Failed to generate discussion summary")
-            body["discussionsSummary"] = summary
-            body["votes"] = votes
+            body["summary"] = summary
             body["isExisted"] = True
 
             # キューストレージにメッセージを格納
-            queue_message_community(
+            queue_message_discussion(
                 {
                     "testId": test_id,
                     "questionNumber": int(question_number),
-                    "discussionsSummary": summary,
-                    "votes": votes,
+                    "summary": summary,
                 }
             )
 

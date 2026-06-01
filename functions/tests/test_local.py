@@ -45,7 +45,7 @@ class TestCreateQueueStorages(unittest.TestCase):
                 ),
                 call(
                     conn_str=AZURITE_QUEUE_STORAGE_CONNECTION_STRING,
-                    queue_name="communities",
+                    queue_name="discussions",
                 ),
             ]
         )
@@ -79,7 +79,7 @@ class TestCreateQueueStorages(unittest.TestCase):
                 ),
                 call(
                     conn_str=AZURITE_QUEUE_STORAGE_CONNECTION_STRING,
-                    queue_name="communities",
+                    queue_name="discussions",
                 ),
             ]
         )
