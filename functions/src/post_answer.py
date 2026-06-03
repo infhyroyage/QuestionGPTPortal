@@ -26,6 +26,14 @@ MAX_RETRY_NUMBER: int = 5
 SYSTEM_PROMPT: str = (
     "You are a professional who provides correct explanations for candidates of the exam."
 )
+WEB_SEARCH_PROMPT: str = (
+    "You are researching to verify the correct answer to an IT certification exam question. "
+    "Search the web for authoritative and up-to-date information such as official product "
+    "documentation, vendor whitepapers, and reputable technical sources that are relevant to "
+    "the question and choices below. Summarize, in plain text, the key facts that help "
+    "determine which choice(s) are correct. Do not state the final answer; only provide the "
+    "supporting facts."
+)
 
 
 def validate_request(req: func.HttpRequest) -> str | None:
@@ -54,12 +62,68 @@ def validate_request(req: func.HttpRequest) -> str | None:
     return errors[0] if errors else None
 
 
-def create_chat_completions_messages(
+def search_web_context(
+    subjects: list[str],
+    choices: list[str | None],
+) -> str | None:
+    """
+    Web検索を用いて、正解判定の参考となる最新情報を取得する
+
+    Azure OpenAIのResponses APIのweb_searchツールを使用し、問題文・選択肢に関連する
+    信頼できる最新の情報を取得する。Web検索が失敗した場合はNoneを返し、
+    呼び出し側はグラウンディングなしで回答生成を継続できる。
+
+    Args:
+        subjects (list[str]): 問題文/画像URLのリスト
+        choices (list[str | None]): 選択肢のリスト(画像URLのみの場合はNone)
+
+    Returns:
+        str | None: Web検索で得た参考情報(取得できない場合はNone)
+    """
+
+    # 問題文・選択肢からWeb検索用の入力テキストを作成(画像URLのみの選択肢は除外)
+    question_text = "\n".join(subject for subject in subjects if subject)
+    choices_text = "\n".join(
+        f"{chr(ord('A') + idx)}. {choice}"
+        for idx, choice in enumerate(choices)
+        if choice is not None
+    )
+    web_search_input = (
+        f"{WEB_SEARCH_PROMPT}\n\n"
+        f"# Question\n{question_text}\n\n"
+        f"# Choices\n{choices_text}"
+    )
+
+    try:
+        # web_searchツールを有効化してResponses APIを実行
+        response = AzureOpenAI(
+            api_key=os.environ["OPENAI_API_KEY"],
+            api_version=os.environ["OPENAI_API_VERSION"],
+            azure_deployment=os.environ["OPENAI_DEPLOYMENT_NAME"],
+            azure_endpoint=os.environ["OPENAI_ENDPOINT"],
+        ).responses.create(
+            model=os.environ["OPENAI_MODEL_NAME"],
+            tools=[{"type": "web_search"}],
+            input=web_search_input,
+        )
+        web_search_context = response.output_text
+        logging.info({"web_search_context": web_search_context})
+
+        # 空文字列の場合はグラウンディングなしとしてNoneを返す
+        return web_search_context if web_search_context else None
+    except Exception:
+        # Web検索に失敗しても回答生成は継続する(グラウンディングなしにフォールバック)
+        logging.warning(traceback.format_exc())
+        return None
+
+
+def create_chat_completions_messages(  # pylint: disable=R0913,R0917
     subjects: list[str],
     choices: list[str | None],
     answer_num: int,
     indicate_subject_img_idxes: list[int] | None,
     indicate_choice_imgs: list[str | None] | None,
+    web_search_context: str | None = None,
 ) -> Iterable[ChatCompletionMessageParam]:
     """
     Azure OpenAIのチャット補完に設定するmessagesを作成する
@@ -70,6 +134,7 @@ def create_chat_completions_messages(
         answer_num (int): 正解の選択肢の数
         indicate_subject_img_idxes (list[int] | None): subjectsで指定した画像URLのインデックスのリスト
         indicate_choice_imgs (list[str | None] | None): choicesの後に続ける画像URLのリスト(画像URLを続けない場合はNone)
+        web_search_context (str | None): Web検索で得た参考情報(ない場合はNone)
 
     Returns:
         Iterable[ChatCompletionMessageParam]: Azure OpenAIのチャット補完に設定するmessages
@@ -199,6 +264,16 @@ Important: Do not use any Markdown formatting (such as **, *, __, _, etc.) in th
             )
             user_content_text = ""
 
+    # Web検索で得た参考情報があればユーザープロンプトに追記
+    if web_search_context:
+        user_content_text += (
+            "\n# Reference Information from Web Search\n"
+            "The following information was retrieved from a web search to support your answer. "
+            "Use it as a supplementary reference, but rely on your own expertise to decide the "
+            "correct answer.\n"
+            f"{web_search_context}\n"
+        )
+
     # ユーザープロンプトのフッターを追記
     user_content_text += "---"
     user_content.append(
@@ -241,9 +316,17 @@ def generate_correct_answers(
         CorrectAnswers | None: 正解の選択肢のインデックス・正解/不正解の理由(生成できない場合はNone)
     """
 
+    # Web検索で正解判定の参考となる情報を取得し、プロンプトのグラウンディングに利用する
+    web_search_context: str | None = search_web_context(subjects, choices)
+
     # Azure OpenAIのチャット補完に設定するmessagesを作成
     messages: Iterable[ChatCompletionMessageParam] = create_chat_completions_messages(
-        subjects, choices, answer_num, indicate_subject_img_idxes, indicate_choice_imgs
+        subjects,
+        choices,
+        answer_num,
+        indicate_subject_img_idxes,
+        indicate_choice_imgs,
+        web_search_context,
     )
 
     try:
@@ -269,7 +352,9 @@ def generate_correct_answers(
                 return CorrectAnswers(
                     correct_indexes=response.choices[0].message.parsed.correct_indexes,
                     explanations=response.choices[0].message.parsed.explanations,
-                    answer_key_point=response.choices[0].message.parsed.answer_key_point,
+                    answer_key_point=response.choices[
+                        0
+                    ].message.parsed.answer_key_point,
                 )
     except Exception:
         logging.warning(traceback.format_exc())

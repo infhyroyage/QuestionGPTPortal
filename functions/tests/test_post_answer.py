@@ -1,5 +1,7 @@
 """[POST] /tests/{testId}/answers/{questionNumber} のテスト"""
 
+# pylint: disable=too-many-lines
+
 import json
 import os
 import unittest
@@ -10,10 +12,12 @@ from azure.cosmos.exceptions import CosmosResourceNotFoundError
 from src.post_answer import (
     MAX_RETRY_NUMBER,
     SYSTEM_PROMPT,
+    WEB_SEARCH_PROMPT,
     create_chat_completions_messages,
     generate_correct_answers,
     post_answer,
     queue_message_answer,
+    search_web_context,
     validate_request,
 )
 from type.cosmos import Question
@@ -63,6 +67,149 @@ class TestValidateRequest(unittest.TestCase):
         result = validate_request(req)
 
         self.assertEqual(result, "Invalid questionNumber: a")
+
+
+class TestSearchWebContext(unittest.TestCase):
+    """search_web_context関数のテストケース"""
+
+    @patch("src.post_answer.AzureOpenAI")
+    @patch("src.post_answer.logging")
+    @patch.dict(
+        os.environ,
+        {
+            "OPENAI_API_KEY": "test_api_key",
+            "OPENAI_API_VERSION": "test_api_version",
+            "OPENAI_DEPLOYMENT_NAME": "test_deployment_name",
+            "OPENAI_ENDPOINT": "test_endpoint",
+            "OPENAI_MODEL_NAME": "test_model_name",
+        },
+    )
+    def test_search_web_context_success(self, mock_logging, mock_azure_openai):
+        """Web検索で参考情報を取得できる場合のテスト"""
+
+        # Given: Responses APIがoutput_textを返すようにモックする
+        mock_response = MagicMock()
+        mock_response.output_text = "2 + 2 equals 4 according to authoritative sources."
+        mock_azure_openai.return_value.responses.create.return_value = mock_response
+
+        subjects = ["What is 2 + 2?"]
+        choices = ["3", "4", "5"]
+
+        # When: Web検索を実行する
+        result = search_web_context(subjects, choices)
+
+        # Then: 取得したoutput_textが返り、web_searchツール付きで呼び出される
+        self.assertEqual(result, "2 + 2 equals 4 according to authoritative sources.")
+        mock_azure_openai.assert_called_once_with(
+            api_key="test_api_key",
+            api_version="test_api_version",
+            azure_deployment="test_deployment_name",
+            azure_endpoint="test_endpoint",
+        )
+        mock_azure_openai.return_value.responses.create.assert_called_once_with(
+            model="test_model_name",
+            tools=[{"type": "web_search"}],
+            input=(
+                f"{WEB_SEARCH_PROMPT}\n\n"
+                "# Question\nWhat is 2 + 2?\n\n"
+                "# Choices\nA. 3\nB. 4\nC. 5"
+            ),
+        )
+        mock_logging.warning.assert_not_called()
+
+    @patch("src.post_answer.AzureOpenAI")
+    @patch("src.post_answer.logging")
+    @patch.dict(
+        os.environ,
+        {
+            "OPENAI_API_KEY": "test_api_key",
+            "OPENAI_API_VERSION": "test_api_version",
+            "OPENAI_DEPLOYMENT_NAME": "test_deployment_name",
+            "OPENAI_ENDPOINT": "test_endpoint",
+            "OPENAI_MODEL_NAME": "test_model_name",
+        },
+    )
+    def test_search_web_context_skip_image_only_choices(
+        self, mock_logging, mock_azure_openai
+    ):
+        """画像URLのみの選択肢(None)が検索クエリから除外されるテスト"""
+
+        # Given: 一部の選択肢が画像URLのみ(None)
+        mock_response = MagicMock()
+        mock_response.output_text = "context"
+        mock_azure_openai.return_value.responses.create.return_value = mock_response
+
+        subjects = ["What is shown?"]
+        choices = ["3", None, "5"]
+
+        # When: Web検索を実行する
+        search_web_context(subjects, choices)
+
+        # Then: Noneの選択肢は除外され、テキストの選択肢のみクエリに含まれる
+        mock_azure_openai.return_value.responses.create.assert_called_once_with(
+            model="test_model_name",
+            tools=[{"type": "web_search"}],
+            input=(
+                f"{WEB_SEARCH_PROMPT}\n\n"
+                "# Question\nWhat is shown?\n\n"
+                "# Choices\nA. 3\nC. 5"
+            ),
+        )
+        mock_logging.warning.assert_not_called()
+
+    @patch("src.post_answer.AzureOpenAI")
+    @patch("src.post_answer.logging")
+    @patch.dict(
+        os.environ,
+        {
+            "OPENAI_API_KEY": "test_api_key",
+            "OPENAI_API_VERSION": "test_api_version",
+            "OPENAI_DEPLOYMENT_NAME": "test_deployment_name",
+            "OPENAI_ENDPOINT": "test_endpoint",
+            "OPENAI_MODEL_NAME": "test_model_name",
+        },
+    )
+    def test_search_web_context_empty_output(self, mock_logging, mock_azure_openai):
+        """Web検索の結果が空文字列の場合にNoneを返すテスト"""
+
+        # Given: Responses APIが空のoutput_textを返す
+        mock_response = MagicMock()
+        mock_response.output_text = ""
+        mock_azure_openai.return_value.responses.create.return_value = mock_response
+
+        # When: Web検索を実行する
+        result = search_web_context(["What is 2 + 2?"], ["3", "4", "5"])
+
+        # Then: Noneが返る
+        self.assertIsNone(result)
+        mock_logging.warning.assert_not_called()
+
+    @patch("src.post_answer.AzureOpenAI")
+    @patch("src.post_answer.logging")
+    @patch.dict(
+        os.environ,
+        {
+            "OPENAI_API_KEY": "test_api_key",
+            "OPENAI_API_VERSION": "test_api_version",
+            "OPENAI_DEPLOYMENT_NAME": "test_deployment_name",
+            "OPENAI_ENDPOINT": "test_endpoint",
+            "OPENAI_MODEL_NAME": "test_model_name",
+        },
+    )
+    def test_search_web_context_raise_error(self, mock_logging, mock_azure_openai):
+        """Web検索で例外が発生した場合にNoneを返すテスト"""
+
+        # Given: Responses APIが例外を送出する
+        mock_azure_openai.return_value.responses.create.side_effect = Exception(
+            "Web Search Error"
+        )
+
+        # When: Web検索を実行する
+        result = search_web_context(["What is 2 + 2?"], ["3", "4", "5"])
+
+        # Then: Noneが返り、例外がwarningログに記録される
+        self.assertIsNone(result)
+        mock_logging.warning.assert_called_once()
 
 
 class TestCreateChatCompletionsMessages(unittest.TestCase):
@@ -180,6 +327,81 @@ class TestCreateChatCompletionsMessages(unittest.TestCase):
                 },
             ],
         )
+
+    def test_create_chat_completions_messages_web_search_context(self):
+        """Web検索の参考情報が渡された場合のテスト"""
+
+        # Given: 問題文・選択肢・Web検索の参考情報
+        subjects = ["What is 2 + 2?"]
+        choices = ["3", "4", "5"]
+        answer_num = 1
+        web_search_context = "According to a reliable source, 2 + 2 equals 4."
+
+        # When: Web検索の参考情報を渡してmessagesを作成する
+        messages = create_chat_completions_messages(
+            subjects,
+            choices,
+            answer_num,
+            None,
+            None,
+            web_search_context,
+        )
+
+        # Then: 参考情報セクションがフッターの直前に挿入される
+        self.assertEqual(
+            messages,
+            [
+                {
+                    "role": "developer",
+                    "content": SYSTEM_PROMPT,
+                },
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": (
+                                self.USER_CONTENT_TEXT_HEADER.format(
+                                    answer_num=answer_num
+                                )
+                                + "What is 2 + 2?\n\n"
+                                + "A. 3\n"
+                                + "B. 4\n"
+                                + "C. 5\n"
+                                + "\n# Reference Information from Web Search\n"
+                                + "The following information was retrieved from a web "
+                                "search to support your answer. "
+                                "Use it as a supplementary reference, but rely on your "
+                                "own expertise to decide the correct answer.\n"
+                                + f"{web_search_context}\n"
+                                + self.USER_CONTENT_TEXT_FOOTER
+                            ),
+                        }
+                    ],
+                },
+            ],
+        )
+
+    def test_create_chat_completions_messages_no_web_search_context(self):
+        """Web検索の参考情報が渡されない場合に参考情報セクションが挿入されないテスト"""
+
+        # Given: 問題文・選択肢のみ(Web検索の参考情報なし)
+        subjects = ["What is 2 + 2?"]
+        choices = ["3", "4", "5"]
+        answer_num = 1
+
+        # When: web_search_contextを省略してmessagesを作成する
+        messages = create_chat_completions_messages(
+            subjects,
+            choices,
+            answer_num,
+            None,
+            None,
+        )
+
+        # Then: 参考情報セクションは挿入されない
+        user_text = messages[1]["content"][0]["text"]
+        self.assertNotIn("# Reference Information from Web Search", user_text)
 
     def test_create_chat_completions_messages_subject_images(self):
         """問題文に画像URLが含まれる場合のテスト"""
@@ -381,6 +603,7 @@ class TestCreateChatCompletionsMessages(unittest.TestCase):
 class TestGenerateCorrectAnswers(unittest.TestCase):
     """generate_correct_answers関数のテストケース"""
 
+    @patch("src.post_answer.search_web_context")
     @patch("src.post_answer.AzureOpenAI")
     @patch("src.post_answer.create_chat_completions_messages")
     @patch("src.post_answer.logging")
@@ -399,9 +622,12 @@ class TestGenerateCorrectAnswers(unittest.TestCase):
         mock_logging,
         mock_create_chat_completions_messages,
         mock_azure_openai,
+        mock_search_web_context,
     ):
         """リトライせずに、正解の選択肢のインデックス・正解/不正解の理由を生成するテスト"""
 
+        # Given: Web検索の参考情報とStructured Outputのレスポンスをモックする
+        mock_search_web_context.return_value = "web search context"
         mock_messages = [
             {"role": "developer", "content": SYSTEM_PROMPT},
             {
@@ -430,8 +656,10 @@ class TestGenerateCorrectAnswers(unittest.TestCase):
         subjects = ["What is 2 + 2?"]
         choices = ["3", "4", "5"]
 
+        # When: 正解生成を実行する
         correct_answers = generate_correct_answers(subjects, choices, 1, None, None)
 
+        # Then: 正解・解説が返却され、Web検索の参考情報がプロンプトに渡される
         self.assertEqual(correct_answers["correct_indexes"], [2])
         self.assertEqual(
             correct_answers["explanations"],
@@ -441,8 +669,9 @@ class TestGenerateCorrectAnswers(unittest.TestCase):
             correct_answers["answer_key_point"],
             "Basic arithmetic: 2 + 2 equals 4.",
         )
+        mock_search_web_context.assert_called_once_with(subjects, choices)
         mock_create_chat_completions_messages.assert_called_once_with(
-            subjects, choices, 1, None, None
+            subjects, choices, 1, None, None, "web search context"
         )
         mock_azure_openai.assert_called_once_with(
             api_key="test_api_key",
@@ -463,6 +692,7 @@ class TestGenerateCorrectAnswers(unittest.TestCase):
         )
         mock_logging.warning.assert_not_called()
 
+    @patch("src.post_answer.search_web_context")
     @patch("src.post_answer.AzureOpenAI")
     @patch("src.post_answer.create_chat_completions_messages")
     @patch("src.post_answer.logging")
@@ -481,9 +711,12 @@ class TestGenerateCorrectAnswers(unittest.TestCase):
         mock_logging,
         mock_create_chat_completions_messages,
         mock_azure_openai,
+        mock_search_web_context,
     ):
         """MAX_RETRY_NUMBER回リトライしても、正解の選択肢のインデックス・正解/不正解の理由が生成できない場合のテスト"""
 
+        # Given: Web検索が参考情報を返さず、Structured Outputのparseが常にNoneを返す
+        mock_search_web_context.return_value = None
         mock_messages = [
             {"role": "developer", "content": SYSTEM_PROMPT},
             {
@@ -506,11 +739,14 @@ class TestGenerateCorrectAnswers(unittest.TestCase):
         subjects = ["What is 2 + 2?"]
         choices = ["3", "4", "5"]
 
+        # When: 正解生成を実行する
         correct_answers = generate_correct_answers(subjects, choices, 1, None, None)
 
+        # Then: Noneが返り、Web検索の参考情報(None)がプロンプトに渡される
         self.assertIsNone(correct_answers)
+        mock_search_web_context.assert_called_once_with(subjects, choices)
         mock_create_chat_completions_messages.assert_called_once_with(
-            subjects, choices, 1, None, None
+            subjects, choices, 1, None, None, None
         )
         mock_logging.info.assert_has_calls(
             [
@@ -520,6 +756,7 @@ class TestGenerateCorrectAnswers(unittest.TestCase):
         )
         mock_logging.warning.assert_not_called()
 
+    @patch("src.post_answer.search_web_context")
     @patch("src.post_answer.AzureOpenAI")
     @patch("src.post_answer.create_chat_completions_messages")
     @patch("src.post_answer.logging")
@@ -538,9 +775,12 @@ class TestGenerateCorrectAnswers(unittest.TestCase):
         mock_logging,
         mock_create_chat_completions_messages,
         mock_azure_openai,
+        mock_search_web_context,
     ):
         """正解の選択肢のインデックス・正解/不正解の理由の生成でエラーが発生した場合のテスト"""
 
+        # Given: Web検索が参考情報を返さず、Structured Outputのparseで例外が発生する
+        mock_search_web_context.return_value = None
         mock_messages = [
             {"role": "developer", "content": SYSTEM_PROMPT},
             {
@@ -561,11 +801,14 @@ class TestGenerateCorrectAnswers(unittest.TestCase):
         subjects = ["What is 2 + 2?"]
         choices = ["3", "4", "5"]
 
+        # When: 正解生成を実行する
         correct_answers = generate_correct_answers(subjects, choices, 1, None, None)
 
+        # Then: Noneが返り、例外がwarningログに記録される
         self.assertIsNone(correct_answers)
+        mock_search_web_context.assert_called_once_with(subjects, choices)
         mock_create_chat_completions_messages.assert_called_once_with(
-            subjects, choices, 1, None, None
+            subjects, choices, 1, None, None, None
         )
         mock_logging.info.assert_called_once_with({"retry_number": 0})
         mock_logging.warning.assert_called_once()
