@@ -11,6 +11,11 @@ var vaultSecretNames = {
   functionsDefaultHostKey: 'functions-default-host-key'
 }
 
+// Functions
+resource functions 'Microsoft.Web/sites@2023-12-01' existing = {
+  name: functionsName
+}
+
 // Key Vault
 resource vaultSecretsFunctionsDefaultHostKey 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
   name: '${vaultName}/${vaultSecretNames.functionsDefaultHostKey}'
@@ -18,10 +23,7 @@ resource vaultSecretsFunctionsDefaultHostKey 'Microsoft.KeyVault/vaults/secrets@
     attributes: {
       enabled: true
     }
-    value: listKeys(
-      resourceId('Microsoft.Web/sites/host', functionsName, 'default'),
-      '2022-09-01'
-    ).functionKeys.default
+    value: listKeys('${functions.id}/host/default', '2023-12-01').functionKeys.default
   }
 }
 

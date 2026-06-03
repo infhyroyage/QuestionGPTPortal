@@ -14,24 +14,42 @@ import Tooltip from "./Tooltip";
 export default function OpenExplanationButton() {
   const answerExplanation = useAtomValue(fetchAnswerExplanationAtom);
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   // 回答・解説を生成していない場合、または生成中の場合は、解説表示ボタンを非活性とする
   // 回答済みの問題に遷移した場合は、explanationsが存在しなくてもanswerExplanationが存在すれば活性にする
   // (シート表示時に解説を取得する)
   const isDisabledOpenExplanationButton = useMemo<boolean>(
     () => !answerExplanation || answerExplanation.isSubmitting,
-    [answerExplanation]
+    [answerExplanation],
   );
 
-  const close = useCallback(() => setOpen(false), []);
+  // 解説表示ボタン押下時にシートを表示
+  const handleClick = useCallback(() => {
+    setMounted(true);
+    setOpen(true);
+  }, []);
 
-  useEffect(() => {
+  // 閉じるアニメーション開始
+  const handleClose = useCallback(() => setOpen(false), []);
+
+  // 閉じるアニメーション終了後にアンマウント
+  const handleAnimationEnd = useCallback(() => {
     if (!open) {
+      setMounted(false);
+    }
+  }, [open]);
+
+  // エスケープキー押下時にシートを閉じる
+  useEffect(() => {
+    // シートがマウントされていない場合はキーボードイベントを監視しない
+    if (!mounted) {
       return;
     }
+
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        close();
+        handleClose();
       }
     };
     document.addEventListener("keydown", onKeyDown);
@@ -41,7 +59,7 @@ export default function OpenExplanationButton() {
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
     };
-  }, [close, open]);
+  }, [handleClose, mounted]);
 
   return (
     <>
@@ -49,25 +67,32 @@ export default function OpenExplanationButton() {
         <Button
           size="icon"
           disabled={isDisabledOpenExplanationButton}
-          onClick={() => setOpen(true)}
+          onClick={handleClick}
         >
           <Info />
         </Button>
       </Tooltip>
-      {open &&
+      {mounted &&
         createPortal(
-          <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true">
+          <div className="fixed inset-0 z-100" role="dialog" aria-modal="true">
             <button
               type="button"
-              className="fixed inset-0 bg-black/80"
+              className={`fixed inset-0 bg-black/80 ${
+                open ? "animate-sheet-overlay-in" : "animate-sheet-overlay-out"
+              }`}
               aria-label="閉じる"
-              onClick={close}
+              onClick={handleClose}
             />
-            <div className="fixed inset-x-0 bottom-0 z-[101] max-h-[80vh] w-full min-h-[20vh] overflow-y-auto rounded-t-2xl border-t border-base-300 bg-base-100 p-4 text-base-content shadow-lg">
+            <div
+              className={`fixed inset-x-0 bottom-0 z-101 max-h-[80vh] w-full min-h-[20vh] overflow-y-auto rounded-t-2xl border-t border-base-300 bg-base-100 p-4 text-base-content shadow-lg ${
+                open ? "animate-sheet-in" : "animate-sheet-out"
+              }`}
+              onAnimationEnd={handleAnimationEnd}
+            >
               <ExplanationSheetContent />
             </div>
           </div>,
-          document.body
+          document.body,
         )}
     </>
   );
