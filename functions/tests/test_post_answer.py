@@ -77,7 +77,6 @@ class TestSearchWebContext(unittest.TestCase):
     @patch.dict(
         os.environ,
         {
-            "WEB_SEARCH_ENABLED": "true",
             "OPENAI_API_KEY": "test_api_key",
             "OPENAI_API_VERSION": "test_api_version",
             "OPENAI_DEPLOYMENT_NAME": "test_deployment_name",
@@ -100,9 +99,7 @@ class TestSearchWebContext(unittest.TestCase):
         result = search_web_context(subjects, choices)
 
         # Then: 取得したoutput_textが返り、web_searchツール付きで呼び出される
-        self.assertEqual(
-            result, "2 + 2 equals 4 according to authoritative sources."
-        )
+        self.assertEqual(result, "2 + 2 equals 4 according to authoritative sources.")
         mock_azure_openai.assert_called_once_with(
             api_key="test_api_key",
             api_version="test_api_version",
@@ -125,7 +122,6 @@ class TestSearchWebContext(unittest.TestCase):
     @patch.dict(
         os.environ,
         {
-            "WEB_SEARCH_ENABLED": "true",
             "OPENAI_API_KEY": "test_api_key",
             "OPENAI_API_VERSION": "test_api_version",
             "OPENAI_DEPLOYMENT_NAME": "test_deployment_name",
@@ -166,7 +162,6 @@ class TestSearchWebContext(unittest.TestCase):
     @patch.dict(
         os.environ,
         {
-            "WEB_SEARCH_ENABLED": "true",
             "OPENAI_API_KEY": "test_api_key",
             "OPENAI_API_VERSION": "test_api_version",
             "OPENAI_DEPLOYMENT_NAME": "test_deployment_name",
@@ -194,7 +189,6 @@ class TestSearchWebContext(unittest.TestCase):
     @patch.dict(
         os.environ,
         {
-            "WEB_SEARCH_ENABLED": "true",
             "OPENAI_API_KEY": "test_api_key",
             "OPENAI_API_VERSION": "test_api_version",
             "OPENAI_DEPLOYMENT_NAME": "test_deployment_name",
@@ -216,19 +210,6 @@ class TestSearchWebContext(unittest.TestCase):
         # Then: Noneが返り、例外がwarningログに記録される
         self.assertIsNone(result)
         mock_logging.warning.assert_called_once()
-
-    @patch("src.post_answer.AzureOpenAI")
-    @patch.dict(os.environ, {"WEB_SEARCH_ENABLED": "false"})
-    def test_search_web_context_disabled(self, mock_azure_openai):
-        """WEB_SEARCH_ENABLEDがfalseの場合にWeb検索を実行しないテスト"""
-
-        # Given: WEB_SEARCH_ENABLEDがfalse
-        # When: Web検索を実行する
-        result = search_web_context(["What is 2 + 2?"], ["3", "4", "5"])
-
-        # Then: Noneが返り、Azure OpenAIは呼び出されない
-        self.assertIsNone(result)
-        mock_azure_openai.assert_not_called()
 
 
 class TestCreateChatCompletionsMessages(unittest.TestCase):

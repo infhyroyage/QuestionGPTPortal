@@ -70,7 +70,7 @@ def search_web_context(
     Web検索を用いて、正解判定の参考となる最新情報を取得する
 
     Azure OpenAIのResponses APIのweb_searchツールを使用し、問題文・選択肢に関連する
-    信頼できる最新の情報を取得する。Web検索が無効な場合や失敗した場合はNoneを返し、
+    信頼できる最新の情報を取得する。Web検索が失敗した場合はNoneを返し、
     呼び出し側はグラウンディングなしで回答生成を継続できる。
 
     Args:
@@ -78,12 +78,8 @@ def search_web_context(
         choices (list[str | None]): 選択肢のリスト(画像URLのみの場合はNone)
 
     Returns:
-        str | None: Web検索で得た参考情報(無効/取得できない場合はNone)
+        str | None: Web検索で得た参考情報(取得できない場合はNone)
     """
-
-    # WEB_SEARCH_ENABLEDがfalseの場合はWeb検索を実行しない
-    if os.environ.get("WEB_SEARCH_ENABLED", "true").lower() != "true":
-        return None
 
     # 問題文・選択肢からWeb検索用の入力テキストを作成(画像URLのみの選択肢は除外)
     question_text = "\n".join(subject for subject in subjects if subject)
@@ -356,7 +352,9 @@ def generate_correct_answers(
                 return CorrectAnswers(
                     correct_indexes=response.choices[0].message.parsed.correct_indexes,
                     explanations=response.choices[0].message.parsed.explanations,
-                    answer_key_point=response.choices[0].message.parsed.answer_key_point,
+                    answer_key_point=response.choices[
+                        0
+                    ].message.parsed.answer_key_point,
                 )
     except Exception:
         logging.warning(traceback.format_exc())

@@ -44,7 +44,6 @@ Azure 環境構築後に、以下のサーバーをすべて起動すると、�
        "OPENAI_DEPLOYMENT_NAME": "(Azure OpenAIのデプロイ名)",
        "OPENAI_ENDPOINT": "(Azure OpenAIのエンドポイント)",
        "OPENAI_MODEL_NAME": "(Azure OpenAIのモデル名)",
-       "WEB_SEARCH_ENABLED": "true",
        "PYTHON_PATH": "./venv/bin/python",
        "TRANSLATOR_KEY": "(TranslatorのAPIキー)"
      },
@@ -55,6 +54,7 @@ Azure 環境構築後に、以下のサーバーをすべて起動すると、�
      "ConnectionStrings": {}
    }
    ```
+
    - CORS は任意のオリジンを許可するように設定しているため、特定のオリジンのみ許可したい場合は`Host` > `CORS`にそのオリジンを設定すること。
 4. ターミナルを起動して以下のコマンドを実行し、Cosmos DB、Blob/Queue/Table ストレージをすべて起動する。実行したターミナルはそのまま放置する。
    ```bash
@@ -81,11 +81,14 @@ Azure 環境構築後に、以下のサーバーをすべて起動すると、�
    func start --verbose
    ```
 8. 7 とは別のターミナルで以下のコマンドを実行し、6 で作成した仮想環境の有効後、起動した Cosmos DB サーバーに対し、インポートデータファイルからインポートする。実行したターミナルは閉じる。
+
    ```bash
    ./venv/Scripts/activate
    python functions/import_local.py
    ```
+
    - タイムアウトなどで失敗した場合、もう一度実行し直すこと。
+
 9. 以下を記述したファイル`.env`を swa ディレクトリ配下に保存する。
    ```
    VITE_API_URI="http://localhost:9229"
