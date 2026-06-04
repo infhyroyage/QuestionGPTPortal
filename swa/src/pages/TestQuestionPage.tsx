@@ -185,9 +185,12 @@ export default function TestQuestionPage() {
           direction="vertical"
           className="pt-[52px] min-h-screen w-full"
         >
-          <ResizablePanel defaultSize={60} className="!overflow-visible z-10">
-            <div className="relative h-full overflow-visible">
-              <div className="p-4 h-full min-h-0 overflow-y-auto">
+          <ResizablePanel defaultSize={60} className="z-10">
+            <div className="relative flex h-full min-h-0 flex-col">
+              <div
+                className="flex-1 min-h-0 overflow-y-auto p-4"
+                data-test-question-scroll-container
+              >
                 <SubjectDisplay
                   subjects={questionSelector && questionSelector.subjects}
                   translation={
@@ -201,7 +204,10 @@ export default function TestQuestionPage() {
           </ResizablePanel>
           <TestQuestionResizableHandle withHandle />
           <ResizablePanel defaultSize={40}>
-            <div className="h-full min-h-0 overflow-y-auto bg-slate-200 dark:bg-slate-800">
+            <div
+              className="h-full min-h-0 overflow-y-auto bg-slate-200 dark:bg-slate-800"
+              data-test-question-scroll-container
+            >
               <Selector />
             </div>
           </ResizablePanel>
