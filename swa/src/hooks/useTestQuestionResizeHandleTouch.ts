@@ -4,9 +4,23 @@ import {
   TEST_QUESTION_RESIZE_HANDLE_ID_PREFIX,
   TOUCH_SCROLL_DOMINANCE_RATIO,
   TOUCH_SCROLL_THRESHOLD_PX,
-} from "@/lib/testQuestionScroll";
+} from "@/lib/scroll";
 import { useEffect, useId } from "react";
 
+/**
+ * TestQuestionResizableHandle 向けのタッチ操作フック。
+ *
+ * タッチ端末では PanelResizeHandle が pointer イベントを先に捕捉し、
+ * 縦スワイプがリサイズと誤判定されやすい。本フックは次を行う:
+ *
+ * - グリップ（data-resize-grip）上のタッチ → リサイズライブラリに任せる
+ * - ハンドルバー上のタッチ → 縦方向の移動を緩くスクロールとみなし、上下パネルをスクロール
+ *
+ * capture フェーズで pointer イベントを監視し、スクロール時は
+ * stopImmediatePropagation でリサイズ開始を抑止する。
+ *
+ * @returns PanelResizeHandle に付与する一意の id サフィックス（useId）
+ */
 type TouchGestureState = {
   pointerId: number;
   startX: number;
@@ -52,11 +66,13 @@ export function useTestQuestionResizeHandleTouch() {
         return;
       }
 
+      // 中央グリップのみパネルリサイズ。バー部分は後続 move でスクロール判定する
       if (isResizeGripTarget(event.target)) {
         resetTouchGesture();
         return;
       }
 
+      // react-resizable-panels の pointerdown（capture）より先に処理し、リサイズ開始を抑止
       event.stopImmediatePropagation();
 
       touchGesture = {
@@ -77,6 +93,7 @@ export function useTestQuestionResizeHandleTouch() {
       const deltaX = event.clientX - touchGesture.startX;
 
       if (!touchGesture.isScrollGesture) {
+        // 微小な揺れは無視
         if (
           Math.abs(deltaY) < TOUCH_SCROLL_THRESHOLD_PX &&
           Math.abs(deltaX) < TOUCH_SCROLL_THRESHOLD_PX
@@ -84,6 +101,7 @@ export function useTestQuestionResizeHandleTouch() {
           return;
         }
 
+        // 縦成分が横より十分大きい場合のみスクロール gesture とみなす（緩い判定）
         if (Math.abs(deltaY) > Math.abs(deltaX) * TOUCH_SCROLL_DOMINANCE_RATIO) {
           touchGesture.isScrollGesture = true;
         } else {

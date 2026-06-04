@@ -7,7 +7,7 @@ import {
   scrollContainersByDelta,
   TEST_QUESTION_RESIZE_HANDLE_ID_PREFIX,
   TOUCH_HIT_AREA_MARGINS,
-} from "@/lib/testQuestionScroll";
+} from "@/lib/scroll";
 import { cn } from "@/lib/utils";
 import { PanelResizeHandle } from "react-resizable-panels";
 
