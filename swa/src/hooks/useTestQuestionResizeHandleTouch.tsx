@@ -2,25 +2,9 @@ import {
   getAdjacentScrollContainers,
   scrollContainersByDelta,
   TEST_QUESTION_RESIZE_HANDLE_ID_PREFIX,
-  TOUCH_SCROLL_DOMINANCE_RATIO,
-  TOUCH_SCROLL_THRESHOLD_PX,
 } from "@/lib/scroll";
 import { useEffect, useId } from "react";
 
-/**
- * TestQuestionResizableHandle 向けのタッチ操作フック。
- *
- * タッチ端末では PanelResizeHandle が pointer イベントを先に捕捉し、
- * 縦スワイプがリサイズと誤判定されやすい。本フックは次を行う:
- *
- * - グリップ（data-resize-grip）上のタッチ → リサイズライブラリに任せる
- * - ハンドルバー上のタッチ → 縦方向の移動を緩くスクロールとみなし、上下パネルをスクロール
- *
- * capture フェーズで pointer イベントを監視し、スクロール時は
- * stopImmediatePropagation でリサイズ開始を抑止する。
- *
- * @returns PanelResizeHandle に付与する一意の id サフィックス（useId）
- */
 type TouchGestureState = {
   pointerId: number;
   startX: number;
@@ -29,12 +13,16 @@ type TouchGestureState = {
   isScrollGesture: boolean;
 };
 
+/**
+ * TestQuestionResizableHandleでのタッチ向けポインター処理のカスタムフック
+ * @returns PanelResizeHandleに付与する一意のidサフィックス
+ */
 export function useTestQuestionResizeHandleTouch() {
   const resizeHandleInstanceId = useId();
 
   useEffect(() => {
     const handleElement = document.getElementById(
-      `${TEST_QUESTION_RESIZE_HANDLE_ID_PREFIX}-${resizeHandleInstanceId}`
+      `${TEST_QUESTION_RESIZE_HANDLE_ID_PREFIX}-${resizeHandleInstanceId}`,
     );
     if (!handleElement) {
       return;
@@ -66,13 +54,14 @@ export function useTestQuestionResizeHandleTouch() {
         return;
       }
 
-      // 中央グリップのみパネルリサイズ。バー部分は後続 move でスクロール判定する
+      // 中央グリップのみパネルリサイズ
+      // バー部分は後続のmoveでスクロール判定する
       if (isResizeGripTarget(event.target)) {
         resetTouchGesture();
         return;
       }
 
-      // react-resizable-panels の pointerdown（capture）より先に処理し、リサイズ開始を抑止
+      // react-resizable-panelsのpointerdown(capture)より先に処理し、リサイズ開始を抑止
       event.stopImmediatePropagation();
 
       touchGesture = {
@@ -93,16 +82,14 @@ export function useTestQuestionResizeHandleTouch() {
       const deltaX = event.clientX - touchGesture.startX;
 
       if (!touchGesture.isScrollGesture) {
-        // 微小な揺れは無視
-        if (
-          Math.abs(deltaY) < TOUCH_SCROLL_THRESHOLD_PX &&
-          Math.abs(deltaX) < TOUCH_SCROLL_THRESHOLD_PX
-        ) {
+        // 微小な揺れ(10px未満)は無視
+        if (Math.abs(deltaY) < 10 && Math.abs(deltaX) < 10) {
           return;
         }
 
-        // 縦成分が横より十分大きい場合のみスクロール gesture とみなす（緩い判定）
-        if (Math.abs(deltaY) > Math.abs(deltaX) * TOUCH_SCROLL_DOMINANCE_RATIO) {
+        // 縦成分が横成分の1.2倍以上大きい場合のみスクロールジェスチャーとみなすことで、
+        // タッチ操作とスクロール操作の判定を緩くする
+        if (Math.abs(deltaY) > Math.abs(deltaX) * 1.2) {
           touchGesture.isScrollGesture = true;
         } else {
           resetTouchGesture();
