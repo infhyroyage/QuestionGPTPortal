@@ -6,7 +6,6 @@ import {
   getAdjacentScrollContainers,
   scrollContainersByDelta,
   TEST_QUESTION_RESIZE_HANDLE_ID_PREFIX,
-  TOUCH_HIT_AREA_MARGINS,
 } from "@/lib/scroll";
 import { cn } from "@/lib/utils";
 import { PanelResizeHandle } from "react-resizable-panels";
@@ -25,7 +24,7 @@ const TestQuestionResizableHandle = ({
   >(
     (event) => {
       const handleElement = document.getElementById(
-        `${TEST_QUESTION_RESIZE_HANDLE_ID_PREFIX}-${resizeHandleInstanceId}`
+        `${TEST_QUESTION_RESIZE_HANDLE_ID_PREFIX}-${resizeHandleInstanceId}`,
       );
       if (!handleElement) {
         return;
@@ -40,7 +39,7 @@ const TestQuestionResizableHandle = ({
         event.preventDefault();
       }
     },
-    [resizeHandleInstanceId]
+    [resizeHandleInstanceId],
   );
 
   return (
@@ -48,9 +47,9 @@ const TestQuestionResizableHandle = ({
       id={`${TEST_QUESTION_RESIZE_HANDLE_ID_PREFIX}-${resizeHandleInstanceId}`}
       className={cn(
         "relative flex w-px items-center justify-center bg-base-300 hover:bg-sky-500 transition-colors duration-200 after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2 focus-visible:outline-hidden data-[panel-group-direction=vertical]:h-px data-[panel-group-direction=vertical]:w-full data-[panel-group-direction=vertical]:after:left-0 data-[panel-group-direction=vertical]:after:h-1 data-[panel-group-direction=vertical]:after:w-full data-[panel-group-direction=vertical]:after:-translate-y-1/2 data-[panel-group-direction=vertical]:after:translate-x-0 [&[data-panel-group-direction=vertical]>div]:rotate-90",
-        className
+        className,
       )}
-      hitAreaMargins={TOUCH_HIT_AREA_MARGINS}
+      hitAreaMargins={{ fine: 5, coarse: 40 }}
       onWheel={handleWheel}
       style={{ touchAction: "none" }}
       {...props}
