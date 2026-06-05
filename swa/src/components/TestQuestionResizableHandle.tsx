@@ -52,7 +52,7 @@ const TestQuestionResizableHandle = ({
       )}
       hitAreaMargins={TOUCH_HIT_AREA_MARGINS}
       onWheel={handleWheel}
-      style={{ touchAction: "pan-y" }}
+      style={{ touchAction: "none" }}
       {...props}
     >
       {withHandle && (
