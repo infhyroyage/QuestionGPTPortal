@@ -4,12 +4,14 @@
 export const TEST_QUESTION_RESIZE_HANDLE_ID_PREFIX =
   "test-question-resize-handle";
 
-/** タッチ向け hit area（react-resizable-panels 既定 coarse: 15 より広い） */
+/**
+ * タッチ向けhit area(react-resizable-panels既定のcoarse:15より広い)
+ */
 const TOUCH_HIT_AREA_MARGINS = { fine: 5, coarse: 40 };
 
 /**
- * 現在のポインター種別に応じた hit area マージン（px）を返す
- * @returns {number} hit area マージン（px）
+ * 現在のポインター種別に応じたhit areaマージン(px)を返す
+ * @returns {number} hit areaマージン(px)
  */
 function getTouchHitAreaMargin(): number {
   if (typeof window === "undefined") {
@@ -22,12 +24,11 @@ function getTouchHitAreaMargin(): number {
 }
 
 /**
- * タッチ座標がリサイズハンドルの hit area 内かどうかを判定する
- * react-resizable-panels と同様に座標で判定する（event.target はパネル内容になることがある）
- * @param {HTMLElement} handleElement リサイズハンドル要素
- * @param {number} clientX タッチ座標 X
- * @param {number} clientY タッチ座標 Y
- * @returns {boolean} hit area 内の場合は true
+ * タッチ座標がリサイズハンドルのhit area内かどうかを座標で判定する
+ * @param {HTMLElement} handleElementリサイズハンドル要素
+ * @param {number} clientX タッチX座標
+ * @param {number} clientY タッチY座標
+ * @returns {boolean} hit area内の場合はtrue、hit area外の場合はfalse
  */
 export function isWithinHandleHitArea(
   handleElement: HTMLElement,
@@ -46,11 +47,11 @@ export function isWithinHandleHitArea(
 }
 
 /**
- * タッチ座標が中央グリップ上かどうかを判定する（グリップ上のみリサイズを許可する）
- * @param {HTMLElement} handleElement リサイズハンドル要素
- * @param {number} clientX タッチ座標 X
- * @param {number} clientY タッチ座標 Y
- * @returns {boolean} グリップ上の場合は true
+ * タッチ座標が中央グリップ上かどうかを判定する
+ * @param {HTMLElement} handleElementリサイズハンドル要素
+ * @param {number} clientX タッチX座標
+ * @param {number} clientY タッチY座標
+ * @returns {boolean} グリップ上の場合はtrue、それ以外の場合はfalse
  */
 export function isWithinResizeGripArea(
   handleElement: HTMLElement,
