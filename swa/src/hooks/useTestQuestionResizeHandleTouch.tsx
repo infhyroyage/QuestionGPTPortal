@@ -1,5 +1,7 @@
 import {
   getAdjacentScrollContainers,
+  isWithinHandleHitArea,
+  isWithinResizeGripArea,
   scrollContainersByDelta,
   TEST_QUESTION_RESIZE_HANDLE_ID_PREFIX,
 } from "@/lib/scroll";
@@ -11,6 +13,11 @@ type TouchGestureState = {
   startY: number;
   lastY: number;
   isScrollGesture: boolean;
+};
+
+const POINTER_LISTENER_OPTIONS: AddEventListenerOptions = {
+  capture: true,
+  passive: false,
 };
 
 /**
@@ -34,35 +41,30 @@ export function useTestQuestionResizeHandleTouch() {
       touchGesture = null;
     };
 
-    const isResizeGripTarget = (target: EventTarget | null) => {
-      if (!(target instanceof Node)) {
-        return false;
-      }
-      const grip = handleElement.querySelector("[data-resize-grip]");
-      return grip?.contains(target) ?? false;
-    };
-
     const onPointerDown = (event: PointerEvent) => {
       if (event.pointerType !== "touch") {
         return;
       }
 
+      // event.target は hit area 内でも隣接パネルの要素になり得るため座標で判定する
       if (
-        !(event.target instanceof Node) ||
-        !handleElement.contains(event.target)
+        !isWithinHandleHitArea(handleElement, event.clientX, event.clientY)
       ) {
         return;
       }
 
       // 中央グリップのみパネルリサイズ
       // バー部分は後続のmoveでスクロール判定する
-      if (isResizeGripTarget(event.target)) {
+      if (isWithinResizeGripArea(handleElement, event.clientX, event.clientY)) {
         resetTouchGesture();
         return;
       }
 
       // react-resizable-panelsのpointerdown(capture)より先に処理し、リサイズ開始を抑止
+      event.preventDefault();
       event.stopImmediatePropagation();
+
+      handleElement.setPointerCapture(event.pointerId);
 
       touchGesture = {
         pointerId: event.pointerId,
@@ -93,6 +95,7 @@ export function useTestQuestionResizeHandleTouch() {
           touchGesture.isScrollGesture = true;
         } else {
           resetTouchGesture();
+          handleElement.releasePointerCapture(event.pointerId);
           return;
         }
       }
@@ -101,34 +104,63 @@ export function useTestQuestionResizeHandleTouch() {
       touchGesture.lastY = event.clientY;
 
       const containers = getAdjacentScrollContainers(handleElement);
-      if (scrollContainersByDelta(containers, step)) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-      }
+      scrollContainersByDelta(containers, step);
+
+      // スクロールジェスチャー確定後は端まで達していても、リサイズへ流れないよう常に抑止する
+      event.preventDefault();
+      event.stopImmediatePropagation();
     };
 
     const onPointerEnd = (event: PointerEvent) => {
-      if (touchGesture?.pointerId === event.pointerId) {
-        resetTouchGesture();
+      if (touchGesture?.pointerId !== event.pointerId) {
+        return;
       }
+
+      if (handleElement.hasPointerCapture(event.pointerId)) {
+        handleElement.releasePointerCapture(event.pointerId);
+      }
+
+      resetTouchGesture();
     };
 
-    window.addEventListener("pointerdown", onPointerDown, { capture: true });
-    window.addEventListener("pointermove", onPointerMove, { capture: true });
-    window.addEventListener("pointerup", onPointerEnd, { capture: true });
-    window.addEventListener("pointercancel", onPointerEnd, { capture: true });
+    window.addEventListener(
+      "pointerdown",
+      onPointerDown,
+      POINTER_LISTENER_OPTIONS,
+    );
+    window.addEventListener(
+      "pointermove",
+      onPointerMove,
+      POINTER_LISTENER_OPTIONS,
+    );
+    window.addEventListener("pointerup", onPointerEnd, POINTER_LISTENER_OPTIONS);
+    window.addEventListener(
+      "pointercancel",
+      onPointerEnd,
+      POINTER_LISTENER_OPTIONS,
+    );
 
     return () => {
-      window.removeEventListener("pointerdown", onPointerDown, {
-        capture: true,
-      });
-      window.removeEventListener("pointermove", onPointerMove, {
-        capture: true,
-      });
-      window.removeEventListener("pointerup", onPointerEnd, { capture: true });
-      window.removeEventListener("pointercancel", onPointerEnd, {
-        capture: true,
-      });
+      window.removeEventListener(
+        "pointerdown",
+        onPointerDown,
+        POINTER_LISTENER_OPTIONS,
+      );
+      window.removeEventListener(
+        "pointermove",
+        onPointerMove,
+        POINTER_LISTENER_OPTIONS,
+      );
+      window.removeEventListener(
+        "pointerup",
+        onPointerEnd,
+        POINTER_LISTENER_OPTIONS,
+      );
+      window.removeEventListener(
+        "pointercancel",
+        onPointerEnd,
+        POINTER_LISTENER_OPTIONS,
+      );
     };
   }, [resizeHandleInstanceId]);
 

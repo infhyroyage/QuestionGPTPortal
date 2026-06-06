@@ -5,6 +5,75 @@ export const TEST_QUESTION_RESIZE_HANDLE_ID_PREFIX =
   "test-question-resize-handle";
 
 /**
+ * タッチ向けhit area(react-resizable-panels既定のcoarse:15より広い)
+ */
+const TOUCH_HIT_AREA_MARGINS = { fine: 5, coarse: 40 };
+
+/**
+ * 現在のポインター種別に応じたhit areaマージン(px)を返す
+ * @returns {number} hit areaマージン(px)
+ */
+function getTouchHitAreaMargin(): number {
+  if (typeof window === "undefined") {
+    return TOUCH_HIT_AREA_MARGINS.fine;
+  }
+
+  return window.matchMedia("(pointer: coarse)").matches
+    ? TOUCH_HIT_AREA_MARGINS.coarse
+    : TOUCH_HIT_AREA_MARGINS.fine;
+}
+
+/**
+ * タッチ座標がリサイズハンドルのhit area内かどうかを座標で判定する
+ * @param {HTMLElement} handleElementリサイズハンドル要素
+ * @param {number} clientX タッチX座標
+ * @param {number} clientY タッチY座標
+ * @returns {boolean} hit area内の場合はtrue、hit area外の場合はfalse
+ */
+export function isWithinHandleHitArea(
+  handleElement: HTMLElement,
+  clientX: number,
+  clientY: number,
+): boolean {
+  const { left, right, top, bottom } = handleElement.getBoundingClientRect();
+  const margin = getTouchHitAreaMargin();
+
+  return (
+    clientX >= left - margin &&
+    clientX <= right + margin &&
+    clientY >= top - margin &&
+    clientY <= bottom + margin
+  );
+}
+
+/**
+ * タッチ座標が中央グリップ上かどうかを判定する
+ * @param {HTMLElement} handleElementリサイズハンドル要素
+ * @param {number} clientX タッチX座標
+ * @param {number} clientY タッチY座標
+ * @returns {boolean} グリップ上の場合はtrue、それ以外の場合はfalse
+ */
+export function isWithinResizeGripArea(
+  handleElement: HTMLElement,
+  clientX: number,
+  clientY: number,
+): boolean {
+  const grip = handleElement.querySelector("[data-resize-grip]");
+  if (!grip) {
+    return false;
+  }
+
+  const { left, right, top, bottom } = grip.getBoundingClientRect();
+
+  return (
+    clientX >= left &&
+    clientX <= right &&
+    clientY >= top &&
+    clientY <= bottom
+  );
+}
+
+/**
  * リサイズハンドルの直前・直後にあるパネルから、スクロール可能なコンテナを取得する
  * PanelGroup内では、ハンドルのprevious/nextElementSiblingが上下パネルに対応する
  * @param {HTMLElement} handleElement リサイズハンドル要素
