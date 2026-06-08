@@ -11,7 +11,7 @@
   "dependencies": {
     "@azure/msal-browser": "^5.10.0",
     "@azure/msal-react": "^5.4.2",
-    "axios": "^1.15.1",
+    "axios": "^1.17.0",
     "clsx": "^2.1.1",
     "jotai": "^2.20.0",
     "lucide-react": "^1.11.0",
