@@ -14,7 +14,7 @@
     "axios": "^1.15.1",
     "clsx": "^2.1.1",
     "jotai": "^2.20.0",
-    "lucide-react": "^1.11.0",
+    "lucide-react": "^1.17.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-resizable-panels": "^3.0.6",
