@@ -1,16 +1,16 @@
-import { useToast } from "@/hooks/use-toast";
+import useToast from "@/hooks/useToast";
 
 /**
  * システムエラー用のトーストのカスタムフック
  * @returns システムエラー用のトーストのカスタムフック
  */
 export default function useSystemErrorToast() {
-  const { toast } = useToast();
+  const toast = useToast();
 
   return (e: unknown) => {
     console.error(e);
     toast({
-      variant: "destructive",
+      variant: "error",
       title: "システムエラー",
       description: (
         <>
