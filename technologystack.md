@@ -104,61 +104,8 @@ GitHub Pages を通して React + TailwindCSS をベースとし、レスポン�
 
 ### 3.1 インポートデータファイルによるテスト・問題データのインポート機能
 
-Azure Cosmos DB に格納するデータは、**インポートデータファイル**とよばれる json ファイル`data/(コース名)/(テスト名).json`として管理する:
-インポートデータファイルの json フォーマットを以下に示す。
-
-```json
-[
-  {
-    "subjects": ["問題文1", "https://www.example.com/aaa/xxx.png", "問題文2", ... ],
-    "choices": ["選択肢1", "選択肢2", ... ],
-    "answerNum": 1,
-    "indicateSubjectImgIdxes": [0, ... ],
-    "indicateChoiceImgs": [null, "https://www.example.com/bbb/yyy.png", ... ],
-    "escapeTranslatedIdxes": {
-      "subjects": [0, ... ],
-      "choices": [1, ... ],
-    },
-    "discussions": [
-      {
-        "comment": "コメント1",
-        "upvotedNum": 2,
-        "selectedAnswer": "A"
-      },
-      {
-        "comment": "コメント2",
-        :
-      },
-      :
-    ]
-  },
-  {
-    "subjects": [ ... ],
-    :
-  },
-]
-```
-
-json の各キーの説明を、以下に示す。
-
-| キー名                    | 説明                                         | 必須指定 |
-| ------------------------- | -------------------------------------------- | :------: |
-| `subjects`                | 問題文/画像 URL                              |    o     |
-| `choices`                 | 選択肢                                       |    o     |
-| `answerNum`               | 回答の選択肢の個数                           |    o     |
-| `indicateSubjectImgIdxes` | `subjects`で指定した画像 URL のインデックス  |          |
-| `indicateChoiceImgs`      | `choices`の文章の後に続ける画像 URL          |          |
-| `escapeTranslatedIdxes`   | 翻訳不要な`subjects`/`choices`のインデックス |          |
-| `discussions`             | コミュニティでのディスカッション             |          |
-
-`discussions`キーで配列で設定する連想配列の各キーの説明を、以下に示す。
-
-| キー名           | 説明                     | 必須指定 |
-| ---------------- | ------------------------ | :------: |
-| `comment`        | ユーザーのコメント       |    o     |
-| `upvotedNum`     | 賛成票数                 |    o     |
-| `selectedAnswer` | ユーザーが選択した選択肢 |          |
-
+Azure Cosmos DB に格納するデータは、**インポートデータファイル**とよばれる json ファイル`data/(コース名)/(テスト名).json`として管理する。
+インポートデータファイルの json フォーマットは、 [azureenvironment.md](azureenvironment.md) の構築手順の「8. インポートデータファイルの作成・アップロード」を参照。
 インポートデータファイルに記載したテスト・問題のデータは、Azure 環境では Blob Storage に`import-items/{courseName}/{testName}.json` パスでアップロードすることで、データインポートされる。そのアップロードをもとに、Azure Event Grid 経由の Blob トリガーの関数アプリが Azure Cosmos DB にテスト・問題のデータを非同期でインポートする。
 
 また、ローカル環境では専用のインポート処理を行う Python ファイル `functions/import_local.py`を実行することで、データインポートされる。
