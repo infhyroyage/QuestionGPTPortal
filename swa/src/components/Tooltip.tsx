@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import clsx from "clsx";
 import { type ReactNode } from "react";
 
 type TooltipPosition = "top" | "bottom" | "left" | "right";
@@ -29,7 +29,7 @@ export default function Tooltip({
 }: TooltipProps) {
   return (
     <div
-      className={cn(
+      className={clsx(
         "tooltip z-50 before:z-50 after:z-50",
         positionClasses[position],
         className

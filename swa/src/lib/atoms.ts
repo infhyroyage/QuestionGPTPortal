@@ -237,7 +237,7 @@ export const fetchExplanationsOnlyAtom = atom(
       accountInfo,
     );
 
-    let explanations: string[] = [];
+    let explanations: string[];
     let answerKeyPoint: string | undefined;
     if (getAnswerRes.isExisted) {
       explanations = getAnswerRes.explanations || [];
@@ -301,7 +301,7 @@ export const fetchDiscussionAtom = atom(
       return;
     }
 
-    let summary: string | undefined = undefined;
+    let summary: string | undefined;
     if (isRefresh) {
       // コミュニティ情報再取得の場合、コミュニティ情報に対する翻訳文を初期化してから、
       // [POST] /tests/{testId}/discussions/{questionNumber}にアクセス

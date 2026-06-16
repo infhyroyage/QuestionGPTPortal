@@ -1,11 +1,11 @@
-import { useToast } from "@/hooks/use-toast";
+import useToast from "@/hooks/useToast";
 
 /**
  * 翻訳失敗用のトーストのカスタムフック
  * @returns 翻訳失敗用のトーストのカスタムフック
  */
 export default function useTranslationFailedToast() {
-  const { toast } = useToast();
+  const toast = useToast();
 
   return (message: string, onClick: () => void) => {
     toast({

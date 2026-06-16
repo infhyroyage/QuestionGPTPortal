@@ -96,7 +96,7 @@ export type SelectorButtonProps = {
   /**
    * 選択肢のバリアント
    */
-  variant: "default" | "outline";
+  variant: "primary" | "outline";
 };
 
 /**
