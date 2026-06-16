@@ -128,7 +128,7 @@ export default function TestReadyButtons({
               disabled={hasOnlyFavorites !== undefined}
               onClick={() => setHasOnlyFavorites(false)}
               size="lg"
-              variant={histories.length > 0 ? "destructive" : "default"}
+              variant={histories.length > 0 ? "error" : "primary"}
             >
               {hasOnlyFavorites !== undefined ? (
                 <Loader2 className="animate-spin" />
@@ -143,7 +143,7 @@ export default function TestReadyButtons({
                 disabled={hasOnlyFavorites !== undefined}
                 onClick={() => setHasOnlyFavorites(true)}
                 size="lg"
-                variant={histories.length > 0 ? "destructive" : "default"}
+                variant={histories.length > 0 ? "error" : "primary"}
               >
                 {hasOnlyFavorites !== undefined ? (
                   <Loader2 className="animate-spin" />

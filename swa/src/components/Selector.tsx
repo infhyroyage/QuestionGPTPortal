@@ -77,7 +77,7 @@ export default function Selector() {
               variant={
                 questionSelector.choices[idx].isSelected &&
                 (!answerExplanation || answerExplanation.isSubmitting)
-                  ? "default"
+                  ? "primary"
                   : "outline"
               }
             />

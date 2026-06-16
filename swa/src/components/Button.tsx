@@ -1,30 +1,27 @@
-import { cn } from "@/lib/utils";
-import { forwardRef, type ButtonHTMLAttributes } from "react";
+import clsx from "clsx";
+import { type ButtonHTMLAttributes } from "react";
 
 export type ButtonVariant =
-  | "default"
-  | "destructive"
-  | "outline"
+  | "primary"
   | "secondary"
+  | "outline"
   | "ghost"
-  | "link"
-  | "custom";
+  | "success"
+  | "error";
 
-export type ButtonSize = "default" | "sm" | "lg" | "icon";
+export type ButtonSize = "default" | "lg" | "icon";
 
 const variantClasses: Record<ButtonVariant, string> = {
-  default: "btn-primary",
-  destructive: "btn-error",
-  outline: "btn-outline",
+  primary: "btn-primary",
   secondary: "btn-secondary",
+  outline: "btn-outline",
   ghost: "btn-ghost",
-  link: "btn-link",
-  custom: "",
+  success: "btn-success",
+  error: "btn-error",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
   default: "",
-  sm: "btn-sm",
   lg: "btn-lg",
   icon: "btn-square",
 };
@@ -34,13 +31,20 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   size?: ButtonSize;
 };
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = "default", size = "default", ...props }, ref) => (
+/**
+ * daisyUI の btn をベースにしたボタンコンポーネント
+ * @returns ボタンコンポーネント
+ */
+export function Button({
+  className,
+  variant = "primary",
+  size = "default",
+  ...props
+}: ButtonProps) {
+  return (
     <button
-      ref={ref}
-      className={cn("btn", variantClasses[variant], sizeClasses[size], className)}
+      className={clsx("btn", variantClasses[variant], sizeClasses[size], className)}
       {...props}
     />
-  )
-);
-Button.displayName = "Button";
+  );
+}

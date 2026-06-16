@@ -1,10 +1,10 @@
 import { Button } from "@/components/Button";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
+import { type ButtonVariant } from "@/components/Button";
 import {
   fetchAnswerExplanationAtom,
   fetchQuestionSelectorAtom,
 } from "@/lib/atoms";
-import { cn } from "@/lib/utils";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useAtom, useAtomValue } from "jotai";
 import { Check, Loader2, SendHorizontal, X } from "lucide-react";
@@ -42,22 +42,15 @@ export default function SubmitButton() {
     [answerExplanation, questionSelector]
   );
 
-  const resultButtonClassName = useMemo(() => {
+  // 回答結果に応じてボタンの配色(daisyUI variant)を切り替える
+  // * 未回答・生成中: primary
+  // * 正解: success
+  // * 不正解: error
+  const buttonVariant = useMemo<ButtonVariant>(() => {
     if (!answerExplanation || answerExplanation.isSubmitting) {
-      return undefined;
+      return "primary";
     }
-    if (answerExplanation.isCorrect) {
-      return cn(
-        "border-green-500 bg-green-500 text-white",
-        "hover:border-green-600 hover:bg-green-600",
-        "shadow-none outline-none focus-visible:outline-none focus-visible:ring-0"
-      );
-    }
-    return cn(
-      "border-red-500 bg-red-500 text-white",
-      "hover:border-red-600 hover:bg-red-600",
-      "shadow-none outline-none focus-visible:outline-none focus-visible:ring-0"
-    );
+    return answerExplanation.isCorrect ? "success" : "error";
   }, [answerExplanation]);
 
   // 回答・解説生成ボタン押下時に、回答・解説を1度だけ生成/取得
@@ -94,8 +87,7 @@ export default function SubmitButton() {
   return (
     <Tooltip tip="回答・解説生成" position="top">
       <Button
-        variant={resultButtonClassName ? "custom" : "default"}
-        className={resultButtonClassName}
+        variant={buttonVariant}
         size="icon"
         disabled={isDisabledSubmitButton}
         onClick={onClickSubmit}
