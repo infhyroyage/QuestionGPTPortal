@@ -5,7 +5,7 @@ export const TEST_QUESTION_RESIZE_HANDLE_ID_PREFIX =
   "test-question-resize-handle";
 
 /**
- * タッチ向けhit area(react-resizable-panels既定のcoarse:15より広い)
+ * タッチ向けhit area(GroupのresizeTargetMinimumSize coarse:40に合わせる)
  */
 const TOUCH_HIT_AREA_MARGINS = { fine: 5, coarse: 40 };
 
@@ -66,16 +66,13 @@ export function isWithinResizeGripArea(
   const { left, right, top, bottom } = grip.getBoundingClientRect();
 
   return (
-    clientX >= left &&
-    clientX <= right &&
-    clientY >= top &&
-    clientY <= bottom
+    clientX >= left && clientX <= right && clientY >= top && clientY <= bottom
   );
 }
 
 /**
  * リサイズハンドルの直前・直後にあるパネルから、スクロール可能なコンテナを取得する
- * PanelGroup内では、ハンドルのprevious/nextElementSiblingが上下パネルに対応する
+ * Group内では、Separatorのprevious/nextElementSiblingが上下パネルに対応する
  * @param {HTMLElement} handleElement リサイズハンドル要素
  * @returns {HTMLElement[]} スクロール可能なコンテナ要素の配列
  */

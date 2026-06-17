@@ -1,9 +1,9 @@
 import IconButtonsContainer from "@/components/IconButtonsContainer";
+import { ResizablePanel, ResizablePanelGroup } from "@/components/Resizable";
 import Selector from "@/components/Selector";
 import SubjectDisplay from "@/components/SubjectDisplay";
 import TestQuestionResizableHandle from "@/components/TestQuestionResizableHandle";
 import TopBar from "@/components/TopBar";
-import { ResizablePanel, ResizablePanelGroup } from "@/components/Resizable";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import useTranslationFailedToast from "@/hooks/useTranslationFailedToast";
 import {
@@ -25,10 +25,10 @@ import { useNavigate, useNavigationType, useParams } from "react-router";
 export default function TestQuestionPage() {
   const { histories, order } = useAtomValue(fetchProgressesAtom);
   const [questionSelector, fetchQuestionSelector] = useAtom(
-    fetchQuestionSelectorAtom
+    fetchQuestionSelectorAtom,
   );
   const [translationSubjectChoice, fetchTranslationSubjectChoice] = useAtom(
-    fetchTranslationSubjectChoiceAtom
+    fetchTranslationSubjectChoiceAtom,
   );
   const resetAtomsForTestQuestion = useSetAtom(resetAtomsForTestQuestionAtom);
   const restoreAnsweredQuestion = useSetAtom(restoreAnsweredQuestionAtom);
@@ -102,7 +102,7 @@ export default function TestQuestionPage() {
           testId,
           questionNumber,
           instance,
-          accountInfo
+          accountInfo,
         );
       } catch (e) {
         setIsOccurredSystemError(true);
@@ -155,7 +155,7 @@ export default function TestQuestionPage() {
       } catch {
         setIsOccurredTranslationFailed(true);
         translationFailedToast("問題文・選択肢", () =>
-          setIsOccurredTranslationFailed(false)
+          setIsOccurredTranslationFailed(false),
         );
       }
     })();
@@ -182,10 +182,11 @@ export default function TestQuestionPage() {
           }問)`}
         />
         <ResizablePanelGroup
-          direction="vertical"
+          orientation="vertical"
+          resizeTargetMinimumSize={{ fine: 5, coarse: 40 }}
           className="pt-[52px] min-h-screen w-full"
         >
-          <ResizablePanel defaultSize={60} className="z-10">
+          <ResizablePanel defaultSize="60%" className="z-10">
             <div className="relative flex h-full min-h-0 flex-col">
               <div
                 className="flex-1 min-h-0 overflow-y-auto p-4"
@@ -203,7 +204,7 @@ export default function TestQuestionPage() {
             </div>
           </ResizablePanel>
           <TestQuestionResizableHandle withHandle />
-          <ResizablePanel defaultSize={40}>
+          <ResizablePanel defaultSize="40%">
             <div
               className="h-full min-h-0 overflow-y-auto bg-slate-200 dark:bg-slate-800"
               data-test-question-scroll-container

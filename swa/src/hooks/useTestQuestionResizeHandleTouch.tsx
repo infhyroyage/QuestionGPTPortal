@@ -22,7 +22,7 @@ const POINTER_LISTENER_OPTIONS: AddEventListenerOptions = {
 
 /**
  * TestQuestionResizableHandleでのタッチ向けポインター処理のカスタムフック
- * @returns PanelResizeHandleに付与する一意のidサフィックス
+ * @returns Separatorに付与する一意のidサフィックス
  */
 export function useTestQuestionResizeHandleTouch() {
   const resizeHandleInstanceId = useId();
@@ -47,9 +47,7 @@ export function useTestQuestionResizeHandleTouch() {
       }
 
       // event.target は hit area 内でも隣接パネルの要素になり得るため座標で判定する
-      if (
-        !isWithinHandleHitArea(handleElement, event.clientX, event.clientY)
-      ) {
+      if (!isWithinHandleHitArea(handleElement, event.clientX, event.clientY)) {
         return;
       }
 
@@ -133,7 +131,11 @@ export function useTestQuestionResizeHandleTouch() {
       onPointerMove,
       POINTER_LISTENER_OPTIONS,
     );
-    window.addEventListener("pointerup", onPointerEnd, POINTER_LISTENER_OPTIONS);
+    window.addEventListener(
+      "pointerup",
+      onPointerEnd,
+      POINTER_LISTENER_OPTIONS,
+    );
     window.addEventListener(
       "pointercancel",
       onPointerEnd,

@@ -8,19 +8,19 @@ import {
   TEST_QUESTION_RESIZE_HANDLE_ID_PREFIX,
 } from "@/lib/scroll";
 import clsx from "clsx";
-import { PanelResizeHandle } from "react-resizable-panels";
+import { Separator } from "react-resizable-panels";
 
 const TestQuestionResizableHandle = ({
   withHandle,
   className,
   ...props
-}: React.ComponentProps<typeof PanelResizeHandle> & {
+}: React.ComponentProps<typeof Separator> & {
   withHandle?: boolean;
 }) => {
   const resizeHandleInstanceId = useTestQuestionResizeHandleTouch();
 
   const handleWheel = useCallback<
-    NonNullable<React.ComponentProps<typeof PanelResizeHandle>["onWheel"]>
+    NonNullable<React.ComponentProps<typeof Separator>["onWheel"]>
   >(
     (event) => {
       const handleElement = document.getElementById(
@@ -43,13 +43,12 @@ const TestQuestionResizableHandle = ({
   );
 
   return (
-    <PanelResizeHandle
+    <Separator
       id={`${TEST_QUESTION_RESIZE_HANDLE_ID_PREFIX}-${resizeHandleInstanceId}`}
       className={clsx(
-        "relative flex w-px items-center justify-center bg-base-300 hover:bg-sky-500 transition-colors duration-200 after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2 focus-visible:outline-hidden data-[panel-group-direction=vertical]:h-px data-[panel-group-direction=vertical]:w-full data-[panel-group-direction=vertical]:after:left-0 data-[panel-group-direction=vertical]:after:h-1 data-[panel-group-direction=vertical]:after:w-full data-[panel-group-direction=vertical]:after:-translate-y-1/2 data-[panel-group-direction=vertical]:after:translate-x-0 [&[data-panel-group-direction=vertical]>div]:rotate-90",
+        "relative flex w-px items-center justify-center bg-base-300 hover:bg-sky-500 transition-colors duration-200 after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2 focus-visible:outline-hidden aria-[orientation=horizontal]:h-px aria-[orientation=horizontal]:w-full aria-[orientation=horizontal]:after:left-0 aria-[orientation=horizontal]:after:h-1 aria-[orientation=horizontal]:after:w-full aria-[orientation=horizontal]:after:-translate-y-1/2 aria-[orientation=horizontal]:after:translate-x-0 [&[aria-orientation=horizontal]>div]:rotate-90",
         className,
       )}
-      hitAreaMargins={{ fine: 5, coarse: 40 }}
       onWheel={handleWheel}
       style={{ touchAction: "none" }}
       {...props}
@@ -62,7 +61,7 @@ const TestQuestionResizableHandle = ({
           <GripVertical className="h-2.5 w-2.5" />
         </div>
       )}
-    </PanelResizeHandle>
+    </Separator>
   );
 };
 

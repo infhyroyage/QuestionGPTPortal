@@ -5,11 +5,11 @@ import * as ResizablePrimitive from "react-resizable-panels";
 export const ResizablePanelGroup = ({
   className,
   ...props
-}: React.ComponentProps<typeof ResizablePrimitive.PanelGroup>) => (
-  <ResizablePrimitive.PanelGroup
+}: ResizablePrimitive.GroupProps) => (
+  <ResizablePrimitive.Group
     className={clsx(
-      "flex h-full w-full data-[panel-group-direction=vertical]:flex-col",
-      className
+      "flex h-full w-full aria-[orientation=vertical]:flex-col",
+      className,
     )}
     {...props}
   />
