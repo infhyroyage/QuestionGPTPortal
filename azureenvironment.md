@@ -258,6 +258,45 @@ export COSMOSDB_KEY="(取得した削除対象のCosmos DBのプライマリー�
 python functions/delete_by_course_name.py "(削除したいコース名)"
 ```
 
+## 特定のテスト名に対応するCosmos DBのデータを削除したい場合
+
+1. Python 3.12をインストールする。
+
+2. Python 3.12 の仮想環境を作成する:
+   ```bash
+   python3.12 -m venv venv
+   ```
+3. Python 3.12 の仮想環境を有効化する:
+
+   ```bash
+   source venv/bin/activate
+   ```
+
+4. 以下のコマンドを実行し、削除対象のCosmos DBのURIを取得する:
+
+```bash
+az cosmosdb show -g qgtranslator-je -n (当リポジトリの変数COSMOSDB_NAMEの値) --query "writeLocations[0].documentEndpoint" -o tsv
+```
+
+5. 以下のコマンドを実行し、削除対象のCosmos DBのプライマリーアクセスキーを取得する:
+
+```bash
+az cosmosdb keys list -g qgtranslator-je -n (当リポジトリの変数COSMOSDB_NAMEの値) --query "primaryMasterKey" -o tsv
+```
+
+6. 以下のコマンドを実行し、取得した削除対象のCosmos DBのURI・プライマリーアクセスキーを環境変数に設定する:
+
+```bash
+export COSMOSDB_URI="(取得した削除対象のCosmos DBのURI)"
+export COSMOSDB_KEY="(取得した削除対象のCosmos DBのプライマリーアクセスキー)"
+```
+
+7. 以下のコマンドを実行し、特定のテスト名に対応するCosmos DBのデータを削除する。テスト名はダブルクォーテーションで囲むことに注意すること:
+
+```bash
+python functions/delete_by_test_name.py "(削除したいテスト名)"
+```
+
 ## 削除手順
 
 1. 当リポジトリの各 workflow をすべて無効化する。

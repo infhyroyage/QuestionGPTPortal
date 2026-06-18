@@ -16,18 +16,18 @@ CONTAINER_NAMES_WITHOUT_TESTS: list[str] = [
 ]
 
 
-def delete_items_by_test_ids(ids: set[str]) -> int:
+def delete_items_by_test_ids(test_ids: set[str]) -> int:
     """
     testId が指定集合に含まれる各コンテナーの項目を削除する
 
     Args:
-        ids (set[str]): 削除対象の testId の集合
+        test_ids (set[str]): 削除対象の testId の集合
 
     Returns:
         int: 削除した合計項目数
     """
 
-    count = 0
+    count: int = 0
     for container_name in CONTAINER_NAMES_WITHOUT_TESTS:
         container: ContainerProxy = (
             CosmosClient(
@@ -37,8 +37,8 @@ def delete_items_by_test_ids(ids: set[str]) -> int:
             .get_container_client(container_name)
         )
 
-        for test_id in sorted(ids):
-            items = list(
+        for test_id in sorted(test_ids):
+            items: list[dict] = list(
                 container.query_items(
                     query="SELECT c.id, c.testId FROM c WHERE c.testId = @testId",
                     parameters=[{"name": "@testId", "value": test_id}],
@@ -69,7 +69,7 @@ def delete_test_items(container: ContainerProxy, items: list[dict]) -> int:
         int: 削除した合計項目数
     """
 
-    count = 0
+    count: int = 0
     for item in items:
         container.delete_item(
             item=item["id"],
@@ -82,9 +82,11 @@ def delete_test_items(container: ContainerProxy, items: list[dict]) -> int:
 
 if __name__ == "__main__":
     # コマンドライン引数からコース名を取得
-    parser = argparse.ArgumentParser(description="Delete items by courseName")
+    parser: argparse.ArgumentParser = argparse.ArgumentParser(
+        description="Delete items by courseName"
+    )
     parser.add_argument("course_name", help="Course name to delete (courseName)")
-    args = parser.parse_args()
+    args: argparse.Namespace = parser.parse_args()
 
     # Test コンテナーから指定したコース名に対応するtestIdをすべて取得
     test_container: ContainerProxy = (
@@ -104,10 +106,9 @@ if __name__ == "__main__":
     if not test_items:
         print(f"No Test items found for courseName: {args.course_name}")
         sys.exit(0)
-    test_ids: set[str] = {item["id"] for item in test_items}
 
     # Test コンテナー以外の各コンテナーの項目を削除
-    item_count: int = delete_items_by_test_ids(test_ids)
+    item_count: int = delete_items_by_test_ids({item["id"] for item in test_items})
 
     # Test コンテナーの項目を削除
     test_item_count: int = delete_test_items(test_container, test_items)
