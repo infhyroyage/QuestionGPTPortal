@@ -29,6 +29,7 @@ Azure 環境構築後に、以下のサーバーをすべて起動すると、�
    - Python 3.12
 2. GitHub アカウントを用意して、このリポジトリをフォークし、ローカル環境にクローンする
 3. 以下を記述したファイル`local.settings.json`を functions ディレクトリ配下に保存する。
+
    ```json
    {
      "IsEncrypted": false,
@@ -56,6 +57,7 @@ Azure 環境構築後に、以下のサーバーをすべて起動すると、�
    ```
 
    - CORS は任意のオリジンを許可するように設定しているため、特定のオリジンのみ許可したい場合は`Host` > `CORS`にそのオリジンを設定すること。
+
 4. ターミナルを起動して以下のコマンドを実行し、Cosmos DB、Blob/Queue/Table ストレージをすべて起動する。実行したターミナルはそのまま放置する。
    ```bash
    docker compose up
@@ -70,10 +72,7 @@ Azure 環境構築後に、以下のサーバーをすべて起動すると、�
    ```
 6. Python 3.12 の仮想環境を有効化する:
    ```bash
-   # Linux/macOSの場合
    source venv/bin/activate
-   # Windowsの場合
-   venv\Scripts\activate
    ```
 7. 6 と同じターミナルで以下のコマンドを実行し、Azure Functions を起動する。実行したターミナルはそのまま放置する。
    ```bash
@@ -83,7 +82,7 @@ Azure 環境構築後に、以下のサーバーをすべて起動すると、�
 8. 7 とは別のターミナルで以下のコマンドを実行し、6 で作成した仮想環境の有効後、起動した Cosmos DB サーバーに対し、インポートデータファイルからインポートする。実行したターミナルは閉じる。
 
    ```bash
-   ./venv/Scripts/activate
+   source venv/bin/activate
    python functions/import_local.py
    ```
 
