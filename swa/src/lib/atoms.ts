@@ -730,7 +730,6 @@ export const resetAtomsForTestQuestionAtom = atom(null, (_, set) => {
 export const resetDiscussionAtom = atom(null, (_, set) => {
   set(discussionAtom, undefined);
   set(translationDiscussionAtom, undefined);
-  set(votesAtom, undefined);
 });
 
 /**

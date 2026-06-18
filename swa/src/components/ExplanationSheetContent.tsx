@@ -49,6 +49,7 @@ export default function ExplanationSheetContent() {
   const fetchExplanationsOnlyCalledRef = useRef<boolean>(false);
   const fetchTranslationExplanationCalledRef = useRef<boolean>(false);
   const fetchTranslationDiscussionCalledRef = useRef<boolean>(false);
+  const fetchVotesCalledRef = useRef<boolean>(false);
   const previousQuestionNumberRef = useRef<string | undefined>(undefined);
 
   const { testId, questionNumber } = useParams();
@@ -60,24 +61,23 @@ export default function ExplanationSheetContent() {
 
   // コミュニティ情報を再取得する関数
   const handleRefreshDiscussion = async () => {
-    if (
-      !testId ||
-      !questionNumber ||
-      discussion === undefined ||
-      votes === undefined
-    ) {
+    if (!testId || !questionNumber || discussion === undefined) {
       return;
     }
     try {
-      // コミュニティ情報と翻訳をクリア(ローディング表示にするため)
+      // コミュニティ情報と翻訳をクリア
       resetDiscussion();
-      // コミュニティ情報を再生成(isRefresh: trueでPOSTのみ実行)し、votesを並列取得
-      await Promise.all([
-        fetchDiscussion(testId, questionNumber, instance, accountInfo, true),
-        fetchVotes(testId, questionNumber, instance, accountInfo),
-      ]);
-      // 翻訳も再取得するためにフラグをリセット
+
+      // コミュニティ情報を再生成
+      await fetchDiscussion(
+        testId,
+        questionNumber,
+        instance,
+        accountInfo,
+        true,
+      );
       fetchTranslationDiscussionCalledRef.current = false;
+
       // エラーが発生した問題番号をクリア
       setTranslationFailedForQuestion(null);
       setSystemErrorForQuestion(null);
@@ -96,6 +96,7 @@ export default function ExplanationSheetContent() {
       fetchExplanationsOnlyCalledRef.current = false;
       fetchTranslationExplanationCalledRef.current = false;
       fetchTranslationDiscussionCalledRef.current = false;
+      fetchVotesCalledRef.current = false;
       previousQuestionNumberRef.current = questionNumber;
     }
   }, [questionNumber]);
@@ -106,7 +107,6 @@ export default function ExplanationSheetContent() {
       !testId ||
       !questionNumber ||
       discussion !== undefined ||
-      votes !== undefined ||
       systemErrorForQuestion === questionNumber ||
       fetchDiscussionCalledRef.current
     ) {
@@ -115,10 +115,7 @@ export default function ExplanationSheetContent() {
     fetchDiscussionCalledRef.current = true;
     (async () => {
       try {
-        await Promise.all([
-          fetchDiscussion(testId, questionNumber, instance, accountInfo),
-          fetchVotes(testId, questionNumber, instance, accountInfo),
-        ]);
+        await fetchDiscussion(testId, questionNumber, instance, accountInfo);
       } catch (e) {
         // エラーが発生した問題番号を設定
         setSystemErrorForQuestion(questionNumber);
@@ -130,8 +127,39 @@ export default function ExplanationSheetContent() {
     testId,
     questionNumber,
     discussion,
-    votes,
     fetchDiscussion,
+    instance,
+    accountInfo,
+    systemErrorForQuestion,
+    systemErrorToast,
+  ]);
+
+  // 解説シートの表示直前に、コミュニティでの回答の割合を1度だけ取得
+  useEffect(() => {
+    if (
+      !testId ||
+      !questionNumber ||
+      votes !== undefined ||
+      systemErrorForQuestion === questionNumber ||
+      fetchVotesCalledRef.current
+    ) {
+      return;
+    }
+    fetchVotesCalledRef.current = true;
+    (async () => {
+      try {
+        await fetchVotes(testId, questionNumber, instance, accountInfo);
+      } catch (e) {
+        // エラーが発生した問題番号を設定
+        setSystemErrorForQuestion(questionNumber);
+        // システムエラートーストを表示
+        systemErrorToast(e);
+      }
+    })();
+  }, [
+    testId,
+    questionNumber,
+    votes,
     fetchVotes,
     instance,
     accountInfo,
@@ -329,42 +357,46 @@ export default function ExplanationSheetContent() {
             variant="ghost"
             size="icon"
             onClick={handleRefreshDiscussion}
-            disabled={discussion === undefined || votes === undefined}
+            disabled={discussion === undefined}
             title="コミュニティ情報を再取得"
           >
             <RefreshCw
-              className={
-                discussion === undefined || votes === undefined
-                  ? "animate-spin"
-                  : ""
-              }
+              className={discussion === undefined ? "animate-spin" : ""}
               size={20}
             />
           </Button>
         </div>
-        {discussion === undefined || votes === undefined ? (
+        {votes === undefined ? (
+          <div className="flex mb-4">
+            <div className="skeleton h-5 w-full" />
+          </div>
+        ) : votes.length === 0 ? (
+          <div className="flex mb-4">
+            <span className="badge badge-neutral">回答者なし</span>
+          </div>
+        ) : (
+          <div className="flex space-x-4 mb-4">
+            {votes.map((vote: string, idx: number) => (
+              <span key={idx} className="badge badge-neutral">
+                {vote}
+              </span>
+            ))}
+          </div>
+        )}
+        {discussion === undefined ? (
           <>
             <div className="space-y-1">
               <div className="skeleton h-7 w-full" />
               <div className="skeleton h-5 w-full" />
             </div>
           </>
-        ) : votes.length === 0 && !discussion.summary ? (
+        ) : !discussion.summary ? (
           <div className="flex items-center justify-center flex-col space-y-4">
             <Info size={50} />
             <div>コミュニティ回答要約はありません</div>
           </div>
         ) : (
           <>
-            {votes.length > 0 && (
-              <div className="flex space-x-4 mb-4">
-                {votes.map((vote: string, idx: number) => (
-                  <span key={idx} className="badge badge-neutral">
-                    {vote}
-                  </span>
-                ))}
-              </div>
-            )}
             {discussion.summary && (
               <div className="space-y-1">
                 <p className="leading-7">{discussion.summary}</p>
