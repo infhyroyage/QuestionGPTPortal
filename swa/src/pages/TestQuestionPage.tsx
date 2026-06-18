@@ -187,7 +187,7 @@ export default function TestQuestionPage() {
           className="pt-[52px] min-h-screen w-full"
         >
           <ResizablePanel defaultSize="60%" className="z-10">
-            <div className="relative flex h-full min-h-0 flex-col">
+            <div className="relative flex h-full min-h-0 flex-col overflow-hidden">
               <div
                 className="flex-1 min-h-0 overflow-y-auto p-4"
                 data-test-question-scroll-container
