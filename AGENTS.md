@@ -19,8 +19,8 @@ QuestionGPTPortal は、Azure OpenAI を活用した英語IT資格試験の学�
 
 ### 重要な注意点
 
-- **Docker in Docker**: `dockerd` の起動・`docker` コマンドは `sudo` が必要（例: `sudo dockerd`、`sudo docker compose up`）。`iptables-legacy` を使用する。
-- **Docker ストレージドライバーは `vfs`**: `/etc/docker/daemon.json` に `{"storage-driver": "vfs"}` を設定済み。`fuse-overlayfs` だと CosmosDB Emulator (vnext-preview) 内部の PostgreSQL が起動時に `could not remove file "base/pgsql_job_cache": Invalid cross-device link` で失敗し、`pgcosmos extension is still starting` のまま使用不能になる。`vfs` に切り替えると `docker compose up` で `PostgreSQL=OK, Gateway=OK, Explorer=OK` となり正常に動作する。この設定は変更しないこと。
+- **Docker in Docker**: `dockerd` の起動・`docker` コマンドは `sudo` が必要（例: `sudo dockerd`、`sudo docker compose up`）。ストレージドライバーは `fuse-overlayfs`、`iptables-legacy` を使用する（`/etc/docker/daemon.json` に設定済み）。
+- **CosmosDB Emulator の PostgreSQL 起動対策**: `fuse-overlayfs` 環境では、イメージ下位レイヤー上のファイル削除が `could not remove file "base/pgsql_job_cache": Invalid cross-device link` (EXDEV) となり、内蔵 PostgreSQL が起動失敗（`pgcosmos extension is still starting` のまま使用不能）する。これを回避するため、`compose.yaml` で CosmosDB の `/data` を名前付きボリューム `cosmosdata` にマウントしている（名前付きボリュームはイメージ内の初期化済み `/data` を自動コピーし、実ファイルシステム上で動作するため EXDEV を回避できる）。正常起動時は `docker compose up` のログに `PostgreSQL=OK, Gateway=OK, Explorer=OK` が出る。ボリュームを完全に作り直したい場合のみ `docker compose down -v` を使う。
 - **認証スキップ**: `import.meta.env.DEV` が true のとき MSAL 認証をスキップし、バックエンドへのリクエストに `X-User-Id: local` ヘッダーを付与する。
 - **Node.js バージョン**: v24 が必要。`nvm use 24` で切り替え可能。
 - **Python venv**: `/workspace/venv` に作成済み。`source /workspace/venv/bin/activate` で有効化。
