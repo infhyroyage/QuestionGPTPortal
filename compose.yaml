@@ -14,6 +14,10 @@ services:
     environment:
       - AZURE_COSMOS_EMULATOR_PARTITION_COUNT=3
       - AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE=true
+    # fuse-overlayfsストレージドライバー環境では、イメージ下位レイヤー上のファイル削除が"Invalid cross-device link"(EXDEV)となって
+    # PostgreSQLが起動失敗するため、/dataを名前付きボリュームにマウントし、実ファイルシステム上で内蔵PostgreSQLを動作させることで回避する
+    volumes:
+      - ./cosmosdata:/data
   localstorage:
     image: mcr.microsoft.com/azure-storage/azurite:latest
     container_name: localstorage
@@ -23,3 +27,6 @@ services:
       - 10002:10002
     volumes:
       - ./azurite:/data
+
+volumes:
+  cosmosdata:
