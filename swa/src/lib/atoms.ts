@@ -34,7 +34,7 @@ import { accessBackend } from "./backend";
 import { translateSubjectsAndChoices } from "./translation";
 
 /**
- * 正解・解説文を管理するatom
+ * 正解・解説文・回答のポイントを管理するatom
  */
 const answerExplanationAtom = atom<AnswerExplanation>(undefined);
 
@@ -94,7 +94,7 @@ const translationSubjectChoiceAtom = atom<TranslationSubjectChoice>(undefined);
 const votesAtom = atom<Votes>(undefined);
 
 /**
- * 正解・解説文を取得するatom
+ * 正解・解説文・回答のポイントを取得するatom
  */
 export const fetchAnswerExplanationAtom = atom(
   (get) => get(answerExplanationAtom),
@@ -133,7 +133,7 @@ export const fetchAnswerExplanationAtom = atom(
       return;
     }
 
-    // 回答・解説生成中に更新
+    // 正解・解説文・回答のポイント生成中に更新
     set(answerExplanationAtom, {
       isSubmitting: true,
     });
@@ -142,7 +142,7 @@ export const fetchAnswerExplanationAtom = atom(
     let explanations: string[];
     let answerKeyPoint: string | undefined;
     if (isResubmit) {
-      // 回答・解説再生成の場合、解説文に対する翻訳文を初期化してから、
+      // 正解・解説文・回答のポイント再生成の場合、解説文・回答のポイントに対する翻訳文を初期化してから、
       // [POST] /tests/{testId}/answers/{questionNumber}にアクセス
       set(translationExplanationAtom, undefined);
       const postAnswerRes: PostAnswerRes = await accessBackend<PostAnswerRes>(
@@ -155,7 +155,8 @@ export const fetchAnswerExplanationAtom = atom(
       explanations = postAnswerRes.explanations;
       answerKeyPoint = postAnswerRes.answerKeyPoint;
     } else {
-      // 回答・解説再生成ではない場合、[GET] /tests/{testId}/answers/{questionNumber}にアクセスして事前に生成した回答・解説を取得
+      // 正解・解説文・回答のポイント再生成ではない場合、[GET] /tests/{testId}/answers/{questionNumber}にアクセスして
+      // 事前に生成した正解・解説文・回答のポイントを取得
       // もし取得できなかった場合、[POST] /tests/{testId}/answers/{questionNumber}にアクセス
       const getAnswerRes: GetAnswer = await accessBackend<GetAnswer>(
         "GET",
@@ -180,7 +181,7 @@ export const fetchAnswerExplanationAtom = atom(
       }
     }
 
-    // 生成/取得した正解・解説文で更新
+    // 生成/取得した正解・解説文・回答のポイントで更新
     const correctFlags: boolean[] = [
       ...Array(questionSelector.choices.length),
     ].map((_, idx: number) => correctIdxes.includes(idx));
@@ -200,8 +201,7 @@ export const fetchAnswerExplanationAtom = atom(
 );
 
 /**
- * 解説文のみを取得するatom(回答済みの問題に遷移した際に使用)
- * 既存のanswerExplanationの状態を保持したまま、解説のみを追加する
+ * 正解は取得せず、解説文・回答のポイントのみを取得するatom
  */
 export const fetchExplanationsOnlyAtom = atom(
   null,
@@ -213,23 +213,23 @@ export const fetchExplanationsOnlyAtom = atom(
     instance: IPublicClientApplication,
     accountInfo: AccountInfo | null,
   ) => {
-    // 既存のanswerExplanationを取得
+    // 既存の正解・解説文・回答のポイントを取得
     const answerExplanation: AnswerExplanation = get(answerExplanationAtom);
     if (!answerExplanation) {
       return;
     }
 
-    // 回答・解説生成中、または今回のセッションで新規回答した直後は何もしない
+    // 正解・解説文・回答のポイント生成中、または今回のセッションで正解・解説文・回答のポイントを新規回答した直後は何もしない
     if (answerExplanation.isSubmitting || !answerExplanation.isSavedProgress) {
       return;
     }
 
-    // 既に解説が存在する場合は何もしない
+    // 既に解説文が存在する場合は何もしない
     if (answerExplanation.explanations) {
       return;
     }
 
-    // [GET] /tests/{testId}/answers/{questionNumber}にアクセスして解説を取得
+    // [GET] /tests/{testId}/answers/{questionNumber}にアクセスして解説文・回答のポイントを取得
     const getAnswerRes: GetAnswer = await accessBackend<GetAnswer>(
       "GET",
       `/tests/${testId}/answers/${questionNumber}`,
@@ -243,7 +243,8 @@ export const fetchExplanationsOnlyAtom = atom(
       explanations = getAnswerRes.explanations || [];
       answerKeyPoint = getAnswerRes.answerKeyPoint;
     } else {
-      // 解説がまだ生成されていない場合は、POSTで生成
+      // 解説文・回答のポイントがまだ生成されていない場合は、[POST] /tests/{testId}/answers/{questionNumber}にアクセスして
+      // 解説文・回答のポイントを生成
       const postAnswerRes: PostAnswerRes = await accessBackend<PostAnswerRes>(
         "POST",
         `/tests/${testId}/answers/${questionNumber}`,
@@ -254,7 +255,7 @@ export const fetchExplanationsOnlyAtom = atom(
       answerKeyPoint = postAnswerRes.answerKeyPoint;
     }
 
-    // 既存の状態を保持したまま、解説と回答のポイントを追加
+    // 既存の正解はそのままにして、解説文・回答のポイントを追加
     set(answerExplanationAtom, {
       ...answerExplanation,
       explanations,
@@ -295,7 +296,7 @@ export const fetchDiscussionAtom = atom(
       return;
     }
 
-    // 正解・解説文がまだ存在しない場合は何も取得・更新しない
+    // 正解・解説文・回答のポイントがまだ存在しない場合は何も取得・更新しない
     const answerExplanation: AnswerExplanation = get(answerExplanationAtom);
     if (!answerExplanation) {
       return;
@@ -497,7 +498,7 @@ export const fetchTranslationDiscussionAtom = atom(
 );
 
 /**
- * 解説文に対する翻訳文を取得するatom
+ * 解説文・回答のポイントに対する翻訳文を取得するatom
  */
 export const fetchTranslationExplanationAtom = atom(
   (get) => get(translationExplanationAtom),
@@ -520,7 +521,7 @@ export const fetchTranslationExplanationAtom = atom(
       textsToTranslate.push(answerExplanation.answerKeyPoint!);
     }
 
-    // [PUT] /en2jaにアクセスして取得した解説文の翻訳文で更新
+    // [PUT] /en2jaにアクセスして取得した解説文・回答のポイントの翻訳文で更新
     const res: PutEn2JaRes = await accessBackend<PutEn2JaRes, PutEn2JaReq>(
       "PUT",
       "/en2ja",
@@ -618,12 +619,13 @@ export const fetchVotesAtom = atom(
       return;
     }
 
-    // 正解・解説文がまだ存在しない場合は何も取得・更新しない
+    // 正解・解説文・回答のポイントがまだ存在しない場合は何も取得・更新しない
     const answerExplanation: AnswerExplanation = get(answerExplanationAtom);
     if (!answerExplanation) {
       return;
     }
 
+    // [GET] /tests/{testId}/votes/{questionNumber}にアクセスしてコミュニティでの回答の割合を取得
     const votesRes: GetVotesRes = await accessBackend<GetVotesRes>(
       "GET",
       `/tests/${testId}/votes/${questionNumber}`,
@@ -751,7 +753,7 @@ export const saveProgressAtom = atom(
       return;
     }
 
-    // 回答・解説がまだ存在しない場合は回答履歴を保存しない
+    // 正解・解説文・回答のポイントがまだ存在しない場合は回答履歴を保存しない
     const answerExplanation: AnswerExplanation = get(answerExplanationAtom);
     if (
       !answerExplanation ||

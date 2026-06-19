@@ -1,5 +1,5 @@
 import { GetQuestion, Subject } from "@/types/backend";
-import { ReactNode } from "react";
+import { ReactNode, RefObject } from "react";
 import { History } from "./atoms";
 
 /**
@@ -10,6 +10,31 @@ export type ApplyMSALProps = {
    * 子コンポーネント
    */
   children: ReactNode;
+};
+
+/**
+ * ExplanationSheetCommunityのProps
+ */
+export type ExplanationSheetCommunityProps = {
+  /**
+   * コミュニティ情報を取得するためのAPI呼び出しフラグ
+   */
+  fetchDiscussionCalledRef: RefObject<boolean>;
+
+  /**
+   * コミュニティ情報の翻訳文を取得するためのAPI呼び出しフラグ
+   */
+  fetchTranslationDiscussionCalledRef: RefObject<boolean>;
+
+  /**
+   * システムエラーが発生した問題番号を設定する関数
+   */
+  setSystemErrorForQuestion: (questionNumber: string | null) => void;
+
+  /**
+   * 翻訳失敗が発生した問題番号を設定する関数
+   */
+  setTranslationFailedForQuestion: (questionNumber: string | null) => void;
 };
 
 /**

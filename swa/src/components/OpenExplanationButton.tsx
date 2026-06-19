@@ -4,7 +4,7 @@ import { Info } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "./Button";
-import ExplanationSheetContent from "./ExplanationSheetContent";
+import ExplanationSheet from "./ExplanationSheet";
 import Tooltip from "./Tooltip";
 
 /**
@@ -89,7 +89,7 @@ export default function OpenExplanationButton() {
               }`}
               onAnimationEnd={handleAnimationEnd}
             >
-              <ExplanationSheetContent />
+              <ExplanationSheet />
             </div>
           </div>,
           document.body,
