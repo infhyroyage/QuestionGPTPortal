@@ -72,8 +72,13 @@ export default function TestQuestionPage() {
     }
   }, [histories, navigate, navigationType, order]);
 
-  // 最初の問題開始時、および問題番号を変更した場合、
-  // 前問題の問題文・選択肢・回答・解説文・翻訳文のatomをすべて初期化
+  // 最初の問題開始時、および問題番号を変更した場合、前問題の以下のatomをすべて初期化
+  // * 問題文
+  // * 選択肢
+  // * 回答・解説文
+  // * コミュニティ情報
+  // * コミュニティでの回答の割合
+  // * 翻訳文
   useEffect(() => {
     if (
       questionNumber &&
@@ -125,8 +130,7 @@ export default function TestQuestionPage() {
     if (
       !questionNumber ||
       !questionSelector ||
-      // questionSelectorが現在の問題番号と一致しない場合はまだAPIレスポンス待ち
-      questionSelector.questionNumber !== questionNumber ||
+      questionSelector.questionNumber !== questionNumber || // 問題文・選択肢の取得中
       restoreAnsweredQuestionCalledRef.current
     ) {
       return;
@@ -140,8 +144,7 @@ export default function TestQuestionPage() {
     if (
       !questionNumber ||
       !questionSelector ||
-      // questionSelectorが現在の問題番号と一致しない場合はまだAPIレスポンス待ち
-      questionSelector.questionNumber !== questionNumber ||
+      questionSelector.questionNumber !== questionNumber || // 問題文・選択肢の取得中
       translationSubjectChoice ||
       isOccurredTranslationFailed ||
       fetchTranslationSubjectChoiceCalledRef.current
