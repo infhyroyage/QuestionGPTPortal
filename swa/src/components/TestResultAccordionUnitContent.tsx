@@ -1,20 +1,20 @@
 import useTranslationFailedToast from "@/hooks/useTranslationFailedToast";
 import { translateSubjectsAndChoices } from "@/lib/translation";
 import { TranslationSubjectChoice } from "@/types/atoms";
-import { TestResultAccordionContentProps } from "@/types/props";
+import { TestResultAccordionUnitContentProps } from "@/types/props";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useEffect, useState } from "react";
 import SelectorButton from "./SelectorButton";
 import SubjectDisplay from "./SubjectDisplay";
 
 /**
- * テスト結果アコーディオンのコンテンツのコンポーネント
- * @returns テスト結果アコーディオンのコンテンツのコンポーネント
+ * テスト結果アコーディオンの行単位のコンテンツのコンポーネント
+ * @returns テスト結果アコーディオンの行単位のコンテンツのコンポーネント
  */
-export default function TestResultAccordionContent({
+export default function TestResultAccordionUnitContent({
   getQuestion,
   history,
-}: TestResultAccordionContentProps) {
+}: TestResultAccordionUnitContentProps) {
   const [translation, setTranslation] =
     useState<TranslationSubjectChoice>(undefined);
   const [isOccurredTranslationFailed, setIsOccurredTranslationFailed] =
@@ -34,13 +34,13 @@ export default function TestResultAccordionContent({
               getQuestion.subjects,
               getQuestion.choices,
               instance,
-              accountInfo
+              accountInfo,
             );
           setTranslation(translationSubjectChoice);
         } catch {
           setIsOccurredTranslationFailed(true);
           translationFailedToast("問題文・選択肢", () =>
-            setIsOccurredTranslationFailed(false)
+            setIsOccurredTranslationFailed(false),
           );
         }
       })();

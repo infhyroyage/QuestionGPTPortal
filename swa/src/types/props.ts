@@ -125,9 +125,63 @@ export type TestReadyButtonsProps = {
 };
 
 /**
- * TestResultAccordionContentのProps
+ * TestResultAccordionUnitのProps
  */
-export type TestResultAccordionContentProps = {
+export type TestResultAccordionUnitProps = {
+  /**
+   * 問題文・選択肢
+   */
+  getQuestion: GetQuestion | undefined;
+
+  /**
+   * 回答履歴
+   */
+  history: History;
+
+  /**
+   * 回答履歴のインデックス
+   */
+  historyIdx: number;
+
+  /**
+   * 問題番号
+   */
+  questionNumber: string;
+
+  /**
+   * i番目(0スタート)の問題のお気に入り状態
+   */
+  isFavorite: boolean;
+
+  /**
+   * 回答履歴が開かれている場合はtrue、閉じている場合はfalse
+   */
+  isOpen: boolean;
+
+  /**
+   * お気に入り切替ボタンがローディング中の場合はtrue、ローディング中でない場合はfalse
+   */
+  isLoadingFavoriteButton: boolean;
+
+  /**
+   * i番目(0スタート)の問題のお気に入り切替ボタンのお気に入り状態変更時の動作
+   * @param favoriteIdx {number} i番目(0スタート)の問題のインデックス
+   * @param newIsFavorite 新しいお気に入り状態
+   */
+  onFavoriteChange: (favoriteIdx: number, newIsFavorite: boolean) => void;
+
+  /**
+   * 回答履歴の開閉ボタンのクリック時の動作
+   * @param historyIdx {string} 回答履歴のインデックス
+   * @param isOpen {boolean} 回答履歴が開かれているかどうか
+   */
+  onToggle: (historyIdx: string, isOpen: boolean) => void;
+};
+
+/**
+ * TestResultAccordionUnitContentのProps
+ */
+export type TestResultAccordionUnitContentProps = {
   /**
    * 問題文・選択肢
    */
