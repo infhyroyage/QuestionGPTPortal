@@ -12,10 +12,8 @@ QuestionGPTPortal は、Azure OpenAI を活用した英語IT資格試験の学�
 
 ### サービス起動順序
 
-手順 1〜2（設定ファイル準備・Docker/CosmosDB・Azurite 起動・データインポート）は起動スクリプト `./scripts/start-local.sh` でまとめて実行できる（冪等。Docker デーモン未起動なら自動起動し、`PostgreSQL=OK` まで待機する）。バックエンド・フロントエンドはスクリプト完了後に手動起動する。
-
-1. 設定ファイル `functions/local.settings.json`・`swa/.env` を用意（`start-local.sh` が未存在時のみ作成。`local.settings.json` の `OPENAI_*`/`TRANSLATOR_KEY` はダミー値）
-2. Docker (`sudo dockerd` → `sudo docker compose up`) — CosmosDB + Azurite を起動し、CosmosDB 初期化＋データインポート (`functions/import_local.py`)
+1. Docker (`sudo dockerd` → `docker compose up`) — CosmosDB + Azurite
+2. CosmosDB 初期化: `cd functions && python import_local.py` — DB/コンテナー作成
 3. バックエンド: `source /workspace/venv/bin/activate && cd functions && func start --verbose`
 4. フロントエンド: `cd swa && npm run dev`
 

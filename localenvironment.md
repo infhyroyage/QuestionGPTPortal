@@ -20,22 +20,6 @@ Azure 環境構築後に、以下のサーバーをすべて起動すると、�
 > [!TIP]  
 > localhost 環境構築後、ブラウザから [データエクスプローラー](http://localhost:1234) にアクセスすると、Cosmos DB 内のデータを GUI で参照・更新できる。
 
-## 簡易起動（起動スクリプト）
-
-設定ファイルの用意・Docker（CosmosDB Emulator + Azurite）の起動・サンプルデータのインポートまでは、以下の起動スクリプトでまとめて実行できる（冪等。既存の設定ファイルは上書きしない）。
-
-```bash
-./scripts/start-local.sh
-```
-
-- 初回は `functions/local.settings.json` と `swa/.env` を自動生成する（`OPENAI_*`・`TRANSLATOR_KEY` はダミー値。AI 機能を使う場合は実際の Azure の値に置き換える）。
-- Docker デーモンが未起動の場合は自動起動を試みる。
-- CosmosDB Emulator の起動完了（`PostgreSQL=OK`）まで待機してから、`functions/import_local.py` でデータをインポートする。
-- 問題データを投入するには、事前に `functions/data/<コース名>/<テスト名>.json` を配置しておくこと。
-- バックエンド（`func start`）・フロントエンド（`npm run dev`）はスクリプト完了後に手動で起動する（スクリプト末尾に手順を表示）。
-
-以下は手動で構築する場合の詳細手順。
-
 ## 構築手順
 
 1. 以下をすべてインストールする。
