@@ -64,10 +64,14 @@ export default function ExplanationSheetContent() {
     if (!testId || !questionNumber || discussion === undefined) {
       return;
     }
-    try {
-      // コミュニティ情報と翻訳をクリア
-      resetDiscussion();
 
+    fetchDiscussionCalledRef.current = true;
+    fetchTranslationDiscussionCalledRef.current = true;
+
+    // コミュニティ情報と翻訳をクリア
+    resetDiscussion();
+
+    try {
       // コミュニティ情報を再生成
       await fetchDiscussion(
         testId,
@@ -76,7 +80,6 @@ export default function ExplanationSheetContent() {
         accountInfo,
         true,
       );
-      fetchTranslationDiscussionCalledRef.current = false;
 
       // エラーが発生した問題番号をクリア
       setTranslationFailedForQuestion(null);
@@ -86,6 +89,19 @@ export default function ExplanationSheetContent() {
       setSystemErrorForQuestion(questionNumber ?? null);
       // システムエラートーストを表示
       systemErrorToast(e);
+      return;
+    }
+
+    // 再生成したコミュニティ情報に連動した翻訳文を取得
+    try {
+      await fetchTranslationDiscussion(instance, accountInfo);
+    } catch {
+      // エラーが発生した問題番号を設定
+      setTranslationFailedForQuestion(questionNumber ?? null);
+      // 翻訳失敗トーストを表示
+      translationFailedToast("コミュニティ情報", () =>
+        setTranslationFailedForQuestion(null),
+      );
     }
   };
 
@@ -103,15 +119,22 @@ export default function ExplanationSheetContent() {
 
   // 解説シートの表示直前に、コミュニティ情報を1度だけ取得
   useEffect(() => {
+    // コミュニティ情報の再取得時によってクリアする際に、このuseEffectが再発火してしまうため、
+    // 既にコミュニティ情報が存在する場合は取得済みとして記録して何もしないようにする
+    if (discussion !== undefined) {
+      fetchDiscussionCalledRef.current = true;
+      return;
+    }
+
     if (
       !testId ||
       !questionNumber ||
-      discussion !== undefined ||
       systemErrorForQuestion === questionNumber ||
       fetchDiscussionCalledRef.current
     ) {
       return;
     }
+
     fetchDiscussionCalledRef.current = true;
     (async () => {
       try {
