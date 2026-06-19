@@ -65,19 +65,14 @@ export default function ExplanationSheetContent() {
       return;
     }
 
-    // 再取得は本関数内でコミュニティ情報の取得と翻訳を明示的に行う。
-    // resetDiscussion() で discussion を undefined に戻すと、自動取得用の
-    // useEffect(GET と翻訳)が再発火し、再生成の POST(低速)と GET(高速)が
-    // 競合して「新しい要約 + 古い翻訳」が表示される不具合が発生するため、
-    // 先にフラグを立てて自動取得用の useEffect の発火を抑止する。
     fetchDiscussionCalledRef.current = true;
     fetchTranslationDiscussionCalledRef.current = true;
 
-    try {
-      // コミュニティ情報と翻訳をクリア
-      resetDiscussion();
+    // コミュニティ情報と翻訳をクリア
+    resetDiscussion();
 
-      // コミュニティ情報を再生成(POST で最新の要約を取得)
+    try {
+      // コミュニティ情報を再生成
       await fetchDiscussion(
         testId,
         questionNumber,
@@ -124,14 +119,13 @@ export default function ExplanationSheetContent() {
 
   // 解説シートの表示直前に、コミュニティ情報を1度だけ取得
   useEffect(() => {
-    // 既にコミュニティ情報が存在する場合(シートを開き直した場合など)は、
-    // 取得済みとして記録しておく。これを記録しないと、再取得ボタン押下時の
-    // resetDiscussion() による discussion=undefined を契機にこの useEffect が
-    // GET を再発火し、再生成の POST と競合してしまう。
+    // コミュニティ情報の再取得時によってクリアする際に、このuseEffectが再発火してしまうため、
+    // 既にコミュニティ情報が存在する場合は取得済みとして記録して何もしないようにする
     if (discussion !== undefined) {
       fetchDiscussionCalledRef.current = true;
       return;
     }
+
     if (
       !testId ||
       !questionNumber ||
@@ -140,6 +134,7 @@ export default function ExplanationSheetContent() {
     ) {
       return;
     }
+
     fetchDiscussionCalledRef.current = true;
     (async () => {
       try {
