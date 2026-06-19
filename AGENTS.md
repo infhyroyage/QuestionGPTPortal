@@ -19,7 +19,8 @@ QuestionGPTPortal は、Azure OpenAI を活用した英語IT資格試験の学�
 
 ### 重要な注意点
 
-- **Docker in Docker**: このVM環境では `fuse-overlayfs` ストレージドライバーと `iptables-legacy` が必要。`/etc/docker/daemon.json` に `{"storage-driver": "fuse-overlayfs"}` を設定済み。
+- **Docker in Docker**: このVM環境では `fuse-overlayfs` ストレージドライバーと `iptables-legacy` が必要。`/etc/docker/daemon.json` に `{"storage-driver": "fuse-overlayfs"}` を設定済み。Docker デーモンは `sudo dockerd` で起動し、`docker` コマンドは `sudo` 付きで実行する。
+- **CosmosDB Emulator の fuse-overlayfs 対策**: `fuse-overlayfs` 上では CosmosDB Emulator 内蔵 PostgreSQL が `could not remove file "base/pgsql_job_cache": Invalid cross-device link` で起動失敗する。リポジトリ直下の `compose.override.yaml`（`docker compose up` が自動マージ）で名前付きボリューム `cosmosdb-data` を `/data` にマウントし、データディレクトリを fuse-overlayfs レイヤーから外すことで回避している。ボリュームは必ず `/data` にマウントすること（`/data/db` だと entrypoint が initdb をスキップして失敗する）。`PostgreSQL=OK, Gateway=OK, Explorer=OK` のログが出れば起動完了。
 - **認証スキップ**: `import.meta.env.DEV` が true のとき MSAL 認証をスキップし、バックエンドへのリクエストに `X-User-Id: local` ヘッダーを付与する。
 - **Node.js バージョン**: v24 が必要。`nvm use 24` で切り替え可能。
 - **Python venv**: `/workspace/venv` に作成済み。`source /workspace/venv/bin/activate` で有効化。

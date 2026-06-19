@@ -1,0 +1,23 @@
+# Local/Cloud override automatically merged by `docker compose up`.
+#
+# In the Cursor Cloud Agent VM, Docker uses the `fuse-overlayfs` storage driver
+# (required because the VM kernel lacks full overlay2 support). The Cosmos DB
+# emulator's embedded PostgreSQL fails to start on that driver with:
+#   FATAL: could not remove file "base/pgsql_job_cache": Invalid cross-device link
+#
+# Mounting the emulator data path (/data) on a Docker named volume keeps the
+# PostgreSQL data directory off the fuse-overlayfs layered filesystem, which
+# resolves the error. The volume must be mounted at /data (not /data/db): the
+# entrypoint only runs initdb when /data/db does not yet exist, so the volume
+# must be empty at /data and let the entrypoint create /data/db itself.
+#
+# This is harmless on normal hosts: it simply persists the emulator data, which
+# matches AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE=true and the existing
+# ./azurite bind mount for the storage emulator.
+services:
+  localcosmosdb:
+    volumes:
+      - cosmosdb-data:/data
+
+volumes:
+  cosmosdb-data:
