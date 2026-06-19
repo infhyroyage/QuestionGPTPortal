@@ -64,11 +64,20 @@ export default function ExplanationSheetContent() {
     if (!testId || !questionNumber || discussion === undefined) {
       return;
     }
+
+    // 再取得は本関数内でコミュニティ情報の取得と翻訳を明示的に行う。
+    // resetDiscussion() で discussion を undefined に戻すと、自動取得用の
+    // useEffect(GET と翻訳)が再発火し、再生成の POST(低速)と GET(高速)が
+    // 競合して「新しい要約 + 古い翻訳」が表示される不具合が発生するため、
+    // 先にフラグを立てて自動取得用の useEffect の発火を抑止する。
+    fetchDiscussionCalledRef.current = true;
+    fetchTranslationDiscussionCalledRef.current = true;
+
     try {
       // コミュニティ情報と翻訳をクリア
       resetDiscussion();
 
-      // コミュニティ情報を再生成
+      // コミュニティ情報を再生成(POST で最新の要約を取得)
       await fetchDiscussion(
         testId,
         questionNumber,
@@ -76,7 +85,6 @@ export default function ExplanationSheetContent() {
         accountInfo,
         true,
       );
-      fetchTranslationDiscussionCalledRef.current = false;
 
       // エラーが発生した問題番号をクリア
       setTranslationFailedForQuestion(null);
@@ -86,6 +94,19 @@ export default function ExplanationSheetContent() {
       setSystemErrorForQuestion(questionNumber ?? null);
       // システムエラートーストを表示
       systemErrorToast(e);
+      return;
+    }
+
+    // 再生成したコミュニティ情報に連動した翻訳文を取得
+    try {
+      await fetchTranslationDiscussion(instance, accountInfo);
+    } catch {
+      // エラーが発生した問題番号を設定
+      setTranslationFailedForQuestion(questionNumber ?? null);
+      // 翻訳失敗トーストを表示
+      translationFailedToast("コミュニティ情報", () =>
+        setTranslationFailedForQuestion(null),
+      );
     }
   };
 
@@ -103,10 +124,17 @@ export default function ExplanationSheetContent() {
 
   // 解説シートの表示直前に、コミュニティ情報を1度だけ取得
   useEffect(() => {
+    // 既にコミュニティ情報が存在する場合(シートを開き直した場合など)は、
+    // 取得済みとして記録しておく。これを記録しないと、再取得ボタン押下時の
+    // resetDiscussion() による discussion=undefined を契機にこの useEffect が
+    // GET を再発火し、再生成の POST と競合してしまう。
+    if (discussion !== undefined) {
+      fetchDiscussionCalledRef.current = true;
+      return;
+    }
     if (
       !testId ||
       !questionNumber ||
-      discussion !== undefined ||
       systemErrorForQuestion === questionNumber ||
       fetchDiscussionCalledRef.current
     ) {
