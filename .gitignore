@@ -14,9 +14,6 @@ functions/local.settings.json
 # Bicep Parameter Files
 resources/*.parameters.bicepparam
 
-# CosmosDB Emulator
-cosmosdata/
-
 # Python Virtual Environment
 venv/
 
