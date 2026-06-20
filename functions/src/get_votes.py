@@ -16,11 +16,11 @@ bp_get_votes = func.Blueprint()
 
 def calculate_community_votes(discussions: list[QuestionDiscussion]) -> list[str]:
     """
-    コミュニティのディスカッションからユーザーが選択した選択肢を集計し、
+    コミュニティでのディスカッションからユーザーが選択した選択肢を集計し、
     コミュニティでの回答の割合の文字列配列を生成する
 
     Args:
-        discussions (list[QuestionDiscussion]): コミュニティのディスカッション
+        discussions (list[QuestionDiscussion]): コミュニティでのディスカッション
 
     Returns:
         list[str]: コミュニティでの回答の割合の文字列配列(例：["A (60%)", "B (40%)"]、ユーザーが選択した選択肢がすべてNoneの場合は空配列)

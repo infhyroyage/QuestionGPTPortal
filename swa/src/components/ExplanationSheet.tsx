@@ -144,10 +144,10 @@ export default function ExplanationSheet() {
     translationFailedToast,
   ]);
 
-  // 解説シートの表示直前に、コミュニティ情報を1度だけ取得
+  // 解説シートの表示直前に、コミュニティでのディスカッションの要約を1度だけ取得
   useEffect(() => {
-    // コミュニティ情報の再取得時によってクリアする際に、このuseEffectが再発火してしまうため、
-    // 既にコミュニティ情報が存在する場合は取得済みとして記録して何もしないようにする
+    // コミュニティでのディスカッションの要約の再取得時によってクリアする際に、このuseEffectが再発火してしまうため、
+    // 既にコミュニティでのディスカッションの要約が存在する場合は取得済みとして記録して何もしないようにする
     if (discussion !== undefined) {
       fetchDiscussionCalledRef.current = true;
       return;
@@ -217,7 +217,7 @@ export default function ExplanationSheet() {
     systemErrorToast,
   ]);
 
-  // コミュニティ情報の取得直後に、コミュニティ情報の翻訳文を1度だけ取得
+  // コミュニティでのディスカッションの要約の取得直後に、コミュニティでのディスカッションの要約の翻訳文を1度だけ取得
   useEffect(() => {
     if (
       !discussion ||
@@ -235,7 +235,7 @@ export default function ExplanationSheet() {
         // エラーが発生した問題番号を設定
         setTranslationFailedForQuestion(questionNumber ?? null);
         // 翻訳失敗トーストを表示
-        translationFailedToast("コミュニティ情報", () =>
+        translationFailedToast("コミュニティディスカッション要約", () =>
           setTranslationFailedForQuestion(null),
         );
       }

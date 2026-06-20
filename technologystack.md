@@ -19,7 +19,7 @@ GitHub Pages を通して React + TailwindCSS をベースとし、レスポン�
 3. フロントエンドアプリケーションが API Management 経由で関数アプリにアクセスし、Azure Cosmos DB で管理するテスト・問題・選択肢・学習履歴・お気に入り情報を取得・表示する。
 4. 関数アプリが Azure Translator で翻訳を実行し、英語の問題文・選択肢を日本語で表示する。
 5. ユーザーが問題を解答し、Azure OpenAI が正解の選択肢と各選択肢の正解/不正解理由を生成・表示しつつ、Azure Storage Queue トリガーの関数アプリが Azure Cosmos DB に非同期で保存する。
-6. Azure OpenAI がコミュニティのディスカッションの内容要約を生成・表示しつつ、Azure Storage Queue トリガーの関数アプリが Azure Cosmos DB に非同期で保存する。
+6. Azure OpenAI がコミュニティでのディスカッションの要約を生成・表示しつつ、Azure Storage Queue トリガーの関数アプリが Azure Cosmos DB に非同期で保存する。
 7. 学習進捗機能により、学習履歴・お気に入り情報を Azure Cosmos DB に保存する。
 
 ## 2. アーキテクチャ
@@ -126,9 +126,9 @@ API サーバーへの認証・アクセスは、`swa/src/lib/backend.ts` で統
 
 ### 3.3 Azure OpenAI による正解・解説・ディスカッション要約の生成
 
-Azure OpenAI を用いて、問題文や選択肢の文章から正解の選択肢・解説(正解/不正解の理由)、およびコミュニティの各コメントから要約を生成する。Azure OpenAI では Vision-enabled をサポートするモデルの使用を必須としているため、問題文や選択肢に画像が含まれていても適切に生成できる。
+Azure OpenAI を用いて、問題文や選択肢の文章から正解の選択肢・解説(正解/不正解の理由)、およびコミュニティでのディスカッションの各コメントから要約を生成する。Azure OpenAI では Vision-enabled をサポートするモデルの使用を必須としているため、問題文や選択肢に画像が含まれていても適切に生成できる。
 
-また、Azure OpenAI を実行して正解の選択肢、解説(正解/不正解の理由)、コミュニティの各コメントの要約を生成する関数アプリは、関数アプリの実行時間が長くなるため、生成直後に生成結果を Azure Cosmos DB に保存しておくことで、同じ入力パラメーターで関数アプリ再実行した際にわざわざ Azure OpenAI を実行せずに Azure Cosmos DB に保存した生成結果をそのまま出力する仕組みを採用する。
+また、Azure OpenAI を実行して正解の選択肢、解説(正解/不正解の理由)、コミュニティでのディスカッションの各コメントの要約を生成する関数アプリは、関数アプリの実行時間が長くなるため、生成直後に生成結果を Azure Cosmos DB に保存しておくことで、同じ入力パラメーターで関数アプリ再実行した際にわざわざ Azure OpenAI を実行せずに Azure Cosmos DB に保存した生成結果をそのまま出力する仕組みを採用する。
 これにより、実行時間の短縮と、Azure OpenAI の利用料金の削減を実現する。
 なお、この Azure Cosmos DB への保存処理は、関数アプリが Queue Storage にメッセージを送信し、Azure Storage Queue トリガーの関数アプリが非同期で保存する。
 
@@ -139,7 +139,7 @@ Azure OpenAI を用いて、問題文や選択肢の文章から正解の選択�
 - 問題文
 - 選択肢
 - 正解/不正解の理由の解説文
-- コミュニティディスカッション要約
+- コミュニティでのディスカッションの要約
 
 このうち、問題文と選択肢は、両者をまとめて翻訳することで、API 呼び出し回数を最適化している。
 翻訳処理は、`swa/src/lib/translation.ts` で統一的に行う。
@@ -151,19 +151,19 @@ Azure OpenAI を用いて、問題文や選択肢の文章から正解の選択�
 
 以下の Jotai での Atom を用いた状態管理により、コンポーネント間でのデータ共有を実現する。
 
-| Atom 名                        | Atom で管理する状態        |
-| ------------------------------ | -------------------------- |
-| `answerExplanationAtom`        | 正解・解説文               |
-| `discussionAtom`               | コミュニティ情報           |
-| `historiesAtom`                | 回答履歴                   |
-| `isDarkModeAtom`               | ダークモードかのフラグ     |
-| `orderAtom`                    | テストを解く問題番号の順序 |
-| `questionSelectorAtom`         | 問題文・選択肢             |
-| `testDetailsAtom`              | テスト詳細情報             |
-| `translationDiscussionAtom`    | コミュニティ情報の翻訳文   |
-| `translationExplanationAtom`   | 解説文の翻訳文             |
-| `translationSubjectChoiceAtom` | 問題文・選択肢の翻訳文     |
-| `votesAtom`                    | コミュニティでの回答の割合 |
+| Atom 名                        | Atom で管理する状態                            |
+| ------------------------------ | ---------------------------------------------- |
+| `answerExplanationAtom`        | 正解・解説文                                   |
+| `discussionAtom`               | コミュニティでのディスカッションの要約         |
+| `historiesAtom`                | 回答履歴                                       |
+| `isDarkModeAtom`               | ダークモードかのフラグ                         |
+| `orderAtom`                    | テストを解く問題番号の順序                     |
+| `questionSelectorAtom`         | 問題文・選択肢                                 |
+| `testDetailsAtom`              | テスト詳細情報                                 |
+| `translationDiscussionAtom`    | コミュニティでのディスカッションの要約の翻訳文 |
+| `translationExplanationAtom`   | 解説文の翻訳文                                 |
+| `translationSubjectChoiceAtom` | 問題文・選択肢の翻訳文                         |
+| `votesAtom`                    | コミュニティでの回答の割合                     |
 
 API アクセスを含む非同期処理は、Atom の write 関数で行う。この非同期処理のエラーハンドリングは、Atom の write 関数の呼び出し元コンポーネントで行う。
 

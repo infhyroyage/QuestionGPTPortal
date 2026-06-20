@@ -17,12 +17,12 @@ export type ApplyMSALProps = {
  */
 export type ExplanationSheetCommunityProps = {
   /**
-   * コミュニティ情報を取得するためのAPI呼び出しフラグ
+   * コミュニティでのディスカッションの要約を取得するためのAPI呼び出しフラグ
    */
   fetchDiscussionCalledRef: RefObject<boolean>;
 
   /**
-   * コミュニティ情報の翻訳文を取得するためのAPI呼び出しフラグ
+   * コミュニティでのディスカッションの要約の翻訳文を取得するためのAPI呼び出しフラグ
    */
   fetchTranslationDiscussionCalledRef: RefObject<boolean>;
 

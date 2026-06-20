@@ -47,7 +47,7 @@ def validate_request(req: func.HttpRequest) -> str | None:
 )
 def get_discussion(req: func.HttpRequest) -> func.HttpResponse:
     """
-    指定したテストID・問題番号でのコミュニティディスカッションの要約を取得します
+    指定したテストID・問題番号でのコミュニティでのディスカッションの要約を取得します
     """
 
     try:

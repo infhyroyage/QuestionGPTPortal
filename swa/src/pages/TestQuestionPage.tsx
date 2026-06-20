@@ -76,7 +76,7 @@ export default function TestQuestionPage() {
   // * 問題文
   // * 選択肢
   // * 回答・解説文
-  // * コミュニティ情報
+  // * コミュニティでのディスカッションの要約
   // * コミュニティでの回答の割合
   // * 翻訳文
   useEffect(() => {

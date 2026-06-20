@@ -39,7 +39,7 @@ import { translateSubjectsAndChoices } from "./translation";
 const answerExplanationAtom = atom<AnswerExplanation>(undefined);
 
 /**
- * コミュニティ情報を管理するatom
+ * コミュニティでのディスカッションの要約を管理するatom
  */
 const discussionAtom = atom<Discussion>(undefined);
 
@@ -74,7 +74,7 @@ const questionSelectorAtom = atom<QuestionSelector>(undefined);
 const testDetailsAtom = atom<TestDetails>(undefined);
 
 /**
- * コミュニティ情報に対する翻訳文を管理するatom
+ * コミュニティでのディスカッションの要約に対する翻訳文を管理するatom
  */
 const translationDiscussionAtom = atom<TranslationDiscussion>(undefined);
 
@@ -265,7 +265,7 @@ export const fetchExplanationsOnlyAtom = atom(
 );
 
 /**
- * コミュニティ情報を取得するatom
+ * コミュニティでのディスカッションの要約を取得するatom
  */
 export const fetchDiscussionAtom = atom(
   (get) => get(discussionAtom),
@@ -304,8 +304,8 @@ export const fetchDiscussionAtom = atom(
 
     let summary: string | undefined;
     if (isRefresh) {
-      // コミュニティ情報再取得の場合、コミュニティ情報に対する翻訳文を初期化してから、
-      // [POST] /tests/{testId}/discussions/{questionNumber}にアクセス
+      // コミュニティでのディスカッションの要約再取得の場合、コミュニティでのディスカッションの要約に対する翻訳文を
+      // 初期化してから、[POST] /tests/{testId}/discussions/{questionNumber}にアクセス
       set(translationDiscussionAtom, undefined);
       const postDiscussionRes: PostDiscussionRes =
         await accessBackend<PostDiscussionRes>(
@@ -316,7 +316,8 @@ export const fetchDiscussionAtom = atom(
         );
       summary = postDiscussionRes.summary;
     } else {
-      // コミュニティ情報再取得ではない場合、[GET] /tests/{testId}/discussions/{questionNumber}にアクセスして事前に生成したコミュニティ情報を取得
+      // コミュニティでのディスカッションの要約再取得ではない場合、[GET] /tests/{testId}/discussions/{questionNumber}に
+      // アクセスして事前に生成したコミュニティでのディスカッションの要約を取得
       // もし取得できなかった場合、[POST] /tests/{testId}/discussions/{questionNumber}にアクセス
       const getDiscussionRes: GetDiscussionRes =
         await accessBackend<GetDiscussionRes>(
@@ -468,7 +469,7 @@ export const fetchTestDetailsAtom = atom(
 );
 
 /**
- * コミュニティ情報に対する翻訳文を取得するatom
+ * コミュニティでのディスカッションの要約に対する翻訳文を取得するatom
  */
 export const fetchTranslationDiscussionAtom = atom(
   (get) => get(translationDiscussionAtom),
@@ -478,13 +479,13 @@ export const fetchTranslationDiscussionAtom = atom(
     instance: IPublicClientApplication,
     accountInfo: AccountInfo | null,
   ) => {
-    // 翻訳対象のコミュニティ情報がまだ存在しない場合は何も翻訳しない
+    // 翻訳対象のコミュニティでのディスカッションの要約がまだ存在しない場合は何も翻訳しない
     const discussion: Discussion = get(discussionAtom);
     if (!discussion || !discussion.summary) {
       return;
     }
 
-    // [PUT] /en2jaにアクセスして取得したコミュニティ情報の翻訳文で更新
+    // [PUT] /en2jaにアクセスして取得したコミュニティでのディスカッションの要約の翻訳文で更新
     const res: PutEn2JaRes = await accessBackend<PutEn2JaRes, PutEn2JaReq>(
       "PUT",
       "/en2ja",
@@ -727,7 +728,7 @@ export const resetAtomsForTestQuestionAtom = atom(null, (_, set) => {
 });
 
 /**
- * コミュニティ情報と翻訳を初期値に戻すatom(write only)
+ * コミュニティでのディスカッションの要約と、その翻訳文を初期値に戻すatom(write only)
  */
 export const resetDiscussionAtom = atom(null, (_, set) => {
   set(discussionAtom, undefined);

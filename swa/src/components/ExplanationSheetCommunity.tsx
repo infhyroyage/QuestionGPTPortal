@@ -15,8 +15,8 @@ import { Button } from "./Button";
 import VoteBadges from "./VoteBadges";
 
 /**
- * 解説シートのコミュニティ回答要約のコンポーネント
- * @returns 解説シートのコミュニティ回答要約のコンポーネント
+ * 解説シートのコミュニティでのディスカッションの要約のコンポーネント
+ * @returns 解説シートのコミュニティでのディスカッションの要約のコンポーネント
  */
 export default function ExplanationSheetCommunity({
   fetchDiscussionCalledRef,
@@ -37,7 +37,7 @@ export default function ExplanationSheetCommunity({
   const translationFailedToast = useTranslationFailedToast();
   const systemErrorToast = useSystemErrorToast();
 
-  // コミュニティ情報を再取得する関数
+  // コミュニティでのディスカッションの要約を再取得する関数
   const handleRefreshDiscussion = useCallback(async () => {
     if (!testId || !questionNumber) {
       return;
@@ -46,11 +46,11 @@ export default function ExplanationSheetCommunity({
     fetchDiscussionCalledRef.current = true;
     fetchTranslationDiscussionCalledRef.current = true;
 
-    // コミュニティ情報と翻訳をクリア
+    // コミュニティでのディスカッションの要約と、その翻訳文をクリア
     resetDiscussion();
 
     try {
-      // コミュニティ情報を再生成
+      // コミュニティでのディスカッションの要約を再生成
       await fetchDiscussion(
         testId,
         questionNumber,
@@ -66,14 +66,14 @@ export default function ExplanationSheetCommunity({
       return;
     }
 
-    // 再生成したコミュニティ情報に連動した翻訳文を取得
+    // 再生成したコミニティでのディスカッションの要約に連動した翻訳文を取得
     try {
       await fetchTranslationDiscussion(instance, accountInfo);
     } catch {
       // エラーが発生した問題番号を設定
       setTranslationFailedForQuestion(questionNumber);
       // 翻訳失敗トーストを表示
-      translationFailedToast("コミュニティ情報", () =>
+      translationFailedToast("コミュニティディスカッション要約", () =>
         setTranslationFailedForQuestion(null),
       );
     }
@@ -97,14 +97,14 @@ export default function ExplanationSheetCommunity({
     <>
       <div className="flex items-center justify-between my-4">
         <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-          コミュニティ回答要約
+          コミュニティディスカッション要約
         </h4>
         <Button
           variant="ghost"
           size="icon"
           onClick={handleRefreshDiscussion}
           disabled={discussion === undefined}
-          title="コミュニティ情報を再取得"
+          title="再取得"
         >
           <RefreshCw
             className={discussion === undefined ? "animate-spin" : ""}
@@ -123,7 +123,7 @@ export default function ExplanationSheetCommunity({
       ) : !discussion.summary ? (
         <div className="flex items-center justify-center flex-col space-y-4">
           <Info size={50} />
-          <div>コミュニティ回答要約はありません</div>
+          <div>コミュニティディスカッション要約はありません</div>
         </div>
       ) : (
         <>

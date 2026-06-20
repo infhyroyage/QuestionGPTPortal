@@ -237,7 +237,7 @@ paths:
   /tests/{testId}/discussions/{questionNumber}:
     get:
       summary: コミュニティディスカッション要約取得API
-      description: 指定したテストID・問題番号でのコミュニティディスカッションの要約を取得します
+      description: 指定したテストID・問題番号でのコミュニティでのディスカッションの要約を取得します
       operationId: get-discussion
       parameters:
         - name: testId
@@ -295,7 +295,7 @@ paths:
                 type: string
     post:
       summary: コミュニティディスカッション要約生成API
-      description: コミュニティディスカッションの要約を生成します
+      description: コミュニティでのディスカッションの要約を生成します
       operationId: post-discussion
       parameters:
         - name: testId

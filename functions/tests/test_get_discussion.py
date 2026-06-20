@@ -127,7 +127,7 @@ class TestGetDiscussion(TestCase):
     def test_get_discussion_not_found(
         self, mock_logging, mock_get_read_only_container, mock_validate_request
     ):
-        """コミュニティ要約が見つからない場合のレスポンスのテスト"""
+        """コミュニティでのディスカッションの要約が存在しない場合のレスポンスのテスト"""
 
         mock_validate_request.return_value = None
         mock_container = MagicMock()

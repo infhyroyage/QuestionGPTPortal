@@ -101,7 +101,7 @@ Summary (approximately 300 characters):"""
 
 def generate_discussion_summary(discussions: list[QuestionDiscussion]) -> str | None:
     """
-    コミュニティディスカッションの要約を生成する
+    コミュニティでのディスカッションの要約を生成する
 
     Args:
         discussions (list[QuestionDiscussion]): ディスカッション情報のリスト
@@ -171,7 +171,7 @@ bp_post_discussion = func.Blueprint()
 )
 def post_discussion(req: func.HttpRequest) -> func.HttpResponse:
     """
-    コミュニティディスカッションの要約を生成します
+    コミュニティでのディスカッションの要約を生成します
     """
 
     try:
@@ -203,14 +203,14 @@ def post_discussion(req: func.HttpRequest) -> func.HttpResponse:
         except CosmosResourceNotFoundError:
             return func.HttpResponse(body="Not Found Question", status_code=404)
 
-        # discussionsフィールドが存在する場合はディスカッション要約を生成(存在しない場合は空文字列)
+        # discussionsフィールドが存在する場合はコミュニティでのディスカッションの要約を生成(存在しない場合は空文字列)
         discussions: list[QuestionDiscussion] | None = item.get("discussions")
         body: PostDiscussionRes = {
             "isExisted": False,
         }
 
         if discussions and len(discussions) > 0:
-            # ディスカッション要約を生成
+            # コミュニティでのディスカッションの要約を生成
             summary: str | None = generate_discussion_summary(discussions)
             if summary is None:
                 raise ValueError("Failed to generate discussion summary")

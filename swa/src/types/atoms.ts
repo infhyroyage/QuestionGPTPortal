@@ -55,14 +55,14 @@ export type AnswerExplanation =
   | undefined;
 
 /**
- * コミュニティ情報を管理するatomの型
+ * コミュニティでのディスカッションの要約を管理するatomの型
  * 初期値の場合はundefined
  */
 export type Discussion =
   | {
       /**
        * コミュニティでのディスカッションの要約
-       * コミュニティ情報が生成中、またはデータが存在しない場合はundefined
+       * コミュニティでのディスカッションの要約が生成中、またはデータが存在しない場合はundefined
        */
       summary?: string;
     }
@@ -165,7 +165,7 @@ export type TestDetail = {
 export type TestDetails = TestDetail[] | undefined;
 
 /**
- * コミュニティ情報に対する翻訳文を管理するatomの型
+ * コミュニティでのディスカッションの要約に対する翻訳文を管理するatomの型
  * 初期値の場合はundefined
  */
 export type TranslationDiscussion =
