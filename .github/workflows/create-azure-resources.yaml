@@ -34,31 +34,33 @@ jobs:
         run: az bicep upgrade
 
       - name: Create Resources
-        uses: azure/arm-deploy@v2
+        uses: azure/bicep-deploy@v2
         with:
-          scope: resourcegroup
-          subscriptionId: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-          resourceGroupName: ${{ env.RESOURCE_GROUP }}
-          template: ./resources/base.bicep
-          parameters: >-
-            apimName=${{ vars.APIM_NAME }}
-            azureAdEAContributorObjectId=${{ vars.AZURE_AD_EA_CONTRIBUTOR_OBJECT_ID }}
-            azureApimPublisherEmail=${{ secrets.AZURE_APIM_PUBLISHER_EMAIL }}
-            cosmosDBName=${{ vars.COSMOSDB_NAME }}
-            eventGridName=${{ vars.EVENT_GRID_NAME }}
-            functionsName=${{ vars.FUNCTIONS_NAME }}
-            githubRepoUrl=${{ github.server_url }}/${{ github.repository }}
-            openAIApiVersion=${{ vars.OPENAI_API_VERSION }}
-            openAICapacity=${{ vars.OPENAI_CAPACITY }}
-            openAIDeploymentName=${{ vars.OPENAI_DEPLOYMENT_NAME }}
-            openAILocation=${{ vars.OPENAI_LOCATION }}
-            openAIModelName=${{ vars.OPENAI_MODEL_NAME }}
-            openAIModelVersion=${{ vars.OPENAI_MODEL_VERSION }}
-            openAIName=${{ vars.OPENAI_NAME }}
-            storageName=${{ vars.STORAGE_NAME }}
-            swaName=${{ vars.SWA_NAME }}
-            translatorName=${{ vars.TRANSLATOR_NAME }}
-            vaultName=${{ vars.VAULT_NAME }}
+          type: deployment
+          operation: create
+          scope: resourceGroup
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: ${{ env.RESOURCE_GROUP }}
+          template-file: ./resources/base.bicep
+          parameters: |
+            apimName: ${{ vars.APIM_NAME }}
+            azureAdEAContributorObjectId: ${{ vars.AZURE_AD_EA_CONTRIBUTOR_OBJECT_ID }}
+            azureApimPublisherEmail: ${{ secrets.AZURE_APIM_PUBLISHER_EMAIL }}
+            cosmosDBName: ${{ vars.COSMOSDB_NAME }}
+            eventGridName: ${{ vars.EVENT_GRID_NAME }}
+            functionsName: ${{ vars.FUNCTIONS_NAME }}
+            githubRepoUrl: ${{ github.server_url }}/${{ github.repository }}
+            openAIApiVersion: ${{ vars.OPENAI_API_VERSION }}
+            openAICapacity: ${{ vars.OPENAI_CAPACITY }}
+            openAIDeploymentName: ${{ vars.OPENAI_DEPLOYMENT_NAME }}
+            openAILocation: ${{ vars.OPENAI_LOCATION }}
+            openAIModelName: ${{ vars.OPENAI_MODEL_NAME }}
+            openAIModelVersion: ${{ vars.OPENAI_MODEL_VERSION }}
+            openAIName: ${{ vars.OPENAI_NAME }}
+            storageName: ${{ vars.STORAGE_NAME }}
+            swaName: ${{ vars.SWA_NAME }}
+            translatorName: ${{ vars.TRANSLATOR_NAME }}
+            vaultName: ${{ vars.VAULT_NAME }}
 
   # Azure FunctionsのFlex Consumptionプランでは、Azure FunctionsのマネージドIDに対して
   # Azure Storageアカウントへのアクセス権限を付与するロールを割り当てる必要がある
@@ -210,16 +212,18 @@ jobs:
         run: az bicep upgrade
 
       - name: Create Resources
-        uses: azure/arm-deploy@v2
+        uses: azure/bicep-deploy@v2
         with:
-          scope: resourcegroup
-          subscriptionId: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-          resourceGroupName: ${{ env.RESOURCE_GROUP }}
-          template: ./resources/connect-apim-2-functions.bicep
-          parameters: >-
-            apimName=${{ vars.APIM_NAME }}
-            functionsName=${{ vars.FUNCTIONS_NAME }}
-            vaultName=${{ vars.VAULT_NAME }}
+          type: deployment
+          operation: create
+          scope: resourceGroup
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: ${{ env.RESOURCE_GROUP }}
+          template-file: ./resources/connect-apim-2-functions.bicep
+          parameters: |
+            apimName: ${{ vars.APIM_NAME }}
+            functionsName: ${{ vars.FUNCTIONS_NAME }}
+            vaultName: ${{ vars.VAULT_NAME }}
 
   use-deploy-functions-app-workflow:
     needs: set-functions-appsettings
@@ -262,12 +266,14 @@ jobs:
         run: az bicep upgrade
 
       - name: Create Resources
-        uses: azure/arm-deploy@v2
+        uses: azure/bicep-deploy@v2
         with:
-          scope: resourcegroup
-          subscriptionId: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-          resourceGroupName: ${{ env.RESOURCE_GROUP }}
-          template: ./resources/event-grid-subscription.bicep
-          parameters: >-
-            functionsName=${{ vars.FUNCTIONS_NAME }}
-            eventGridName=${{ vars.EVENT_GRID_NAME }}
+          type: deployment
+          operation: create
+          scope: resourceGroup
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: ${{ env.RESOURCE_GROUP }}
+          template-file: ./resources/event-grid-subscription.bicep
+          parameters: |
+            functionsName: ${{ vars.FUNCTIONS_NAME }}
+            eventGridName: ${{ vars.EVENT_GRID_NAME }}
