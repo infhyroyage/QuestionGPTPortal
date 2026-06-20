@@ -173,40 +173,46 @@ def post_progress(req: func.HttpRequest) -> func.HttpResponse:
             return func.HttpResponse(body="Progress Not exists", status_code=400)
 
         # 指定した問題番号が、テストを解く問題番号の順番における、
-        # 最後に保存した回答履歴の問題番号、またはその次の問題番号であるかのチェック
-        current_question_number: Optional[int] = (
-            item["order"][len(item["progresses"]) - 1]
-            if len(item["progresses"]) > 0
-            else None
-        )
-        next_question_number: Optional[int] = (
-            item["order"][len(item["progresses"])]
-            if len(item["progresses"]) < len(item["order"])
-            else None
-        )
+        # 既に回答履歴を保存済みの問題番号(更新対象)、
+        # またはその次に解くべき問題番号(追加対象)であるかのチェック
+        # 有効な問題番号は order[0 .. len(progresses)] (回答済み + 次の1問)
         logging.info(
             {
-                "current_question_number": current_question_number,
-                "next_question_number": next_question_number,
+                "current_question_number": (
+                    item["order"][len(item["progresses"]) - 1]
+                    if len(item["progresses"]) > 0
+                    else None
+                ),
+                "next_question_number": (
+                    item["order"][len(item["progresses"])]
+                    if len(item["progresses"]) < len(item["order"])
+                    else None
+                ),
             }
         )
-        if question_number not in (current_question_number, next_question_number):
-            msg: str = "questionNumber must be "
-            if len(item["progresses"]) == 0:
-                msg += f"{next_question_number}"
-            elif next_question_number is None:
-                msg += f"{current_question_number}"
-            else:
-                msg += f"{current_question_number} or {next_question_number}"
+
+        # 指定した問題番号が、テストを解く問題番号の順番における何番目かを取得
+        # (順番に存在しない場合はNone)
+        target_index: Optional[int] = (
+            item["order"].index(question_number)
+            if question_number in item["order"]
+            else None
+        )
+
+        # 順番に存在しない、または回答済みでもなくその次でもない(先の問題)の場合はエラー
+        if target_index is None or target_index > len(item["progresses"]):
+            msg: str = "questionNumber must be " + " or ".join(
+                str(number) for number in item["order"][: len(item["progresses"]) + 1]
+            )
             return func.HttpResponse(body=msg, status_code=400)
 
         req_body: PostProgressReq = json.loads(req_body_encoded.decode("utf-8"))
 
-        # 指定した問題番号が、最後に保存した問題番号と同じ場合はupdate、
-        # その次の問題番号の場合はinsertするように、Progressコンテナーの項目を生成
+        # 指定した問題番号が回答済みの場合は該当位置をupdate、
+        # その次に解くべき問題番号の場合はinsertするように、Progressコンテナーの項目を生成
         updated_progresses: List[ProgressElement] = item["progresses"]
-        if question_number == current_question_number:
-            updated_progresses[len(item["progresses"]) - 1] = {
+        if target_index < len(item["progresses"]):
+            updated_progresses[target_index] = {
                 "isCorrect": req_body.get("isCorrect"),
                 "selectedIdxes": req_body.get("selectedIdxes"),
                 "correctIdxes": req_body.get("correctIdxes"),

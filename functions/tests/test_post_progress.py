@@ -634,7 +634,7 @@ class TestPostProgress(unittest.TestCase):
     @patch("src.post_progress.validate_body")
     @patch("src.post_progress.get_read_write_container")
     @patch("src.post_progress.logging")
-    def test_post_progress_invalid_question_number_with_all_progresses(  # pylint: disable=too-many-arguments, too-many-positional-arguments
+    def test_post_progress_invalid_question_number_not_in_order(  # pylint: disable=too-many-arguments, too-many-positional-arguments
         self,
         mock_logging,
         mock_get_read_write_container,
@@ -642,7 +642,7 @@ class TestPostProgress(unittest.TestCase):
         mock_validate_headers,
         mock_validate_route_params,
     ):
-        """最後まですべて回答履歴を保存した場合に、誤った問題番号を指定した場合のテスト"""
+        """テストを解く問題番号の順番に存在しない問題番号を指定した場合のテスト"""
 
         mock_validate_route_params.return_value = []
         mock_validate_headers.return_value = []
@@ -692,15 +692,18 @@ class TestPostProgress(unittest.TestCase):
         req = func.HttpRequest(
             method="POST",
             body=request_body_encoded,
-            url="/api/tests/test-id/progresses/5",
-            route_params={"testId": "test-id", "questionNumber": "5"},
+            url="/api/tests/test-id/progresses/6",
+            route_params={"testId": "test-id", "questionNumber": "6"},
             headers={"X-User-Id": "user-id"},
         )
 
         res = post_progress(req)
 
         self.assertEqual(res.status_code, 400)
-        self.assertEqual(res.get_body().decode("utf-8"), "questionNumber must be 4")
+        self.assertEqual(
+            res.get_body().decode("utf-8"),
+            "questionNumber must be 3 or 5 or 1 or 2 or 4",
+        )
         mock_validate_route_params.assert_called_once_with(req.route_params)
         mock_validate_headers.assert_called_once_with(req.headers)
         mock_validate_body.assert_called_once_with(request_body_encoded)
@@ -716,12 +719,133 @@ class TestPostProgress(unittest.TestCase):
             [
                 call(
                     {
-                        "question_number": 5,
+                        "question_number": 6,
                         "test_id": "test-id",
                         "user_id": "user-id",
                     }
                 ),
                 call({"current_question_number": 4, "next_question_number": None}),
+            ]
+        )
+        mock_logging.error.assert_not_called()
+
+    @patch("src.post_progress.validate_route_params")
+    @patch("src.post_progress.validate_headers")
+    @patch("src.post_progress.validate_body")
+    @patch("src.post_progress.get_read_write_container")
+    @patch("src.post_progress.logging")
+    def test_post_progress_update_previous_answered(  # pylint: disable=too-many-arguments, too-many-positional-arguments
+        self,
+        mock_logging,
+        mock_get_read_write_container,
+        mock_validate_body,
+        mock_validate_headers,
+        mock_validate_route_params,
+    ):
+        """途中まで回答済みの状態で、最後ではない回答済みの問題番号を再保存(更新)する場合のテスト"""
+
+        mock_validate_route_params.return_value = []
+        mock_validate_headers.return_value = []
+        mock_validate_body.return_value = []
+        mock_container = MagicMock()
+        mock_get_read_write_container.return_value = mock_container
+        mock_container.read_item.return_value = {
+            "id": "user-id_test-id",
+            "userId": "user-id",
+            "testId": "test-id",
+            "order": [3, 5, 1, 2, 4],
+            "progresses": [
+                {
+                    "isCorrect": True,
+                    "selectedIdxes": [0],
+                    "correctIdxes": [0],
+                },
+                {
+                    "isCorrect": True,
+                    "selectedIdxes": [1],
+                    "correctIdxes": [1],
+                },
+                {
+                    "isCorrect": True,
+                    "selectedIdxes": [2],
+                    "correctIdxes": [2],
+                },
+            ],
+        }
+
+        # order=[3,5,1,2,4]の2問目(問題番号5, 回答済みかつ最後ではない)を再保存
+        request_body = {
+            "isCorrect": False,
+            "selectedIdxes": [3],
+            "correctIdxes": [1],
+        }
+        request_body_encoded = json.dumps(request_body).encode("utf-8")
+        req = func.HttpRequest(
+            method="POST",
+            body=request_body_encoded,
+            url="/api/tests/test-id/progresses/5",
+            route_params={"testId": "test-id", "questionNumber": "5"},
+            headers={"X-User-Id": "user-id"},
+        )
+
+        res = post_progress(req)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(
+            json.loads(res.get_body().decode("utf-8")),
+            [
+                {
+                    "isCorrect": True,
+                    "selectedIdxes": [0],
+                    "correctIdxes": [0],
+                },
+                {
+                    "isCorrect": False,
+                    "selectedIdxes": [3],
+                    "correctIdxes": [1],
+                },
+                {
+                    "isCorrect": True,
+                    "selectedIdxes": [2],
+                    "correctIdxes": [2],
+                },
+            ],
+        )
+        mock_container.upsert_item.assert_called_once_with(
+            {
+                "id": "user-id_test-id",
+                "userId": "user-id",
+                "testId": "test-id",
+                "order": [3, 5, 1, 2, 4],
+                "progresses": [
+                    {
+                        "isCorrect": True,
+                        "selectedIdxes": [0],
+                        "correctIdxes": [0],
+                    },
+                    {
+                        "isCorrect": False,
+                        "selectedIdxes": [3],
+                        "correctIdxes": [1],
+                    },
+                    {
+                        "isCorrect": True,
+                        "selectedIdxes": [2],
+                        "correctIdxes": [2],
+                    },
+                ],
+            }
+        )
+        mock_logging.info.assert_has_calls(
+            [
+                call(
+                    {
+                        "question_number": 5,
+                        "test_id": "test-id",
+                        "user_id": "user-id",
+                    }
+                ),
+                call({"current_question_number": 1, "next_question_number": 2}),
             ]
         )
         mock_logging.error.assert_not_called()
