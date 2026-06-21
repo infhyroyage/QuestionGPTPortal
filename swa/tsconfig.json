@@ -5,8 +5,7 @@
     { "path": "./tsconfig.node.json" }
   ],
   "compilerOptions": {
-    /* path alias (@/*) */
-    "baseUrl": ".",
+    /* path alias (@/*) — baseUrl は TS 6.0 で非推奨のため paths に明示 */
     "paths": {
       "@/*": ["./src/*"]
     }
