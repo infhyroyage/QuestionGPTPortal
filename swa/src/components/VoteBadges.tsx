@@ -10,7 +10,7 @@ export default function VoteBadges() {
 
   return votes === undefined ? (
     <div className="flex mb-4">
-      <div className="skeleton h-5 w-full" />
+      <div className="skeleton h-6 w-full" />
     </div>
   ) : votes.length === 0 ? (
     <div className="flex mb-4">
