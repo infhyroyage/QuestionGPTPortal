@@ -39,7 +39,7 @@ export default function FavoriteButton({
           `/tests/${testId}/favorites/${questionNumber}`,
           instance,
           accountInfo,
-          req
+          req,
         );
 
         onFavoriteChange(!isFavorite);
@@ -62,7 +62,7 @@ export default function FavoriteButton({
   return (
     <Tooltip tip={isFavorite ? "お気に入り解除" : "お気に入り登録"}>
       <button
-        className={`bg-transparent border-none p-0 ml-1 cursor-pointer hover:opacity-80 transition-all duration-300 focus:outline-hidden ${
+        className={`bg-transparent border-none p-0 cursor-pointer hover:opacity-80 transition-all duration-300 focus:outline-hidden ${
           isLoading ? "opacity-50" : ""
         }`}
         onClick={onClick}
@@ -74,8 +74,8 @@ export default function FavoriteButton({
             isLoading
               ? "animate-pulse"
               : isFavorite
-              ? "fill-yellow-400 text-yellow-400 scale-110 animate-[bounce_0.3s_ease-in-out]"
-              : "text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-100"
+                ? "fill-yellow-400 text-yellow-400 scale-110 animate-[bounce_0.3s_ease-in-out]"
+                : "text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-100"
           }`}
         />
       </button>

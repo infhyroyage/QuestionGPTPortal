@@ -85,35 +85,35 @@ export default function TopBar({ title }: TopBarProps) {
   }, []);
 
   return (
-    <div className="fixed top-0 left-0 right-0 h-[52px] p-3 bg-slate-200 dark:bg-slate-800 z-30">
-      <div className="mx-3 flex items-center justify-between">
-        <div className="flex items-center">
-          <h1 className="text-lg font-bold">{title}</h1>
-          {isTestQuestionPage && questionNumber && (
-            <div className="ml-2 flex items-center justify-center">
-              <FavoriteButton
-                isFavorite={isFavorite || false}
-                isLoading={isFavorite === undefined}
-                onFavoriteChange={onFavoriteChange}
-                questionNumber={questionNumber}
-              />
-            </div>
-          )}
-        </div>
-        <div className="flex items-center space-x-2 min-w-fit">
-          {isTestQuestionPage && (
-            <>
-              <div className="shrink-0">
-                <PreviousAnsweredQuestionButton />
-              </div>
-              <div className="shrink-0">
-                <NextAnsweredQuestionButton />
-              </div>
-            </>
-          )}
-          <div className="shrink-0">
-            <DarkModeSwitchButton />
+    <div className="navbar fixed top-0 left-0 right-0 z-30 h-[52px] min-h-[52px] items-center bg-base-100 px-4 py-0 shadow-sm">
+      <div className="navbar-start flex-1 items-center gap-2">
+        <h1 className="m-0 flex h-7 items-center text-lg font-bold leading-none">
+          {title}
+        </h1>
+        {isTestQuestionPage && questionNumber && (
+          <div className="flex h-7 items-center">
+            <FavoriteButton
+              isFavorite={isFavorite || false}
+              isLoading={isFavorite === undefined}
+              onFavoriteChange={onFavoriteChange}
+              questionNumber={questionNumber}
+            />
           </div>
+        )}
+      </div>
+      <div className="navbar-end flex-none items-center gap-2">
+        {isTestQuestionPage && (
+          <>
+            <div className="flex h-7 items-center">
+              <PreviousAnsweredQuestionButton />
+            </div>
+            <div className="flex h-7 items-center">
+              <NextAnsweredQuestionButton />
+            </div>
+          </>
+        )}
+        <div className="flex h-7 items-center">
+          <DarkModeSwitchButton />
         </div>
       </div>
     </div>
