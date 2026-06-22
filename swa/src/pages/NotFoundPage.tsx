@@ -1,5 +1,4 @@
 import TopBar from "@/components/TopBar";
-import { Button } from "@/components/Button";
 import { Frown } from "lucide-react";
 import { useCallback } from "react";
 import { useNavigate } from "react-router";
@@ -21,9 +20,13 @@ export default function NotFoundPage() {
       <div className="pt-[52px] flex items-center justify-center min-h-screen flex-col space-y-4">
         <Frown size={100} />
         <div>Not Found</div>
-        <Button onClick={onClick} size="lg">
+        <button
+          type="button"
+          className="btn btn-primary btn-lg"
+          onClick={onClick}
+        >
           トップページへ戻る
-        </Button>
+        </button>
       </div>
     </>
   );

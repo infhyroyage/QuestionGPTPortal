@@ -3,7 +3,6 @@ import { useAtomValue } from "jotai";
 import { ChevronRight } from "lucide-react";
 import { useCallback, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
-import { Button } from "./Button";
 import Tooltip from "./Tooltip";
 
 /**
@@ -35,7 +34,7 @@ export default function NextAnsweredQuestionButton() {
       currentIdx + 1 >= order.length ||
       currentIdx >= histories.length ||
       (answerExplanation?.isSubmitting ?? false),
-    [histories, order, currentIdx, answerExplanation]
+    [histories, order, currentIdx, answerExplanation],
   );
 
   // ボタン押下時に1つ後の問題に遷移
@@ -54,15 +53,14 @@ export default function NextAnsweredQuestionButton() {
 
   return (
     <Tooltip tip="次の問題へ">
-      <Button
-        className="size-7"
-        size="icon"
-        variant="outline"
+      <button
+        type="button"
+        className="btn btn-outline btn-square size-7"
         disabled={isDisabled}
         onClick={onClick}
       >
         <ChevronRight className="size-4" />
-      </Button>
+      </button>
     </Tooltip>
   );
 }

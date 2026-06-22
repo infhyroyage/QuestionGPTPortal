@@ -1,8 +1,6 @@
 import { SelectorButtonProps } from "@/types/props";
 import { useMemo } from "react";
 import ImageDialog from "./ImageDialog";
-import { Button } from "./Button";
-
 /**
  * 選択肢のボタンのコンポーネント
  * @returns 選択肢のボタンのコンポーネント
@@ -23,9 +21,11 @@ export default function SelectorButton({
   }, [idx]);
 
   return (
-    <Button
-      variant={variant}
-      className={`relative flex flex-col py-4 pl-4 w-full h-full space-y-1 whitespace-normal text-left items-start${
+    <button
+      type="button"
+      className={`btn ${
+        variant === "primary" ? "btn-primary" : "btn-outline"
+      } relative flex flex-col py-4 pl-4 w-full h-full space-y-1 whitespace-normal text-left items-start${
         className ? ` ${className}` : ""
       }`}
       disabled={disabled}
@@ -51,6 +51,6 @@ export default function SelectorButton({
         )}
         {img && <ImageDialog img={img} alt={img} />}
       </div>
-    </Button>
+    </button>
   );
 }

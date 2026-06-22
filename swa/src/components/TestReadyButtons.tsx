@@ -1,4 +1,3 @@
-import { Button } from "@/components/Button";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import { fetchProgressesAtom, initializeProgressesAtom } from "@/lib/atoms";
 import { TestReadyButtonsProps } from "@/types/props";
@@ -18,7 +17,7 @@ export default function TestReadyButtons({
   const { histories, order } = useAtomValue(fetchProgressesAtom);
   const initializeProgresses = useSetAtom(initializeProgressesAtom);
   const [hasOnlyFavorites, setHasOnlyFavorites] = useState<boolean | undefined>(
-    undefined
+    undefined,
   );
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
@@ -58,7 +57,7 @@ export default function TestReadyButtons({
             testId,
             instance,
             accountInfo,
-            hasOnlyFavorites ? favoriteQuestionNumbers : undefined
+            hasOnlyFavorites ? favoriteQuestionNumbers : undefined,
           );
         if (initialQuestionNumber) {
           navigate(`/tests/${testId}/questions/${initialQuestionNumber}`);
@@ -106,29 +105,36 @@ export default function TestReadyButtons({
         {histories.length > 0 &&
         order.length > 0 &&
         histories.length === order.length ? (
-          <Button onClick={onClickResultButton} size="lg">
+          <button
+            type="button"
+            className="btn btn-primary btn-lg"
+            onClick={onClickResultButton}
+          >
             結果を見る
-          </Button>
+          </button>
         ) : (
           <>
             {histories.length > 0 && (
-              <Button
+              <button
+                type="button"
+                className="btn btn-primary btn-lg"
                 disabled={hasOnlyFavorites !== undefined}
                 onClick={onClickResumeButton}
-                size="lg"
               >
                 {hasOnlyFavorites !== undefined ? (
                   <Loader2 className="animate-spin" />
                 ) : (
                   `途中の${histories.length + 1}問目から再開`
                 )}
-              </Button>
+              </button>
             )}
-            <Button
+            <button
+              type="button"
+              className={`btn btn-lg ${
+                histories.length > 0 ? "btn-error" : "btn-primary"
+              }`}
               disabled={hasOnlyFavorites !== undefined}
               onClick={() => setHasOnlyFavorites(false)}
-              size="lg"
-              variant={histories.length > 0 ? "error" : "primary"}
             >
               {hasOnlyFavorites !== undefined ? (
                 <Loader2 className="animate-spin" />
@@ -137,13 +143,15 @@ export default function TestReadyButtons({
                   histories.length > 0 ? "(回答履歴が削除されます)" : ""
                 }`
               )}
-            </Button>
+            </button>
             {favoriteQuestionNumbers.length > 0 && (
-              <Button
+              <button
+                type="button"
+                className={`btn btn-lg ${
+                  histories.length > 0 ? "btn-error" : "btn-primary"
+                }`}
                 disabled={hasOnlyFavorites !== undefined}
                 onClick={() => setHasOnlyFavorites(true)}
-                size="lg"
-                variant={histories.length > 0 ? "error" : "primary"}
               >
                 {hasOnlyFavorites !== undefined ? (
                   <Loader2 className="animate-spin" />
@@ -152,13 +160,17 @@ export default function TestReadyButtons({
                     histories.length > 0 ? "(回答履歴が削除されます)" : ""
                   }`
                 )}
-              </Button>
+              </button>
             )}
           </>
         )}
-        <Button onClick={onClickRootPageButton} size="lg">
+        <button
+          type="button"
+          className="btn btn-primary btn-lg"
+          onClick={onClickRootPageButton}
+        >
           トップページへ戻る
-        </Button>
+        </button>
       </div>
     )
   );

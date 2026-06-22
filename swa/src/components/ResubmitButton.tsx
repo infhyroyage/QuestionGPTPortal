@@ -5,7 +5,6 @@ import { useAtom } from "jotai";
 import { RefreshCcw } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useParams } from "react-router";
-import { Button } from "./Button";
 import Tooltip from "./Tooltip";
 
 /**
@@ -14,7 +13,7 @@ import Tooltip from "./Tooltip";
  */
 export default function ResubmitButton() {
   const [answerExplanation, fetchAnswerExplanation] = useAtom(
-    fetchAnswerExplanationAtom
+    fetchAnswerExplanationAtom,
   );
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
@@ -28,7 +27,7 @@ export default function ResubmitButton() {
   // 回答・解説を生成していない場合は、回答・解説再生成ボタンを非活性とする
   const isDisabledResubmitButton = useMemo<boolean>(
     () => !answerExplanation || answerExplanation.isSubmitting,
-    [answerExplanation]
+    [answerExplanation],
   );
 
   // 回答・解説再生成ボタン押下時に、回答・解説を1度だけ再生成
@@ -41,7 +40,7 @@ export default function ResubmitButton() {
           questionNumber,
           instance,
           accountInfo,
-          true
+          true,
         );
       } catch (e) {
         setIsOccurredSystemError(true);
@@ -60,13 +59,14 @@ export default function ResubmitButton() {
 
   return (
     <Tooltip tip="回答・解説再生成" position="top">
-      <Button
-        size="icon"
+      <button
+        type="button"
+        className="btn btn-primary btn-square"
         disabled={isDisabledResubmitButton}
         onClick={onClickResubmit}
       >
         <RefreshCcw />
-      </Button>
+      </button>
     </Tooltip>
   );
 }

@@ -3,7 +3,6 @@ import { useAtomValue } from "jotai";
 import { Info } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { Button } from "./Button";
 import ExplanationSheet from "./ExplanationSheet";
 import Tooltip from "./Tooltip";
 
@@ -64,13 +63,14 @@ export default function OpenExplanationButton() {
   return (
     <>
       <Tooltip tip="解説表示" position="top">
-        <Button
-          size="icon"
+        <button
+          type="button"
+          className="btn btn-primary btn-square"
           disabled={isDisabledOpenExplanationButton}
           onClick={handleClick}
         >
           <Info />
-        </Button>
+        </button>
       </Tooltip>
       {mounted &&
         createPortal(

@@ -1,6 +1,4 @@
-import { Button } from "@/components/Button";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
-import { type ButtonVariant } from "@/components/Button";
 import {
   fetchAnswerExplanationAtom,
   fetchQuestionSelectorAtom,
@@ -18,7 +16,7 @@ import Tooltip from "./Tooltip";
  */
 export default function SubmitButton() {
   const [answerExplanation, fetchAnswerExplanation] = useAtom(
-    fetchAnswerExplanationAtom
+    fetchAnswerExplanationAtom,
   );
   const questionSelector = useAtomValue(fetchQuestionSelectorAtom);
   const [isOccurredSystemError, setIsOccurredSystemError] =
@@ -39,18 +37,18 @@ export default function SubmitButton() {
       !questionSelector ||
       questionSelector.choices.every((choice) => !choice.isSelected) ||
       (!!answerExplanation && answerExplanation.isSubmitting),
-    [answerExplanation, questionSelector]
+    [answerExplanation, questionSelector],
   );
 
   // 回答結果に応じてボタンの配色(daisyUI variant)を切り替える
   // * 未回答・生成中: primary
   // * 正解: success
   // * 不正解: error
-  const buttonVariant = useMemo<ButtonVariant>(() => {
+  const buttonColorClass = useMemo(() => {
     if (!answerExplanation || answerExplanation.isSubmitting) {
-      return "primary";
+      return "btn-primary";
     }
-    return answerExplanation.isCorrect ? "success" : "error";
+    return answerExplanation.isCorrect ? "btn-success" : "btn-error";
   }, [answerExplanation]);
 
   // 回答・解説生成ボタン押下時に、回答・解説を1度だけ生成/取得
@@ -66,7 +64,7 @@ export default function SubmitButton() {
           testId,
           questionNumber,
           instance,
-          accountInfo
+          accountInfo,
         );
       } catch (e) {
         setIsOccurredSystemError(true);
@@ -86,9 +84,9 @@ export default function SubmitButton() {
 
   return (
     <Tooltip tip="回答・解説生成" position="top">
-      <Button
-        variant={buttonVariant}
-        size="icon"
+      <button
+        type="button"
+        className={`btn btn-square ${buttonColorClass}`}
         disabled={isDisabledSubmitButton}
         onClick={onClickSubmit}
       >
@@ -101,7 +99,7 @@ export default function SubmitButton() {
         ) : (
           <X />
         )}
-      </Button>
+      </button>
     </Tooltip>
   );
 }

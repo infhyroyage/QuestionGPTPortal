@@ -1,6 +1,5 @@
 import TestResultAccordion from "@/components/TestResultAccordion";
 import TopBar from "@/components/TopBar";
-import { Button } from "@/components/Button";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import { fetchProgressesAtom } from "@/lib/atoms";
 import { accessBackend } from "@/lib/backend";
@@ -68,7 +67,7 @@ export default function TestResultPage() {
           "DELETE",
           `/tests/${testId}/progresses`,
           instance,
-          accountInfo
+          accountInfo,
         );
       } catch (e) {
         systemErrorToast(e);
@@ -102,12 +101,16 @@ export default function TestResultPage() {
               (histories.filter((history: History) => history.isCorrect)
                 .length /
                 histories.length) *
-                100
+                100,
             )}%)`}
           </h3>
-          <Button onClick={onClick} size="lg" className="shrink-0">
+          <button
+            type="button"
+            className="btn btn-primary btn-lg shrink-0"
+            onClick={onClick}
+          >
             トップページへ戻る
-          </Button>
+          </button>
           {isFinishedDelete ? (
             <div className="flex-1 overflow-y-auto min-h-0">
               <TestResultAccordion />

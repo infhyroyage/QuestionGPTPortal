@@ -1,4 +1,3 @@
-import { Button } from "@/components/Button";
 import { toggleDarkModeAtom } from "@/lib/atoms";
 import { useAtom } from "jotai";
 import { Moon, Sun } from "lucide-react";
@@ -13,18 +12,13 @@ export default function DarkModeSwitchButton() {
 
   return (
     <Tooltip tip={isDarkMode ? "ダークモード" : "ライトモード"}>
-      <Button
-        className="size-7"
+      <button
+        type="button"
+        className="btn btn-outline btn-square size-7"
         onClick={toggleDarkMode}
-        variant="outline"
-        size="icon"
       >
-        {isDarkMode ? (
-          <Moon className="size-4" />
-        ) : (
-          <Sun className="size-4" />
-        )}
-      </Button>
+        {isDarkMode ? <Moon className="size-4" /> : <Sun className="size-4" />}
+      </button>
     </Tooltip>
   );
 }

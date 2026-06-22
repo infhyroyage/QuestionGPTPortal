@@ -3,7 +3,6 @@ import { useAtomValue } from "jotai";
 import { ChevronLeft } from "lucide-react";
 import { useCallback, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
-import { Button } from "./Button";
 import Tooltip from "./Tooltip";
 
 /**
@@ -28,7 +27,7 @@ export default function PreviousAnsweredQuestionButton() {
   // - 回答・解説が生成中の場合
   const isDisabled = useMemo(
     () => currentIdx <= 0 || (answerExplanation?.isSubmitting ?? false),
-    [currentIdx, answerExplanation]
+    [currentIdx, answerExplanation],
   );
 
   // ボタン押下時に1つ前の問題に遷移
@@ -40,15 +39,14 @@ export default function PreviousAnsweredQuestionButton() {
 
   return (
     <Tooltip tip="前の問題へ">
-      <Button
-        className="size-7"
-        size="icon"
-        variant="outline"
+      <button
+        type="button"
+        className="btn btn-outline btn-square size-7"
         disabled={isDisabled}
         onClick={onClick}
       >
         <ChevronLeft className="size-4" />
-      </Button>
+      </button>
     </Tooltip>
   );
 }

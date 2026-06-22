@@ -8,7 +8,6 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { ChevronRight, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
-import { Button } from "./Button";
 import Tooltip from "./Tooltip";
 
 /**
@@ -28,7 +27,7 @@ export default function NextQuestionButton() {
   // 回答履歴を保存していない場合は、次問題遷移ボタンを非活性とする
   const isDisabledOpenExplanationButton = useMemo<boolean>(
     () => !answerExplanation || !answerExplanation.isSavedProgress,
-    [answerExplanation]
+    [answerExplanation],
   );
 
   // 回答・解説が生成済み、かつ回答履歴を保存していない場合は、回答履歴を保存する
@@ -59,7 +58,7 @@ export default function NextQuestionButton() {
       navigate(
         histories.length === order.length
           ? `/tests/${testId}/result`
-          : `/tests/${testId}/questions/${order[histories.length]}`
+          : `/tests/${testId}/questions/${order[histories.length]}`,
       );
     }
   }, [histories, navigate, order, testId]);
@@ -73,8 +72,9 @@ export default function NextQuestionButton() {
     histories &&
     order && (
       <Tooltip tip={tooltipTip} position="top">
-        <Button
-          size="icon"
+        <button
+          type="button"
+          className="btn btn-primary btn-square"
           disabled={isDisabledOpenExplanationButton}
           onClick={onClick}
         >
@@ -85,7 +85,7 @@ export default function NextQuestionButton() {
           ) : (
             <ChevronRight />
           )}
-        </Button>
+        </button>
       </Tooltip>
     )
   );

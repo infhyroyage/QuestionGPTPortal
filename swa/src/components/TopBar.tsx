@@ -34,7 +34,7 @@ export default function TopBar({ title }: TopBarProps) {
       testId &&
       questionNumber &&
       location.pathname === `/tests/${testId}/questions/${questionNumber}`,
-    [location.pathname, questionNumber, testId]
+    [location.pathname, questionNumber, testId],
   );
 
   // 問題番号変更時にお気に入り状態を取得
@@ -61,7 +61,7 @@ export default function TopBar({ title }: TopBarProps) {
           "GET",
           `/tests/${testId}/favorites/${questionNumber}`,
           instance,
-          accountInfo
+          accountInfo,
         );
         setIsFavorite(response.isFavorite);
       } catch (e) {
@@ -101,7 +101,7 @@ export default function TopBar({ title }: TopBarProps) {
           )}
         </div>
         <div className="flex items-center space-x-2 min-w-fit">
-          {isTestQuestionPage && questionNumber && (
+          {isTestQuestionPage && (
             <>
               <div className="shrink-0">
                 <PreviousAnsweredQuestionButton />

@@ -4,8 +4,6 @@ import { useAtomValue } from "jotai";
 import { ScrollText } from "lucide-react";
 import { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router";
-import { Button } from "./Button";
-
 /**
  * 全テストのアコーディオンのコンポーネント
  * @returns 全テストのアコーディオンのコンポーネント
@@ -20,7 +18,7 @@ export default function TestListAccordion() {
     (testId: string) => {
       navigate(`/tests/${testId}/ready`);
     },
-    [navigate]
+    [navigate],
   );
 
   // テスト一覧情報のコース名の一覧(重複排除)
@@ -28,8 +26,8 @@ export default function TestListAccordion() {
     return testDetails
       ? Array.from(
           new Set(
-            testDetails.map((testDetail: TestDetail) => testDetail.courseName)
-          )
+            testDetails.map((testDetail: TestDetail) => testDetail.courseName),
+          ),
         )
       : [];
   }, [testDetails]);
@@ -52,20 +50,20 @@ export default function TestListAccordion() {
               {testDetails
                 .filter(
                   (testDetail: TestDetail) =>
-                    testDetail.courseName === courseName
+                    testDetail.courseName === courseName,
                 )
                 .map((testDetail: TestDetail, j: number) => (
-                  <Button
-                    variant="ghost"
+                  <button
+                    type="button"
+                    className="btn btn-ghost flex items-center justify-start space-x-4 w-full py-8"
                     onClick={() => onClickInnerButton(testDetail.testId)}
                     key={j}
-                    className="flex items-center justify-start space-x-4 w-full py-8"
                   >
                     <ScrollText className="size-7" />
                     <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
                       {testDetail.testName}
                     </h4>
-                  </Button>
+                  </button>
                 ))}
             </div>
           </div>

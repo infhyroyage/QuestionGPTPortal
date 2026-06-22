@@ -11,7 +11,6 @@ import { useAtom, useSetAtom } from "jotai";
 import { Info, RefreshCw } from "lucide-react";
 import { useCallback } from "react";
 import { useParams } from "react-router";
-import { Button } from "./Button";
 import VoteBadges from "./VoteBadges";
 
 /**
@@ -99,9 +98,9 @@ export default function ExplanationSheetCommunity({
         <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
           コミュニティディスカッション要約
         </h4>
-        <Button
-          variant="ghost"
-          size="icon"
+        <button
+          type="button"
+          className="btn btn-ghost btn-square"
           onClick={handleRefreshDiscussion}
           disabled={discussion === undefined}
           title="再取得"
@@ -110,7 +109,7 @@ export default function ExplanationSheetCommunity({
             className={discussion === undefined ? "animate-spin" : ""}
             size={20}
           />
-        </Button>
+        </button>
       </div>
       <VoteBadges />
       {discussion === undefined ? (
