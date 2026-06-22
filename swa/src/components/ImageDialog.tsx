@@ -32,16 +32,10 @@ export default function ImageDialog({ img, alt }: ImageDialogProps) {
 
   return (
     <>
-      <div className="inline-block" onClick={handleOpen}>
-        <div className="group relative inline-block cursor-pointer">
-          <img
-            src={img}
-            alt={alt}
-            className="w-auto max-h-[30vh] object-cover"
-          />
-          <div className="absolute inset-0 bg-gray-500 opacity-0 group-hover:opacity-70 transition duration-300" />
-          <ZoomIn className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition duration-300 text-white size-[10vh]" />
-        </div>
+      <div className="group relative w-fit cursor-pointer" onClick={handleOpen}>
+        <img src={img} alt={alt} className="w-auto max-h-[30vh] object-cover" />
+        <div className="absolute inset-0 bg-gray-500 opacity-0 group-hover:opacity-70 transition duration-300" />
+        <ZoomIn className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition duration-300 text-white size-[10vh]" />
       </div>
       {isOpen &&
         createPortal(
