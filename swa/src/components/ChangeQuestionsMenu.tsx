@@ -45,7 +45,7 @@ export default function ChangeQuestionsMenu() {
           >
             <Ellipsis className="size-4" />
           </button>
-          <ul className="dropdown-content menu max-h-[75vh] w-max overflow-y-auto rounded-box bg-base-100 shadow-lg">
+          <ul className="dropdown-content menu max-h-[75vh] w-max flex-nowrap overflow-x-hidden overflow-y-auto rounded-box bg-base-100 shadow-lg">
             {Array.from(
               { length: Math.min(histories.length + 1, order.length) },
               (_, idx: number) => (
