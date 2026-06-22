@@ -5,10 +5,9 @@ import { TopBarProps } from "@/types/props";
 import { useAccount, useMsal } from "@azure/msal-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router";
+import ChangeQuestionsMenu from "./ChangeQuestionsMenu";
 import DarkModeSwitchButton from "./DarkModeSwitchButton";
 import FavoriteButton from "./FavoriteButton";
-import NextAnsweredQuestionButton from "./NextAnsweredQuestionButton";
-import PreviousAnsweredQuestionButton from "./PreviousAnsweredQuestionButton";
 
 /**
  * トップバーのコンポーネント
@@ -103,14 +102,9 @@ export default function TopBar({ title }: TopBarProps) {
       </div>
       <div className="navbar-end flex-none items-center gap-2">
         {isTestQuestionPage && (
-          <>
-            <div className="flex h-7 items-center">
-              <PreviousAnsweredQuestionButton />
-            </div>
-            <div className="flex h-7 items-center">
-              <NextAnsweredQuestionButton />
-            </div>
-          </>
+          <div className="flex h-7 items-center">
+            <ChangeQuestionsMenu />
+          </div>
         )}
         <div className="flex h-7 items-center">
           <DarkModeSwitchButton />
