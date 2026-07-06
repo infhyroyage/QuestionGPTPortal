@@ -2,7 +2,7 @@ azure-cosmos==4.16.1
 azure-functions==1.24.0
 azure-identity==1.25.3
 azure-storage-queue==12.14.0
-coverage==7.14.3
+coverage==7.15.0
 openai==1.109.1
 pydantic==2.13.4
 pylint==4.0.6
