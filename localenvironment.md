@@ -27,7 +27,7 @@ Azure 環境構築後に、以下のサーバーをすべて起動すると、�
    - Docker
    - Git
    - Python 3.12
-   - [uv](https://docs.astral.sh/uv/getting-started/installation/)
+   - uv
 2. GitHub アカウントを用意して、このリポジトリをフォークし、ローカル環境にクローンする
 3. 以下を記述したファイル`local.settings.json`を functions ディレクトリ配下に保存する。
 
