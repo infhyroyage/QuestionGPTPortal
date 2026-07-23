@@ -1,0 +1,23 @@
+[project]
+name = "questiongptportal"
+version = "0.1.0"
+description = "Azure OpenAI powered English IT certification exam learning support web application"
+requires-python = ">=3.12"
+dependencies = [
+    "azure-cosmos==4.16.2",
+    "azure-functions==1.24.0",
+    "azure-identity==1.25.3",
+    "azure-storage-queue==12.14.0",
+    "openai==1.109.1",
+    "pydantic==2.13.4",
+    "requests==2.34.2",
+]
+
+[dependency-groups]
+dev = [
+    "coverage==7.15.1",
+    "pylint==4.0.6",
+]
+
+[tool.uv]
+package = false

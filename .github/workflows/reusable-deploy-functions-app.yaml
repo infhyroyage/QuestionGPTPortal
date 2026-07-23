@@ -33,17 +33,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Setup Python ${{ inputs.PYTHON_VERSION }} Environment
-        uses: actions/setup-python@v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@v9.0.0
         with:
+          enable-cache: true
           python-version: ${{ inputs.PYTHON_VERSION }}
 
       - name: Install Dependencies in functions directory
         run: |
           pushd functions
-          python -m pip install --upgrade pip
-          cp ../requirements.txt .
-          pip install -r requirements.txt --target=".python_packages/lib/site-packages"
+          uv export --frozen --no-dev --no-emit-project --no-hashes --no-header --no-annotate \
+            -o requirements.txt
+          uv pip install -r requirements.txt --target=".python_packages/lib/site-packages"
           popd
 
       - name: Login Azure as Contributor

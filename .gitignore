@@ -15,7 +15,9 @@ functions/local.settings.json
 resources/*.parameters.bicepparam
 
 # Python Virtual Environment
+.venv/
 venv/
+functions/requirements.txt
 
 # SWA
 swa/node_modules

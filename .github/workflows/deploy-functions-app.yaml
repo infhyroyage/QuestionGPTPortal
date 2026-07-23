@@ -8,7 +8,8 @@ on:
       - .github/workflows/deploy-functions-app.yaml
       - .github/workflows/reusable-deploy-functions-app.yaml
       - functions/**
-      - requirements.txt
+      - pyproject.toml
+      - uv.lock
 
 jobs:
   use-deploy-functions-app-workflow:
