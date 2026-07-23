@@ -12,7 +12,7 @@ QuestionGPTPortal は、Azure OpenAI を活用した英語IT資格試験の学�
 
 ### 前提（初回 VM のみ）
 
-[uv](https://docs.astral.sh/uv/) をインストールします（未導入時）:
+[uv](https://docs.astral.sh/uv/) をインストールする（未導入時）:
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -21,14 +21,14 @@ export PATH="$HOME/.local/bin:$PATH"
 
 ### 仮想環境と依存関係
 
-パッケージ管理には **uv** を使用します（`pyproject.toml` / `uv.lock`）。
+パッケージ管理には **uv** を使用する（`pyproject.toml` / `uv.lock`）。
 
 ```bash
 cd /workspace
 uv sync --locked --all-groups
 ```
 
-以降のセッションでは `source .venv/bin/activate` を先に実行するか、各コマンドを `uv run` 経由で実行してください。
+以降のセッションでは `source .venv/bin/activate` を先に実行するか、各コマンドを `uv run` 経由で実行すること。
 
 ### サービス起動順序
 
