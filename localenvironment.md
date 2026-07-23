@@ -27,6 +27,7 @@ Azure 環境構築後に、以下のサーバーをすべて起動すると、�
    - Docker
    - Git
    - Python 3.12
+   - [uv](https://docs.astral.sh/uv/getting-started/installation/)
 2. GitHub アカウントを用意して、このリポジトリをフォークし、ローカル環境にクローンする
 3. 以下を記述したファイル`local.settings.json`を functions ディレクトリ配下に保存する。
 
@@ -45,7 +46,7 @@ Azure 環境構築後に、以下のサーバーをすべて起動すると、�
        "OPENAI_DEPLOYMENT_NAME": "(Azure OpenAIのデプロイ名)",
        "OPENAI_ENDPOINT": "(Azure OpenAIのエンドポイント)",
        "OPENAI_MODEL_NAME": "(Azure OpenAIのモデル名)",
-       "PYTHON_PATH": "./venv/bin/python",
+       "PYTHON_PATH": "../.venv/bin/python",
        "TRANSLATOR_KEY": "(TranslatorのAPIキー)"
      },
      "Host": {
@@ -66,24 +67,23 @@ Azure 環境構築後に、以下のサーバーをすべて起動すると、�
    ```
    localcosmosdb     | Started
    ```
-5. Python 3.12 の仮想環境を作成する:
+5. uv で依存関係を同期し、仮想環境を作成する:
    ```bash
-   python3.12 -m venv venv
+   uv sync --locked --all-groups
    ```
-6. Python 3.12 の仮想環境を有効化する:
+6. （任意）仮想環境を有効化する。以降のコマンドは `uv run` 経由でも実行できる:
    ```bash
-   source venv/bin/activate
+   source .venv/bin/activate
    ```
 7. 6 と同じターミナルで以下のコマンドを実行し、Azure Functions を起動する。実行したターミナルはそのまま放置する。
    ```bash
    cd functions
    func start --verbose
    ```
-8. 7 とは別のターミナルで以下のコマンドを実行し、6 で作成した仮想環境の有効後、起動した Cosmos DB サーバーに対し、インポートデータファイルからインポートする。実行したターミナルは閉じる。
+8. 7 とは別のターミナルで以下のコマンドを実行し、起動した Cosmos DB サーバーに対し、インポートデータファイルからインポートする。実行したターミナルは閉じる。
 
    ```bash
-   source venv/bin/activate
-   python functions/import_local.py
+   uv run python functions/import_local.py
    ```
 
    - タイムアウトなどで失敗した場合、もう一度実行し直すこと。

@@ -221,16 +221,16 @@ az storage blob upload-batch --destination import-items --source ./functions/dat
 
 ## 特定のコース名に対応するCosmos DBのデータを削除したい場合
 
-1. Python 3.12をインストールする。
+1. Python 3.12 と [uv](https://docs.astral.sh/uv/getting-started/installation/) をインストールする。
 
-2. Python 3.12 の仮想環境を作成する:
+2. uv で依存関係を同期し、仮想環境を作成する:
    ```bash
-   python3.12 -m venv venv
+   uv sync --locked --all-groups
    ```
-3. Python 3.12 の仮想環境を有効化する:
+3. （任意）仮想環境を有効化する。以降のコマンドは `uv run` 経由でも実行できる:
 
    ```bash
-   source venv/bin/activate
+   source .venv/bin/activate
    ```
 
 4. 以下のコマンドを実行し、削除対象のCosmos DBのURIを取得する:
@@ -255,21 +255,21 @@ export COSMOSDB_KEY="(取得した削除対象のCosmos DBのプライマリー�
 7. 以下のコマンドを実行し、特定のコース名に対応するCosmos DBのデータを削除する。コース名はダブルクォーテーションで囲むことに注意すること:
 
 ```bash
-python functions/delete_by_course_name.py "(削除したいコース名)"
+uv run python functions/delete_by_course_name.py "(削除したいコース名)"
 ```
 
 ## 特定のテスト名に対応するCosmos DBのデータを削除したい場合
 
-1. Python 3.12をインストールする。
+1. Python 3.12 と [uv](https://docs.astral.sh/uv/getting-started/installation/) をインストールする。
 
-2. Python 3.12 の仮想環境を作成する:
+2. uv で依存関係を同期し、仮想環境を作成する:
    ```bash
-   python3.12 -m venv venv
+   uv sync --locked --all-groups
    ```
-3. Python 3.12 の仮想環境を有効化する:
+3. （任意）仮想環境を有効化する。以降のコマンドは `uv run` 経由でも実行できる:
 
    ```bash
-   source venv/bin/activate
+   source .venv/bin/activate
    ```
 
 4. 以下のコマンドを実行し、削除対象のCosmos DBのURIを取得する:
@@ -294,7 +294,7 @@ export COSMOSDB_KEY="(取得した削除対象のCosmos DBのプライマリー�
 7. 以下のコマンドを実行し、特定のテスト名に対応するCosmos DBのデータを削除する。テスト名はダブルクォーテーションで囲むことに注意すること:
 
 ```bash
-python functions/delete_by_test_name.py "(削除したいテスト名)"
+uv run python functions/delete_by_test_name.py "(削除したいテスト名)"
 ```
 
 ## 削除手順
