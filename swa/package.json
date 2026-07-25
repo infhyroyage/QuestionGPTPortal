@@ -13,7 +13,7 @@
     "@azure/msal-react": "^5.5.1",
     "axios": "^1.18.1",
     "clsx": "^2.1.1",
-    "jotai": "^2.20.1",
+    "jotai": "^2.20.2",
     "lucide-react": "^1.22.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
