@@ -42,7 +42,9 @@ uv sync --locked --all-groups
 - **Docker in Docker**: `dockerd` の起動・`docker` コマンドは `sudo` が必要 (例: `sudo dockerd`、`sudo docker compose up`) 。ストレージドライバーは `fuse-overlayfs`、`iptables-legacy` を使用する (`/etc/docker/daemon.json` に設定済み) 。
 - **CosmosDB Emulator の PostgreSQL 起動対策**: `fuse-overlayfs` 環境では、イメージ下位レイヤー上のファイル削除が `could not remove file "base/pgsql_job_cache": Invalid cross-device link` (EXDEV) となり、内蔵 PostgreSQL が起動失敗 (`pgcosmos extension is still starting` のまま使用不能) する。これを回避するため、`compose.yaml` で CosmosDB の `/data` を名前付きボリューム `cosmosdata` にマウントしている (名前付きボリュームはイメージ内の初期化済み `/data` を自動コピーし、実ファイルシステム上で動作するため EXDEV を回避できる) 。正常起動時は `docker compose up` のログに `PostgreSQL=OK, Gateway=OK, Explorer=OK` が出る。ボリュームを完全に作り直したい場合のみ `docker compose down -v` を使う。
 - **認証スキップ**: `import.meta.env.DEV` が true のとき MSAL 認証をスキップし、バックエンドへのリクエストに `X-User-Id: local` ヘッダーを付与する。
-- **Node.js バージョン**: v24 が必要。`nvm use 24` で切り替え可能。
+- **Node.js バージョン**: v24 が必要。ログインシェル (`bash -l`) では `nvm` により自動的に v24 が有効になり、`node` / `npm` / `func` はすべて PATH 上にある。素の非ログインシェルでは `/exec-daemon/node` (v22) が優先されることがあるため、`func start` などが見つからない場合はログインシェルを使うか `nvm use 24` を実行する。
+- **事前導入済みツール**: `uv`・Docker (29.6.2)・Azure Functions Core Tools (`func`) はスナップショットに導入済みで再インストール不要。起動時の更新スクリプトが `uv sync --locked --all-groups` と `npm --prefix swa ci` を自動実行するため、`.venv` と `swa/node_modules` の依存はセッション開始時に最新化される。Docker/CosmosDB/Azurite/`func`/vite などのサービス起動は更新スクリプトに含めず手動で行う (上記「サービス起動順序」参照)。
+- **`func` のグローバル導入時の注意**: `func` は nvm の Node v24 配下にグローバル導入している。npm のグローバル `prefix` を `~/.npmrc` に設定すると nvm と競合し `node` 解決が壊れるため設定しないこと。再導入が必要な場合はログインシェルで Node v24 を有効化してから `npm install -g azure-functions-core-tools@4` を実行する。
 - **Python / uv**: `uv sync --locked --all-groups` で `.venv` を作成。`source .venv/bin/activate` または `uv run` で実行。
 - **`local.settings.json`**: `functions/local.settings.json` はローカル専用 (.gitignore済み) 。CosmosDB Emulator のデフォルトキーを使用。`PYTHON_PATH` は `../.venv/bin/python` を指定。
 - **`swa/.env`**: `VITE_API_URI="http://localhost:9229"` を設定 (.gitignore済み) 。
