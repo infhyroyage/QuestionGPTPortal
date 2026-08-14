@@ -222,69 +222,57 @@ az storage blob upload-batch --destination import-items --source ./functions/dat
 ## 特定のコース名に対応するCosmos DBのデータを削除したい場合
 
 1. Python 3.12 と [uv](https://docs.astral.sh/uv/getting-started/installation/) をインストールする。
-
-2. uv で依存関係を同期し、仮想環境を作成する:
-   ```bash
-   uv sync --locked --all-groups
-   ```
-
-3. 以下のコマンドを実行し、削除対象のCosmos DBのURIを取得する:
+2. 以下のコマンドを実行し、削除対象のCosmos DBのURIを取得する:
 
 ```bash
 az cosmosdb show -g qgtranslator-je -n (当リポジトリの変数COSMOSDB_NAMEの値) --query "writeLocations[0].documentEndpoint" -o tsv
 ```
 
-4. 以下のコマンドを実行し、削除対象のCosmos DBのプライマリーアクセスキーを取得する:
+3. 以下のコマンドを実行し、削除対象のCosmos DBのプライマリーアクセスキーを取得する:
 
 ```bash
 az cosmosdb keys list -g qgtranslator-je -n (当リポジトリの変数COSMOSDB_NAMEの値) --query "primaryMasterKey" -o tsv
 ```
 
-5. 以下のコマンドを実行し、取得した削除対象のCosmos DBのURI・プライマリーアクセスキーを環境変数に設定する:
+4. 以下のコマンドを実行し、取得した削除対象のCosmos DBのURI・プライマリーアクセスキーを環境変数に設定する:
 
 ```bash
 export COSMOSDB_URI="(取得した削除対象のCosmos DBのURI)"
 export COSMOSDB_KEY="(取得した削除対象のCosmos DBのプライマリーアクセスキー)"
 ```
 
-6. 以下のコマンドを実行し、特定のコース名に対応するCosmos DBのデータを削除する。コース名はダブルクォーテーションで囲むことに注意すること:
+5. 以下のコマンドを実行し、 uv で依存関係を同期して仮想環境を作成後、特定のコース名に対応するCosmos DBのデータを削除する。コース名はダブルクォーテーションで囲むことに注意すること:
 
 ```bash
-uv run python functions/delete_by_course_name.py "(削除したいコース名)"
+uv sync --locked --all-groups && uv run python functions/delete_by_course_name.py "(削除したいコース名)"
 ```
 
 ## 特定のテスト名に対応するCosmos DBのデータを削除したい場合
 
 1. Python 3.12 と [uv](https://docs.astral.sh/uv/getting-started/installation/) をインストールする。
-
-2. uv で依存関係を同期し、仮想環境を作成する:
-   ```bash
-   uv sync --locked --all-groups
-   ```
-
-3. 以下のコマンドを実行し、削除対象のCosmos DBのURIを取得する:
+2. 以下のコマンドを実行し、削除対象のCosmos DBのURIを取得する:
 
 ```bash
 az cosmosdb show -g qgtranslator-je -n (当リポジトリの変数COSMOSDB_NAMEの値) --query "writeLocations[0].documentEndpoint" -o tsv
 ```
 
-4. 以下のコマンドを実行し、削除対象のCosmos DBのプライマリーアクセスキーを取得する:
+3. 以下のコマンドを実行し、削除対象のCosmos DBのプライマリーアクセスキーを取得する:
 
 ```bash
 az cosmosdb keys list -g qgtranslator-je -n (当リポジトリの変数COSMOSDB_NAMEの値) --query "primaryMasterKey" -o tsv
 ```
 
-5. 以下のコマンドを実行し、取得した削除対象のCosmos DBのURI・プライマリーアクセスキーを環境変数に設定する:
+4. 以下のコマンドを実行し、取得した削除対象のCosmos DBのURI・プライマリーアクセスキーを環境変数に設定する:
 
 ```bash
 export COSMOSDB_URI="(取得した削除対象のCosmos DBのURI)"
 export COSMOSDB_KEY="(取得した削除対象のCosmos DBのプライマリーアクセスキー)"
 ```
 
-6. 以下のコマンドを実行し、特定のテスト名に対応するCosmos DBのデータを削除する。テスト名はダブルクォーテーションで囲むことに注意すること:
+5. 以下のコマンドを実行し、 uv で依存関係を同期して仮想環境を作成後、特定のテスト名に対応するCosmos DBのデータを削除する。テスト名はダブルクォーテーションで囲むことに注意すること:
 
 ```bash
-uv run python functions/delete_by_test_name.py "(削除したいテスト名)"
+uv sync --locked --all-groups && uv run python functions/delete_by_test_name.py "(削除したいテスト名)"
 ```
 
 ## 削除手順

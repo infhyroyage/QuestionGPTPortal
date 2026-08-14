@@ -67,44 +67,32 @@ Azure 環境構築後に、以下のサーバーをすべて起動すると、�
    ```
    localcosmosdb     | Started
    ```
-5. uv で依存関係を同期し、仮想環境を作成する:
-   ```bash
-   uv sync --locked --all-groups
-   ```
-6. （任意）仮想環境を有効化する。以降のコマンドは `uv run` 経由でも実行できる:
-   ```bash
-   source .venv/bin/activate
-   ```
-7. 6 と同じターミナルで以下のコマンドを実行し、Azure Functions を起動する。実行したターミナルはそのまま放置する。
+5. 4 と同じターミナルで以下のコマンドを実行し、Azure Functions を起動する。実行したターミナルはそのまま放置する。
    ```bash
    cd functions
    func start --verbose
    ```
-8. 7 とは別のターミナルで以下のコマンドを実行し、起動した Cosmos DB サーバーに対し、インポートデータファイルからインポートする。実行したターミナルは閉じる。
+6. 5 とは別のターミナルで以下のコマンドを実行し、 uv で依存関係を同期して仮想環境を作成後、起動した Cosmos DB サーバーに対してインポートデータファイルからインポートする。実行したターミナルは閉じる。
 
    ```bash
-   uv run python functions/import_local.py
+   uv sync --locked --all-groups && uv run python functions/import_local.py
    ```
 
    - タイムアウトなどで失敗した場合、もう一度実行し直すこと。
 
-9. 以下を記述したファイル`.env`を swa ディレクトリ配下に保存する。
+7. 以下を記述したファイル`.env`を swa ディレクトリ配下に保存する。
    ```
    VITE_API_URI="http://localhost:9229"
    ```
-10. 7 とは別のターミナルで以下のコマンドを実行し、npm パッケージをインストールする。
-    ```bash
-    cd swa && npm i
-    ```
-11. 10 のターミナルで以下のコマンドを実行し、Web サーバーを起動する。実行したターミナルはそのまま放置する。
-    ```bash
-    npm run dev
-    ```
+8. 5 とは別のターミナルで以下のコマンドを実行し、npm パッケージをインストール後、Web サーバーを起動する。実行したターミナルはそのまま放置する。
+   ```bash
+   cd swa && npm i && npm run dev
+   ```
 
 ## 削除手順
 
-1. 構築手順の 11 で起動した Web サーバーのターミナルに対して Ctrl+C キーを入力し、起動した Web サーバーを停止して、ターミナルを閉じる。
-2. 構築手順の 7 で起動した Azure Functions のターミナルに対して Ctrl+C キーを入力し、起動した Azure Functions を停止して、ターミナルを閉じる。
+1. 構築手順の 8 で起動した Web サーバーのターミナルに対して Ctrl+C キーを入力し、起動した Web サーバーを停止して、ターミナルを閉じる。
+2. 構築手順の 5 で起動した Azure Functions のターミナルに対して Ctrl+C キーを入力し、起動した Azure Functions を停止して、ターミナルを閉じる。
 3. ターミナルを起動して以下のコマンドを実行し、構築手順の 4 で起動した Cosmos DB、Blob/Queue/Table ストレージをすべて停止する。
    ```bash
    docker compose down

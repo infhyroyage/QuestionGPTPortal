@@ -16,7 +16,7 @@
   - MSAL (Entra ID 認証)
 - バックエンド
   - Python 3.12 (プログラミング言語)
-  - [uv](https://docs.astral.sh/uv/) (Python パッケージ管理)
+  - uv (Python パッケージ管理)
   - Azure Functions Core Tools (ローカルテストとデプロイ)
   - Docker/Docker Compose (ローカル開発環境構築)
   - coverage (ユニットテスト・カバレッジ測定)
@@ -53,11 +53,11 @@
   - Azure OpenAI Structured Outputs： functions/type/structured.py
 - 関数アプリの Python のユニットテストは functions/tests に実装し、stmt のカバレッジ率 80%以上をみたすようにして、コード品質を担保する。ユニットテストは、以下のコマンドで実行する:
   ```bash
-  cd functions && uv run coverage run -m unittest discover -s tests && uv run coverage report -m && cd ..
+  cd functions && uv sync --locked --all-groups && uv run coverage run -m unittest discover -s tests && uv run coverage report -m && cd ..
   ```
 - 関数アプリの開発時は、.pylintrc に記載した例外を除き、必ず Pylint の警告・エラーをすべて解消するように、コード品質を担保する。Pylint の静的解析は、以下のコマンドで実行する:
   ```bash
-  uv run pylint functions/**/*.py
+  uv sync --locked --all-groups && uv run pylint functions/**/*.py
   ```
 - HTTP Trigger 関数の関数アプリの API リファレンスは Swagger ファイルとして、基本的に apim/apis-functions-swagger.yaml で管理する。ただし、ヘルスチェック API のみ認証処理を行わないため、別の Swagger ファイル apim/apis-healthcheck-functions-swagger.yaml で管理する。
   - API Management のデプロイは、これらの Swagger ファイルをインポートする。
@@ -135,11 +135,11 @@
 
 - [ ] 以下のコマンドを実行して、すべての関数アプリのユニットテストが成功し、カバレッジを 80% 以上にする:
   ```bash
-  cd functions && uv run coverage run -m unittest discover -s tests && uv run coverage report -m && cd ..
+  cd functions && uv sync --locked --all-groups && uv run coverage run -m unittest discover -s tests && uv run coverage report -m && cd ..
   ```
 - [ ] 以下のコマンドを実行して、Pylint の警告・エラーをすべて解消する:
   ```bash
-  uv run pylint functions/**/*.py
+  uv sync --locked --all-groups && uv run pylint functions/**/*.py
   ```
 - [ ] 以下のコマンドを実行して、ESLint の警告・エラーをすべて解消する:
   ```bash
@@ -149,14 +149,14 @@
 
 ## 依存関係管理
 
-本システムでは、[uv](https://docs.astral.sh/uv/) を用いて Python パッケージの依存関係を `pyproject.toml` と `uv.lock` で管理する。
+本システムでは uv を用いて Python パッケージの依存関係を `pyproject.toml` と `uv.lock` で管理する。
 セキュリティの脆弱性や新機能に対応するように定期的にパッケージのバージョンアップを自動的に提案する GitHub Dependabot を使用して、依存関係を自動更新する。
 GitHub Dependabot は以下の実行方式に従い、`.github/dependabot.yaml` で管理する。
 
-### PyPI パッケージ管理（uv）
+### PyPI パッケージ管理
 
 - 実行スケジュール: 毎週月曜日 10:00 (Asia/Tokyo)
-- 対象ファイル: `pyproject.toml` / `uv.lock`
+- 対象ファイル: `pyproject.toml`、`uv.lock`
 - 更新方式: プルリクエストによる自動提案
 - 除外パッケージ: 破壊的変更が多い以下のパッケージは管理対象外
   - `openai`
@@ -164,7 +164,7 @@ GitHub Dependabot は以下の実行方式に従い、`.github/dependabot.yaml` 
 ### npm パッケージ管理
 
 - 実行スケジュール: 毎週月曜日 10:30 (Asia/Tokyo)
-- 対象ファイル: swa/package.json, swa/package-lock.json
+- 対象ファイル: `swa/package.json`、`swa/package-lock.json`
 - 更新方式: プルリクエストによる自動提案
 - 除外パッケージ: 破壊的変更が多い以下のパッケージは管理対象外
   - `@types/node`
@@ -178,5 +178,5 @@ GitHub Dependabot は以下の実行方式に従い、`.github/dependabot.yaml` 
 ### GitHub Actions 管理
 
 - 実行スケジュール: 毎週月曜日 11:00 (Asia/Tokyo)
-- 対象ディレクトリ: .github/workflows/
+- 対象ディレクトリ: `.github/workflows/`
 - 更新方式: プルリクエストによる自動提案

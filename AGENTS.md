@@ -10,9 +10,9 @@ QuestionGPTPortal は、Azure OpenAI を活用した英語IT資格試験の学�
 - **バックエンド**: `functions/` — Python 3.12 Azure Functions (ポート 9229)
 - **インフラ**: Docker Compose で CosmosDB Emulator (ポート 8081) + Azurite (ポート 10000-10002)
 
-### 前提（初回 VM のみ）
+### 前提(初回のみ)
 
-[uv](https://docs.astral.sh/uv/) をインストールする（未導入時）:
+uv をインストールする(未導入時):
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -21,7 +21,7 @@ export PATH="$HOME/.local/bin:$PATH"
 
 ### 仮想環境と依存関係
 
-パッケージ管理には **uv** を使用する（`pyproject.toml` / `uv.lock`）。
+パッケージ管理には **uv** を使用する(`pyproject.toml` / `uv.lock`)。
 
 ```bash
 cd /workspace
@@ -55,7 +55,7 @@ uv sync --locked --all-groups
 
 `CONTRIBUTING.md` に記載の通り:
 
-- **Python テスト**: `cd functions && uv run coverage run -m unittest discover -s tests && uv run coverage report -m`
-- **Pylint**: `uv run pylint functions/**/*.py`
+- **Python テスト**: `cd functions && uv sync --locked --all-groups && uv run coverage run -m unittest discover -s tests && uv run coverage report -m`
+- **Pylint**: `uv sync --locked --all-groups && uv run pylint functions/**/*.py`
 - **ESLint**: `cd swa && npm run lint`
 - **フロントエンドビルド**: `cd swa && npm run build`
