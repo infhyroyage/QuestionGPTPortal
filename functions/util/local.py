@@ -10,7 +10,10 @@ from azure.storage.queue import QueueClient
 from type.cosmos import Question, Test
 from type.importing import ImportData, ImportDatabaseData, ImportItem
 from util.cosmos import get_read_write_container, sanitize_document_strings
-from util.queue import AZURITE_QUEUE_STORAGE_CONNECTION_STRING
+from util.queue import (
+    AZURITE_COMPATIBLE_API_VERSION,
+    AZURITE_QUEUE_STORAGE_CONNECTION_STRING,
+)
 
 
 def create_queue_storages() -> None:
@@ -23,6 +26,7 @@ def create_queue_storages() -> None:
         QueueClient.from_connection_string(
             conn_str=AZURITE_QUEUE_STORAGE_CONNECTION_STRING,
             queue_name="answers",
+            api_version=AZURITE_COMPATIBLE_API_VERSION,
         ).create_queue()
     except ResourceExistsError:
         pass
@@ -30,6 +34,7 @@ def create_queue_storages() -> None:
         QueueClient.from_connection_string(
             conn_str=AZURITE_QUEUE_STORAGE_CONNECTION_STRING,
             queue_name="discussions",
+            api_version=AZURITE_COMPATIBLE_API_VERSION,
         ).create_queue()
     except ResourceExistsError:
         pass

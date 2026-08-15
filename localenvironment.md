@@ -67,6 +67,9 @@ Azure 環境構築後に、以下のサーバーをすべて起動すると、�
    ```
    localcosmosdb     | Started
    ```
+
+   > [!NOTE]
+   > `azure-storage-queue` 12.17.0 以降は既定の REST API バージョン (`2026-06-06`) が Azurite 未対応のため、`compose.yaml` の Azurite 起動コマンドに `--skipApiVersionCheck` を付与している。ローカルの Python クライアントは `2025-11-05` を明示指定する。
 5. 4 とは別のターミナルで以下のコマンドを実行し、Azure Functions を起動する。実行したターミナルはそのまま放置する。
    ```bash
    cd functions

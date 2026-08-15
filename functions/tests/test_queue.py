@@ -5,7 +5,11 @@ from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 from azure.storage.queue import QueueClient
-from util.queue import AZURITE_QUEUE_STORAGE_CONNECTION_STRING, get_queue_client
+from util.queue import (
+    AZURITE_COMPATIBLE_API_VERSION,
+    AZURITE_QUEUE_STORAGE_CONNECTION_STRING,
+    get_queue_client,
+)
 
 
 class TestGetQueueClient(TestCase):
@@ -16,17 +20,23 @@ class TestGetQueueClient(TestCase):
     def test_get_queue_client_local_environment(self, mock_from_connection_string):
         """ローカル環境でget_queue_client関数を呼び出すテスト"""
 
+        # Given: AzureWebJobsStorageが開発用ストレージを指す
         mock_queue_client = MagicMock(spec=QueueClient)
         mock_from_connection_string.return_value = mock_queue_client
 
+        # When: ローカル環境向けにQueueClientを取得する
         result = get_queue_client("test-queue")
 
+        # Then: Azurite接続文字列と互換APIバージョンで生成される
         mock_from_connection_string.assert_called_once()
         call_kwargs = mock_from_connection_string.call_args[1]
         self.assertEqual(
             call_kwargs["conn_str"], AZURITE_QUEUE_STORAGE_CONNECTION_STRING
         )
         self.assertEqual(call_kwargs["queue_name"], "test-queue")
+        self.assertEqual(
+            call_kwargs["api_version"], AZURITE_COMPATIBLE_API_VERSION
+        )
         self.assertIsNotNone(call_kwargs["message_encode_policy"])
         self.assertEqual(result, mock_queue_client)
 
@@ -48,8 +58,11 @@ class TestGetQueueClient(TestCase):
         mock_credential = MagicMock()
         mock_default_azure_credential.return_value = mock_credential
 
+        # Given: AzureWebJobsStorage__accountNameが設定されている
+        # When: Azure環境向けにQueueClientを取得する
         result = get_queue_client("test-queue")
 
+        # Then: 本番エンドポイントで生成され、Azurite用api_versionは指定されない
         mock_default_azure_credential.assert_called_once()
         mock_queue_client_class.assert_called_once()
         call_kwargs = mock_queue_client_class.call_args[1]
@@ -60,15 +73,38 @@ class TestGetQueueClient(TestCase):
         self.assertEqual(call_kwargs["queue_name"], "test-queue")
         self.assertEqual(call_kwargs["credential"], mock_credential)
         self.assertIsNotNone(call_kwargs["message_encode_policy"])
+        self.assertNotIn("api_version", call_kwargs)
         self.assertEqual(result, mock_queue_client)
 
     @patch.dict(os.environ, {}, clear=True)
     def test_get_queue_client_azure_environment_missing_account_name(self):
         """Azure環境でAzureWebJobsStorage__accountNameが未設定の場合のテスト"""
 
+        # Given: AzureWebJobsStorage__accountNameが未設定
+        # When: QueueClientを取得する
         with self.assertRaises(ValueError) as context:
             get_queue_client("test-queue")
 
+        # Then: 必須環境変数不足のValueErrorになる
+        self.assertIn(
+            "AzureWebJobsStorage__accountName environment variable is not set",
+            str(context.exception),
+        )
+
+    @patch.dict(
+        os.environ,
+        {"AzureWebJobsStorage__accountName": ""},
+        clear=True,
+    )
+    def test_get_queue_client_azure_environment_empty_account_name(self):
+        """Azure環境でAzureWebJobsStorage__accountNameが空文字の場合のテスト"""
+
+        # Given: AzureWebJobsStorage__accountNameが空文字
+        # When: QueueClientを取得する
+        with self.assertRaises(ValueError) as context:
+            get_queue_client("test-queue")
+
+        # Then: 必須環境変数不足のValueErrorになる
         self.assertIn(
             "AzureWebJobsStorage__accountName environment variable is not set",
             str(context.exception),

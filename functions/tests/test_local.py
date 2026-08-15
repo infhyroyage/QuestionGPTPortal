@@ -4,7 +4,7 @@ import os
 import unittest
 from unittest.mock import MagicMock, call, mock_open, patch
 
-from azure.core.exceptions import ResourceExistsError
+from azure.core.exceptions import HttpResponseError, ResourceExistsError
 from azure.cosmos import PartitionKey
 from type.cosmos import Question, Test
 from type.importing import ImportData
@@ -18,7 +18,10 @@ from util.local import (
     import_question_items,
     import_test_items,
 )
-from util.queue import AZURITE_QUEUE_STORAGE_CONNECTION_STRING
+from util.queue import (
+    AZURITE_COMPATIBLE_API_VERSION,
+    AZURITE_QUEUE_STORAGE_CONNECTION_STRING,
+)
 
 
 class TestCreateQueueStorages(unittest.TestCase):
@@ -29,23 +32,28 @@ class TestCreateQueueStorages(unittest.TestCase):
         self, mock_from_connection_string
     ):
         """まだQueueが存在しない場合のcreate_queue_storages関数のテスト"""
+        # Given: Queueが未作成
         mock_queue_client = MagicMock()
         mock_from_connection_string.side_effect = [
             mock_queue_client,
             mock_queue_client,
         ]
 
+        # When: Queue Storageを作成する
         create_queue_storages()
 
+        # Then: Azurite互換APIバージョンでanswers/discussionsを作成する
         mock_from_connection_string.assert_has_calls(
             [
                 call(
                     conn_str=AZURITE_QUEUE_STORAGE_CONNECTION_STRING,
                     queue_name="answers",
+                    api_version=AZURITE_COMPATIBLE_API_VERSION,
                 ),
                 call(
                     conn_str=AZURITE_QUEUE_STORAGE_CONNECTION_STRING,
                     queue_name="discussions",
+                    api_version=AZURITE_COMPATIBLE_API_VERSION,
                 ),
             ]
         )
@@ -59,6 +67,7 @@ class TestCreateQueueStorages(unittest.TestCase):
     @patch("util.local.QueueClient.from_connection_string")
     def test_create_queue_storages_when_queue_exists(self, mock_from_connection_string):
         """Queueが既に存在する場合のcreate_queue_storages関数のテスト"""
+        # Given: Queueが既に存在する
         mock_queue_client = MagicMock()
         mock_from_connection_string.side_effect = [
             mock_queue_client,
@@ -69,17 +78,21 @@ class TestCreateQueueStorages(unittest.TestCase):
             ResourceExistsError,
         ]
 
+        # When: Queue Storageを作成する
         create_queue_storages()
 
+        # Then: ResourceExistsErrorを握りつぶし、互換APIバージョンで作成を試行する
         mock_from_connection_string.assert_has_calls(
             [
                 call(
                     conn_str=AZURITE_QUEUE_STORAGE_CONNECTION_STRING,
                     queue_name="answers",
+                    api_version=AZURITE_COMPATIBLE_API_VERSION,
                 ),
                 call(
                     conn_str=AZURITE_QUEUE_STORAGE_CONNECTION_STRING,
                     queue_name="discussions",
+                    api_version=AZURITE_COMPATIBLE_API_VERSION,
                 ),
             ]
         )
@@ -89,6 +102,32 @@ class TestCreateQueueStorages(unittest.TestCase):
                 call(),
             ]
         )
+
+    @patch("util.local.QueueClient.from_connection_string")
+    def test_create_queue_storages_when_api_version_unsupported(
+        self, mock_from_connection_string
+    ):
+        """Azuriteが未対応APIバージョンを拒否した場合のcreate_queue_storages関数のテスト"""
+        # Given: create_queueがAPIバージョン不一致のHttpResponseErrorを返す
+        mock_queue_client = MagicMock()
+        mock_from_connection_string.return_value = mock_queue_client
+        mock_queue_client.create_queue.side_effect = HttpResponseError(
+            message=(
+                "The API version 2026-06-06 is not supported by Azurite. "
+                "ErrorCode:InvalidHeaderValue"
+            )
+        )
+
+        # When: Queue Storageを作成する
+        # Then: ResourceExistsErrorとしては扱わず、HttpResponseErrorが伝播する
+        with self.assertRaises(HttpResponseError) as context:
+            create_queue_storages()
+
+        self.assertIn(
+            "The API version 2026-06-06 is not supported by Azurite",
+            str(context.exception),
+        )
+        self.assertIn("InvalidHeaderValue", str(context.exception))
 
 
 class TestCreateDatabasesAndContainers(unittest.TestCase):
