@@ -22,6 +22,19 @@ services:
   localstorage:
     image: mcr.microsoft.com/azure-storage/azurite:latest
     container_name: localstorage
+    # Azurite への接続時に InvalidHeaderValue にならないよう --skipApiVersionCheck オプションで API バージョン検査をスキップする
+    # これにより command が上書きされるため、 --blobHost/--queueHost/--tableHost オプションの明記が必要になる
+    command:
+      - azurite
+      - --blobHost
+      - "0.0.0.0"
+      - --queueHost
+      - "0.0.0.0"
+      - --tableHost
+      - "0.0.0.0"
+      - --location
+      - /data
+      - --skipApiVersionCheck
     ports:
       - 10000:10000
       - 10001:10001

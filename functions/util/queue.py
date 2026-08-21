@@ -5,6 +5,10 @@ import os
 from azure.identity import DefaultAzureCredential
 from azure.storage.queue import BinaryBase64EncodePolicy, QueueClient
 
+# ローカル環境の場合のAzuriteの互換バージョン
+AZURITE_COMPATIBLE_API_VERSION: str = "2025-11-05"
+
+# ローカル環境の場合のAzuriteの接続文字列
 # pylint: disable=line-too-long
 AZURITE_QUEUE_STORAGE_CONNECTION_STRING: str = (
     "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;"
@@ -30,6 +34,7 @@ def get_queue_client(queue_name: str) -> QueueClient:
             conn_str=AZURITE_QUEUE_STORAGE_CONNECTION_STRING,
             queue_name=queue_name,
             message_encode_policy=BinaryBase64EncodePolicy(),
+            api_version=AZURITE_COMPATIBLE_API_VERSION,
         )
 
     account_name = os.environ.get("AzureWebJobsStorage__accountName")
