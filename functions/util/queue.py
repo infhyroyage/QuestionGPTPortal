@@ -5,14 +5,14 @@ import os
 from azure.identity import DefaultAzureCredential
 from azure.storage.queue import BinaryBase64EncodePolicy, QueueClient
 
+# ローカル環境の場合のAzuriteの互換バージョン
+AZURITE_COMPATIBLE_API_VERSION: str = "2025-11-05"
+
+# ローカル環境の場合のAzuriteの接続文字列
 # pylint: disable=line-too-long
 AZURITE_QUEUE_STORAGE_CONNECTION_STRING: str = (
     "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;"
 )
-
-# azure-storage-queue 12.17.0 の既定 REST API は 2026-06-06 だが、
-# Azurite 3.36 時点の Queue 対応は 2025-11-05 までのため、ローカル接続時は互換バージョンを指定する。
-AZURITE_COMPATIBLE_API_VERSION: str = "2025-11-05"
 
 
 def get_queue_client(queue_name: str) -> QueueClient:

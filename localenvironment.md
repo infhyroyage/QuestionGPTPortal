@@ -30,6 +30,7 @@ Azure 環境構築後に、以下のサーバーをすべて起動すると、�
    - uv
 2. GitHub アカウントを用意して、このリポジトリをフォークし、ローカル環境にクローンする
 3. 以下を記述したファイル`local.settings.json`を functions ディレクトリ配下に保存する。
+   - CORS は任意のオリジンを許可するように設定しているため、特定のオリジンのみ許可したい場合は`Host` > `CORS`にそのオリジンを設定すること。
 
    ```json
    {
@@ -57,37 +58,40 @@ Azure 環境構築後に、以下のサーバーをすべて起動すると、�
    }
    ```
 
-   - CORS は任意のオリジンを許可するように設定しているため、特定のオリジンのみ許可したい場合は`Host` > `CORS`にそのオリジンを設定すること。
-
 4. ターミナルを起動して以下のコマンドを実行し、Cosmos DB、Blob/Queue/Table ストレージをすべて起動する。実行したターミナルはそのまま放置する。
+
    ```bash
    docker compose up
    ```
+
    実行後、以下の標準出力が表示されるまで待機する。
+
    ```
    localcosmosdb     | Started
    ```
 
-   > [!NOTE]
-   > `azure-storage-queue` 12.17.0 以降は既定の REST API バージョン (`2026-06-06`) が Azurite 未対応のため、`compose.yaml` の Azurite 起動コマンドに `--skipApiVersionCheck` を付与している。ローカルの Python クライアントは `2025-11-05` を明示指定する。
 5. 4 とは別のターミナルで以下のコマンドを実行し、Azure Functions を起動する。実行したターミナルはそのまま放置する。
+
    ```bash
    cd functions
    func start --verbose
    ```
+
 6. 5 とは別のターミナルで以下のコマンドを実行し、 uv で依存関係を同期して仮想環境を作成後、起動した Cosmos DB サーバーに対してインポートデータファイルからインポートする。実行したターミナルは閉じる。
+   - タイムアウトなどで失敗した場合、もう一度実行し直すこと。
 
    ```bash
    uv sync --locked --all-groups && uv run python functions/import_local.py
    ```
 
-   - タイムアウトなどで失敗した場合、もう一度実行し直すこと。
-
 7. 以下を記述したファイル`.env`を swa ディレクトリ配下に保存する。
+
    ```
    VITE_API_URI="http://localhost:9229"
    ```
+
 8. 5 とは別のターミナルで以下のコマンドを実行し、npm パッケージをインストール後、Web サーバーを起動する。実行したターミナルはそのまま放置する。
+
    ```bash
    cd swa && npm i && npm run dev
    ```

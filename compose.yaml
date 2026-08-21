@@ -22,9 +22,8 @@ services:
   localstorage:
     image: mcr.microsoft.com/azure-storage/azurite:latest
     container_name: localstorage
-    # azure-storage-queue 12.17.0 以降は既定 REST API が Azurite 未対応のため、
-    # Functions ホスト等からの接続でも InvalidHeaderValue にならないよう API バージョン検査をスキップする。
-    # command を上書きする場合、ホストから接続できるよう --blobHost/--queueHost/--tableHost と永続化先が必要。
+    # Azurite への接続時に InvalidHeaderValue にならないよう --skipApiVersionCheck オプションで API バージョン検査をスキップする
+    # これにより command が上書きされるため、 --blobHost/--queueHost/--tableHost オプションの明記が必要になる
     command:
       - azurite
       - --blobHost
