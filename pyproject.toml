@@ -15,7 +15,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "coverage==7.15.4",
+    "coverage==7.16.0",
     "pylint==4.0.7",
 ]
 
