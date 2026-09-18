@@ -48,15 +48,15 @@ wheels = [
 
 [[package]]
 name = "azure-cosmos"
-version = "4.16.4"
+version = "4.17.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "azure-core" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6d/8a/97b68e849fff7d2a76d85e51acdfbd13072266d581dcb7f6ad32bdddbd27/azure_cosmos-4.16.4.tar.gz", hash = "sha256:5a98d33ce6d539a926f47c67b14587fbb8ba4fd662751ff8b0ebe7f9d3765a2e", size = 2462258, upload-time = "2026-09-02T14:59:54.322Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/99/b7/bd10308e5999dd6972cfbd361cda3c3390c7dff538db9d4226055fc96a37/azure_cosmos-4.17.0.tar.gz", hash = "sha256:38559f209ce13d135c07b12652d72d352bac6b6d6b3007006ce8fc174c815b07", size = 2487427, upload-time = "2026-09-09T21:25:22.496Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e0/cc/5f4b06f49ec0bf26e8a390fb55c67ceb67573e94e83493b6b96837b2ee98/azure_cosmos-4.16.4-py3-none-any.whl", hash = "sha256:89bf558203335efc39551dccef6782aa2f286d94cc87dd9bd98efc37d8c69303", size = 502464, upload-time = "2026-09-02T14:59:56.414Z" },
+    { url = "https://files.pythonhosted.org/packages/27/25/335e03563df6dcb89f3b914afe31d43b7b5100155c7fd09d3e6891d7897c/azure_cosmos-4.17.0-py3-none-any.whl", hash = "sha256:505ce6a196c43d712a0bd9e3222fd74a8b599fdcc1940752d06a28dd06bd10d2", size = 505543, upload-time = "2026-09-09T21:25:24.894Z" },
 ]
 
 [[package]]
@@ -914,7 +914,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "azure-cosmos", specifier = "==4.16.4" },
+    { name = "azure-cosmos", specifier = "==4.17.0" },
     { name = "azure-functions", specifier = "==1.25.0" },
     { name = "azure-identity", specifier = "==1.25.3" },
     { name = "azure-storage-queue", specifier = "==12.17.0" },
