@@ -241,7 +241,7 @@ export COSMOSDB_URI="(取得した削除対象のCosmos DBのURI)"
 export COSMOSDB_KEY="(取得した削除対象のCosmos DBのプライマリーアクセスキー)"
 ```
 
-5. 以下のコマンドを実行し、 uv で依存関係を同期して仮想環境を作成後、以下のケースに応じてCosmos DBのデータを削除する。
+5. 以下のコマンドを実行し、 uv で依存関係を同期して仮想環境を作成後、以下のケースに応じてCosmos DBのデータを削除する。`--course-name`、`--test-name`、`--test-id` は同時に指定できない。
    - 特定のコース名に対応するCosmos DBのデータを削除したい場合
 
    ```bash
@@ -252,6 +252,12 @@ export COSMOSDB_KEY="(取得した削除対象のCosmos DBのプライマリー�
 
    ```bash
    uv sync --locked --all-groups && uv run python functions/delete.py --test-name "(削除したいテスト名)"
+   ```
+
+   - 特定のテストIDに対応するCosmos DBのデータを削除したい場合
+
+   ```bash
+   uv sync --locked --all-groups && uv run python functions/delete.py --test-id "(削除したいテストID)"
    ```
 
 ## 削除手順

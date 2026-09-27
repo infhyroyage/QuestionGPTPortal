@@ -1,3 +1,5 @@
+# 削除処理のテストを1モジュールにまとめているため、モジュール行数の上限だけ外す
+# pylint: disable=too-many-lines
 """delete.py のユニットテスト"""
 
 import os
@@ -13,6 +15,7 @@ from azure.cosmos.exceptions import CosmosResourceNotFoundError
 from delete import (
     CONTAINER_NAMES_WITHOUT_TESTS,
     delete_by_course_name,
+    delete_by_test_id,
     delete_by_test_name,
     delete_items_by_test_ids,
     delete_test_items,
@@ -24,6 +27,7 @@ from delete import (
 CHILD_QUERY = "SELECT c.id, c.testId FROM c WHERE c.testId = @testId"
 COURSE_QUERY = "SELECT * FROM c WHERE c.courseName = @courseName"
 TEST_QUERY = "SELECT * FROM c WHERE c.testName = @testName"
+TEST_ID_QUERY = "SELECT * FROM c WHERE c.id = @id"
 
 
 def _prepare(mock_get_container: MagicMock) -> dict[str, MagicMock]:
@@ -107,6 +111,36 @@ class TestParseArgs(unittest.TestCase):
         # Then: 数値へ変換されず文字列 0 になる
         self.assertEqual(args.test_name, "0")
 
+    def test_parse_test_id(self):
+        """TC-N-14: --test-id でテストIDを受け取る"""
+        # Given: テストIDフラグとテストID
+        # When: 引数を解析する
+        args = parse_args(["--test-id", "t1"])
+
+        # Then: テストIDだけが設定される
+        self.assertEqual(args.test_id, "t1")
+        self.assertIsNone(args.course_name)
+        self.assertIsNone(args.test_name)
+
+    def test_parse_empty_test_id(self):
+        """TC-B-22: 空のテストIDを受け取る"""
+        # Given: 空文字のテストID
+        # When: 引数を解析する
+        args = parse_args(["--test-id", ""])
+
+        # Then: 空文字のままテストIDになる
+        self.assertEqual(args.test_id, "")
+        self.assertIsNone(args.course_name)
+
+    def test_parse_test_id_zero(self):
+        """TC-B-23: テストID 0 を文字列として受け取る"""
+        # Given: テストIDが文字列の 0
+        # When: 引数を解析する
+        args = parse_args(["--test-id", "0"])
+
+        # Then: 数値へ変換されず文字列 0 になる
+        self.assertEqual(args.test_id, "0")
+
     def test_parse_requires_flag(self):
         """TC-A-01: 引数なしは受け付けない"""
         # Given: 引数なし
@@ -137,6 +171,33 @@ class TestParseArgs(unittest.TestCase):
         # When: 引数を解析する
         # Then: 終了コード 2 で値不足エラーになる
         self._assert_parse_error(["--test-name"], "expected one argument")
+
+    def test_parse_test_id_missing_value(self):
+        """TC-A-27: --test-id の値が無い"""
+        # Given: テストIDフラグのみ
+        # When: 引数を解析する
+        # Then: 終了コード 2 で値不足エラーになる
+        self._assert_parse_error(["--test-id"], "expected one argument")
+
+    def test_parse_rejects_course_name_and_test_id(self):
+        """TC-A-28: コース名とテストIDは同時に指定できない"""
+        # Given: コース名とテストID
+        # When: 引数を解析する
+        # Then: 終了コード 2 で排他エラーになる
+        self._assert_parse_error(
+            ["--course-name", "AWS", "--test-id", "t1"],
+            "not allowed with argument",
+        )
+
+    def test_parse_rejects_test_name_and_test_id(self):
+        """TC-A-29: テスト名とテストIDは同時に指定できない"""
+        # Given: テスト名とテストID
+        # When: 引数を解析する
+        # Then: 終了コード 2 で排他エラーになる
+        self._assert_parse_error(
+            ["--test-name", "SAA", "--test-id", "t1"],
+            "not allowed with argument",
+        )
 
     def test_parse_unknown_flag(self):
         """TC-A-05: 未知のフラグは受け付けない"""
@@ -170,10 +231,11 @@ class TestParseArgs(unittest.TestCase):
             with self.assertRaises(SystemExit) as ctx:
                 parse_args(["-h"])
 
-        # Then: 終了コード 0 で両方のフラグを案内する
+        # Then: 終了コード 0 で3つのフラグを案内する
         self.assertEqual(ctx.exception.code, 0)
         self.assertIn("--course-name", stdout.getvalue())
         self.assertIn("--test-name", stdout.getvalue())
+        self.assertIn("--test-id", stdout.getvalue())
 
     def _assert_parse_error(self, argv: list[str], message: str) -> None:
         """引数エラーの終了コードとメッセージを検証する"""
@@ -273,9 +335,10 @@ class TestMain(unittest.TestCase):
         self.assertEqual(result, 0)
         mock_delete.assert_called_once_with("AWS-SAA")
 
+    @patch("delete.delete_by_test_id")
     @patch("delete.delete_by_course_name")
     @patch("delete.delete_by_test_name", return_value=1)
-    def test_main_test_name(self, mock_delete_test, mock_delete_course):
+    def test_main_test_name(self, mock_delete_test, mock_delete_course, mock_delete_id):
         """TC-N-12: --test-name はテスト名削除へ渡す"""
         # Given: テスト名フラグ
         # When: main を実行する
@@ -285,6 +348,55 @@ class TestMain(unittest.TestCase):
         self.assertEqual(result, 0)
         mock_delete_test.assert_called_once_with("SAA")
         mock_delete_course.assert_not_called()
+        mock_delete_id.assert_not_called()
+
+    @patch("delete.delete_by_course_name")
+    @patch("delete.delete_by_test_name")
+    @patch("delete.delete_by_test_id", return_value=4)
+    def test_main_test_id(self, mock_delete_id, mock_delete_name, mock_delete_course):
+        """TC-N-16: --test-id はテストID削除へ渡す"""
+        # Given: テストIDフラグ
+        # When: main を実行する
+        result = main(["--test-id", "t1"])
+
+        # Then: テストID削除だけを実行して 0 を返す
+        self.assertEqual(result, 0)
+        mock_delete_id.assert_called_once_with("t1")
+        mock_delete_name.assert_not_called()
+        mock_delete_course.assert_not_called()
+
+    @patch("delete.delete_by_test_id", return_value=0)
+    def test_main_empty_test_id(self, mock_delete):
+        """TC-B-28: 空のテストIDもそのまま渡す"""
+        # Given: 空文字のテストID
+        # When: main を実行する
+        result = main(["--test-id", ""])
+
+        # Then: 空文字のままテストID削除する
+        self.assertEqual(result, 0)
+        mock_delete.assert_called_once_with("")
+
+    @patch("delete.delete_by_test_id", return_value=0)
+    def test_main_test_id_zero(self, mock_delete):
+        """TC-B-29: テストID 0 を文字列のまま渡す"""
+        # Given: テストIDが文字列の 0
+        # When: main を実行する
+        result = main(["--test-id", "0"])
+
+        # Then: 文字列 0 のままテストID削除する
+        self.assertEqual(result, 0)
+        mock_delete.assert_called_once_with("0")
+
+    @patch("delete.delete_by_test_id", side_effect=SystemExit(1))
+    def test_main_propagates_test_id_exit(self, mock_delete):
+        """TC-A-33: テストIDが複数一致した終了コード 1 を伝播する"""
+        # Given: テストID削除が終了コード 1 で終わる
+        # When: main を実行する
+        # Then: 終了コード 1 が伝播する
+        with self.assertRaises(SystemExit) as ctx:
+            main(["--test-id", "t1"])
+        self.assertEqual(ctx.exception.code, 1)
+        mock_delete.assert_called_once_with("t1")
 
     @patch("delete.delete_by_course_name", return_value=0)
     def test_main_empty_course_name(self, mock_delete):
@@ -979,4 +1091,156 @@ class TestDeleteByTestName(unittest.TestCase):
         containers["Test"].query_items.assert_called_once_with(
             query=TEST_QUERY,
             parameters=[{"name": "@testName", "value": "0"}],
+        )
+
+
+class TestDeleteByTestId(unittest.TestCase):
+    """delete_by_test_id 関数のテストケース"""
+
+    @patch("delete.get_container")
+    def test_delete_by_test_id_single(self, mock_get_container):
+        """TC-N-15: テストIDが1件一致した場合に削除する"""
+        # Given: テストID t1 が1件あり、Answer に2件ある
+        containers = _prepare(mock_get_container)
+        containers["Test"].query_items.return_value = [
+            {"id": "t1", "courseName": "AWS", "testName": "SAA"}
+        ]
+        containers["Answer"].query_items.return_value = [
+            {"id": "a1", "testId": "t1"},
+            {"id": "a2", "testId": "t1"},
+        ]
+
+        # When: テストID t1 を削除する
+        stdout = StringIO()
+        with redirect_stdout(stdout):
+            total = delete_by_test_id("t1")
+
+        # Then: クロスパーティションで検索し、関連2件と Test 1件を削除する
+        self.assertEqual(total, 3)
+        containers["Test"].query_items.assert_called_once_with(
+            query=TEST_ID_QUERY,
+            parameters=[{"name": "@id", "value": "t1"}],
+        )
+        self.assertNotIn("partition_key", containers["Test"].query_items.call_args.kwargs)
+        containers["Test"].delete_item.assert_called_once_with(item="t1", partition_key="AWS")
+        self.assertIn("Total deleted items by testId: t1 : 3", stdout.getvalue())
+
+    @patch("delete.get_container")
+    def test_delete_by_test_id_not_found(self, mock_get_container):
+        """TC-B-27: テストIDが 0 件なら削除しない"""
+        # Given: 一致する Test が無い
+        containers = _prepare(mock_get_container)
+
+        # When: テストID t1 を削除する
+        stdout = StringIO()
+        with redirect_stdout(stdout):
+            total = delete_by_test_id("t1")
+
+        # Then: メッセージを出して 0 を返し、削除しない
+        self.assertEqual(total, 0)
+        self.assertEqual(stdout.getvalue(), "No Test items found for testId: t1\n")
+        mock_get_container.assert_called_once_with("Test")
+        containers["Test"].delete_item.assert_not_called()
+
+    @patch("delete.get_container")
+    def test_delete_by_test_id_multiple(self, mock_get_container):
+        """TC-A-30: テストIDが2件一致した場合は削除せず終了する"""
+        # Given: 同じ id のテストが2件（複数一致の最小件数）
+        containers = _prepare(mock_get_container)
+        containers["Test"].query_items.return_value = [
+            {"id": "t1", "courseName": "AWS", "testName": "SAA"},
+            {"id": "t1", "courseName": "Azure", "testName": "DVA"},
+        ]
+
+        # When: テストID t1 を削除する
+        stdout = StringIO()
+        with redirect_stdout(stdout):
+            with self.assertRaises(SystemExit) as ctx:
+                delete_by_test_id("t1")
+
+        # Then: 終了コード 1 で、何も削除しない
+        self.assertEqual(ctx.exception.code, 1)
+        self.assertEqual(stdout.getvalue(), "Multiple Test items found for testId: t1\n")
+        containers["Test"].delete_item.assert_not_called()
+        mock_get_container.assert_called_once_with("Test")
+
+    @patch("delete.get_container")
+    def test_delete_by_test_id_empty(self, mock_get_container):
+        """TC-B-24: 空のテストIDでも空文字のまま検索する"""
+        # Given: テストIDが空文字
+        containers = _prepare(mock_get_container)
+
+        # When: 空のテストIDを削除する
+        with redirect_stdout(StringIO()):
+            total = delete_by_test_id("")
+
+        # Then: 空文字でクロスパーティション検索する
+        self.assertEqual(total, 0)
+        containers["Test"].query_items.assert_called_once_with(
+            query=TEST_ID_QUERY,
+            parameters=[{"name": "@id", "value": ""}],
+        )
+
+    @patch("delete.get_container")
+    def test_delete_by_test_id_none(self, mock_get_container):
+        """TC-B-25: テストID NULL はそのまま検索する"""
+        # Given: テストIDが None
+        containers = _prepare(mock_get_container)
+
+        # When: None を削除する
+        stdout = StringIO()
+        with redirect_stdout(stdout):
+            total = delete_by_test_id(None)
+
+        # Then: None で検索し、対象なしとして 0 を返す
+        self.assertEqual(total, 0)
+        self.assertIn("testId: None", stdout.getvalue())
+        containers["Test"].query_items.assert_called_once_with(
+            query=TEST_ID_QUERY,
+            parameters=[{"name": "@id", "value": None}],
+        )
+
+    @patch("delete.get_container")
+    def test_delete_by_test_id_query_failure(self, mock_get_container):
+        """TC-A-31: テストID検索の失敗を伝播する"""
+        # Given: Test 検索が失敗する
+        containers = _prepare(mock_get_container)
+        containers["Test"].query_items.side_effect = RuntimeError("query failed")
+
+        # When: テストID t1 を削除する
+        # Then: RuntimeError とメッセージを伝播する
+        with self.assertRaises(RuntimeError) as ctx:
+            delete_by_test_id("t1")
+        self.assertEqual(str(ctx.exception), "query failed")
+        containers["Test"].delete_item.assert_not_called()
+
+    @patch("delete.get_container")
+    def test_delete_by_test_id_missing_id(self, mock_get_container):
+        """TC-A-32: 一致項目に id が無い場合は KeyError"""
+        # Given: id が無い Test 項目が1件
+        containers = _prepare(mock_get_container)
+        containers["Test"].query_items.return_value = [{"courseName": "AWS", "testName": "SAA"}]
+
+        # When: テストID t1 を削除する
+        # Then: id の KeyError になり削除しない
+        with self.assertRaises(KeyError) as ctx:
+            delete_by_test_id("t1")
+        self.assertEqual(str(ctx.exception), "'id'")
+        containers["Test"].delete_item.assert_not_called()
+
+    @patch("delete.get_container")
+    def test_delete_by_test_id_zero(self, mock_get_container):
+        """TC-B-26: テストID 0 を文字列のまま検索する"""
+        # Given: テストIDが文字列の 0
+        containers = _prepare(mock_get_container)
+
+        # When: テストID 0 を削除する
+        with redirect_stdout(StringIO()):
+            total = delete_by_test_id("0")
+
+        # Then: 文字列 0 で検索する
+        self.assertEqual(total, 0)
+        containers["Test"].query_items.assert_called_once_with(
+            query=TEST_ID_QUERY,
+            parameters=[{"name": "@id", "value": "0"}],
         )

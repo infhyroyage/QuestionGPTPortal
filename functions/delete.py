@@ -1,4 +1,4 @@
-"""指定したコース名またはテスト名に対応する各コンテナーの項目を Cosmos DB から削除する"""
+"""指定したコース名、テスト名、またはテストIDに対応する各コンテナーの項目を Cosmos DB から削除する"""
 
 import argparse
 import os
@@ -162,11 +162,47 @@ def delete_by_test_name(test_name: str) -> int:
     return total
 
 
+def delete_by_test_id(test_id: str) -> int:
+    """
+    指定したテストIDに対応する各コンテナーの項目を削除する
+
+    同じ id の Test 項目が複数ある場合は何も削除せず終了コード 1 で終了する。
+
+    Args:
+        test_id (str): 削除対象のテストID
+
+    Returns:
+        int: 削除した合計項目数。対象が無い場合は 0
+    """
+
+    test_container: ContainerProxy = get_container("Test")
+    # Test のパーティションキーは courseName なので、テストID指定時はクロスパーティションで検索する
+    test_items: list[dict] = list(
+        test_container.query_items(
+            query="SELECT * FROM c WHERE c.id = @id",
+            parameters=[{"name": "@id", "value": test_id}],
+        )
+    )
+    if not test_items:
+        print(f"No Test items found for testId: {test_id}")
+        return 0
+    if len(test_items) > 1:
+        print(f"Multiple Test items found for testId: {test_id}")
+        sys.exit(1)
+
+    item_count: int = delete_items_by_test_ids({test_items[0]["id"]})
+    test_item_count: int = delete_test_items(test_container, [test_items[0]])
+    total: int = item_count + test_item_count
+    print(f"Total deleted items by testId: {test_id} : {total}")
+    return total
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """
     コマンドライン引数を解析する
 
-    第1引数に --course-name または --test-name、第2引数に削除対象の名前を指定する。
+    第1引数に --course-name、--test-name、--test-id のいずれか、
+    第2引数に削除対象を指定する。
 
     Args:
         argv (list[str] | None): 解析する引数。None の場合は sys.argv を使う
@@ -176,7 +212,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """
 
     parser: argparse.ArgumentParser = argparse.ArgumentParser(
-        description="Delete items by courseName or testName"
+        description="Delete items by courseName, testName, or testId"
     )
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument(
@@ -187,12 +223,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--test-name",
         help="Test name to delete (testName)",
     )
+    group.add_argument(
+        "--test-id",
+        help="Test id to delete (id)",
+    )
     return parser.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> int:
     """
-    引数に応じてコース名またはテスト名の削除を実行する
+    引数に応じてコース名、テスト名、またはテストIDの削除を実行する
 
     Args:
         argv (list[str] | None): コマンドライン引数
@@ -205,7 +245,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.course_name is not None:
         delete_by_course_name(args.course_name)
         return 0
-    delete_by_test_name(args.test_name)
+    if args.test_name is not None:
+        delete_by_test_name(args.test_name)
+        return 0
+    delete_by_test_id(args.test_id)
     return 0
 
 
