@@ -211,7 +211,7 @@ Web アプリケーションをビルドし、Azure Static Web Apps に対して
 
 ## 運用手順
 
-### 特定のコース名/テスト名に対応するCosmos DBのデータを増やしたい場合
+### Cosmos DBのデータを増やしたい場合
 
 構築手順の「8. インポートデータファイルの作成・アップロード」の手順の通りに、増やしたいデータのインポートデータファイルを新たに格納してから、再度以下のコマンドを実行し、Azure Storage Account の Blob Storage にアップロードすれば良い。
 
@@ -219,7 +219,7 @@ Web アプリケーションをビルドし、Azure Static Web Apps に対して
 az storage blob upload-batch --destination import-items --source ./functions/data --account-name (当リポジトリの変数STORAGE_NAMEの値)
 ```
 
-## 特定のコース名に対応するCosmos DBのデータを削除したい場合
+### Cosmos DBのデータを削除したい場合
 
 1. Python 3.12 と [uv](https://docs.astral.sh/uv/getting-started/installation/) をインストールする。
 2. 以下のコマンドを実行し、削除対象のCosmos DBのURIを取得する:
@@ -241,39 +241,18 @@ export COSMOSDB_URI="(取得した削除対象のCosmos DBのURI)"
 export COSMOSDB_KEY="(取得した削除対象のCosmos DBのプライマリーアクセスキー)"
 ```
 
-5. 以下のコマンドを実行し、 uv で依存関係を同期して仮想環境を作成後、特定のコース名に対応するCosmos DBのデータを削除する。第1引数に `--course-name`、第2引数に削除したいコース名を指定する。`--test-name` と同時には指定できない。コース名はダブルクォーテーションで囲むことに注意すること:
+5. 以下のコマンドを実行し、 uv で依存関係を同期して仮想環境を作成後、以下のケースに応じてCosmos DBのデータを削除する。
+   - 特定のコース名に対応するCosmos DBのデータを削除したい場合
 
-```bash
-uv sync --locked --all-groups && uv run python functions/delete.py --course-name "(削除したいコース名)"
-```
+   ```bash
+   uv sync --locked --all-groups && uv run python functions/delete.py --course-name "(削除したいコース名)"
+   ```
 
-## 特定のテスト名に対応するCosmos DBのデータを削除したい場合
+   - 特定のテスト名に対応するCosmos DBのデータを削除したい場合
 
-1. Python 3.12 と [uv](https://docs.astral.sh/uv/getting-started/installation/) をインストールする。
-2. 以下のコマンドを実行し、削除対象のCosmos DBのURIを取得する:
-
-```bash
-az cosmosdb show -g qgtranslator-je -n (当リポジトリの変数COSMOSDB_NAMEの値) --query "writeLocations[0].documentEndpoint" -o tsv
-```
-
-3. 以下のコマンドを実行し、削除対象のCosmos DBのプライマリーアクセスキーを取得する:
-
-```bash
-az cosmosdb keys list -g qgtranslator-je -n (当リポジトリの変数COSMOSDB_NAMEの値) --query "primaryMasterKey" -o tsv
-```
-
-4. 以下のコマンドを実行し、取得した削除対象のCosmos DBのURI・プライマリーアクセスキーを環境変数に設定する:
-
-```bash
-export COSMOSDB_URI="(取得した削除対象のCosmos DBのURI)"
-export COSMOSDB_KEY="(取得した削除対象のCosmos DBのプライマリーアクセスキー)"
-```
-
-5. 以下のコマンドを実行し、 uv で依存関係を同期して仮想環境を作成後、特定のテスト名に対応するCosmos DBのデータを削除する。第1引数に `--test-name`、第2引数に削除したいテスト名を指定する。`--course-name` と同時には指定できない。テスト名はダブルクォーテーションで囲むことに注意すること:
-
-```bash
-uv sync --locked --all-groups && uv run python functions/delete.py --test-name "(削除したいテスト名)"
-```
+   ```bash
+   uv sync --locked --all-groups && uv run python functions/delete.py --test-name "(削除したいテスト名)"
+   ```
 
 ## 削除手順
 
