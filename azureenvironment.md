@@ -241,10 +241,10 @@ export COSMOSDB_URI="(取得した削除対象のCosmos DBのURI)"
 export COSMOSDB_KEY="(取得した削除対象のCosmos DBのプライマリーアクセスキー)"
 ```
 
-5. 以下のコマンドを実行し、 uv で依存関係を同期して仮想環境を作成後、特定のコース名に対応するCosmos DBのデータを削除する。コース名はダブルクォーテーションで囲むことに注意すること:
+5. 以下のコマンドを実行し、 uv で依存関係を同期して仮想環境を作成後、特定のコース名に対応するCosmos DBのデータを削除する。第1引数に `--course-name`、第2引数に削除したいコース名を指定する。`--test-name` と同時には指定できない。コース名はダブルクォーテーションで囲むことに注意すること:
 
 ```bash
-uv sync --locked --all-groups && uv run python functions/delete_by_course_name.py "(削除したいコース名)"
+uv sync --locked --all-groups && uv run python functions/delete.py --course-name "(削除したいコース名)"
 ```
 
 ## 特定のテスト名に対応するCosmos DBのデータを削除したい場合
@@ -269,10 +269,10 @@ export COSMOSDB_URI="(取得した削除対象のCosmos DBのURI)"
 export COSMOSDB_KEY="(取得した削除対象のCosmos DBのプライマリーアクセスキー)"
 ```
 
-5. 以下のコマンドを実行し、 uv で依存関係を同期して仮想環境を作成後、特定のテスト名に対応するCosmos DBのデータを削除する。テスト名はダブルクォーテーションで囲むことに注意すること:
+5. 以下のコマンドを実行し、 uv で依存関係を同期して仮想環境を作成後、特定のテスト名に対応するCosmos DBのデータを削除する。第1引数に `--test-name`、第2引数に削除したいテスト名を指定する。`--course-name` と同時には指定できない。テスト名はダブルクォーテーションで囲むことに注意すること:
 
 ```bash
-uv sync --locked --all-groups && uv run python functions/delete_by_test_name.py "(削除したいテスト名)"
+uv sync --locked --all-groups && uv run python functions/delete.py --test-name "(削除したいテスト名)"
 ```
 
 ## 削除手順
