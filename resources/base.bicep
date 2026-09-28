@@ -319,7 +319,7 @@ resource openAIDeployments 'Microsoft.CognitiveServices/accounts/deployments@202
       name: openAIModelName
       version: openAIModelVersion
     }
-    versionUpgradeOption: 'OnceCurrentVersionExpired'
+    versionUpgradeOption: 'OnceNewDefaultVersionAvailable'
     currentCapacity: openAICapacity
   }
 }
