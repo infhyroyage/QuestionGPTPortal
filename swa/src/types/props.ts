@@ -1,5 +1,5 @@
 import { GetQuestion, Subject } from "@/types/backend";
-import { ReactNode, RefObject } from "react";
+import { Dispatch, ReactNode, RefObject, SetStateAction } from "react";
 import { History } from "./atoms";
 
 /**
@@ -137,6 +137,16 @@ export type SubjectDisplayProps = {
    * 問題文の翻訳文
    */
   translation?: string[];
+};
+
+/**
+ * TestQuestionBorderLineのProps
+ */
+export type TestQuestionBorderLineProps = {
+  /**
+   * 上側にあるSubjectDisplayの領域のサイズ(画面のパーセンテージ)を設定する関数
+   */
+  setSubjectHeightPercent: Dispatch<SetStateAction<number>>;
 };
 
 /**

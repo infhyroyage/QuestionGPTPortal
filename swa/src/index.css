@@ -12,7 +12,7 @@ body {
   min-height: 100vh;
 }
 
-/* リサイズパネル内でも tooltip が隠れないようにする */
+/* 境界線で区切った領域内でも tooltip が隠れないようにする */
 @layer components {
   .tooltip::before,
   .tooltip::after {

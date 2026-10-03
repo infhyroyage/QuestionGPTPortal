@@ -1,8 +1,7 @@
 import IconButtonsContainer from "@/components/IconButtonsContainer";
-import { ResizablePanel, ResizablePanelGroup } from "@/components/Resizable";
 import Selector from "@/components/Selector";
 import SubjectDisplay from "@/components/SubjectDisplay";
-import TestQuestionResizableHandle from "@/components/TestQuestionResizableHandle";
+import TestQuestionBorderLine from "@/components/TestQuestionBorderLine";
 import TopBar from "@/components/TopBar";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import useTranslationFailedToast from "@/hooks/useTranslationFailedToast";
@@ -36,6 +35,7 @@ export default function TestQuestionPage() {
     useState<boolean>(false);
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
+  const [subjectHeightPercent, setSubjectHeightPercent] = useState<number>(60);
   const fetchQuestionSelectorCalledRef = useRef<boolean>(false);
   const fetchTranslationSubjectChoiceCalledRef = useRef<boolean>(false);
   const restoreAnsweredQuestionCalledRef = useRef<boolean>(false);
@@ -184,38 +184,31 @@ export default function TestQuestionPage() {
             order.length
           }問)`}
         />
-        <ResizablePanelGroup
-          orientation="vertical"
-          resizeTargetMinimumSize={{ fine: 5, coarse: 40 }}
-          className="pt-[52px] min-h-screen w-full"
-        >
-          <ResizablePanel defaultSize="60%" className="z-10">
-            <div className="relative flex h-full min-h-0 flex-col overflow-hidden">
-              <div
-                className="flex-1 min-h-0 overflow-y-auto p-4"
-                data-test-question-scroll-container
-              >
-                <SubjectDisplay
-                  subjects={questionSelector && questionSelector.subjects}
-                  translation={
-                    translationSubjectChoice &&
-                    translationSubjectChoice.subjects
-                  }
-                />
-              </div>
-              <IconButtonsContainer />
+        <main className="flex h-screen w-full flex-col overflow-hidden pt-[52px]">
+          <div
+            className="relative z-10 flex min-h-0 flex-col overflow-hidden"
+            style={{ height: `${subjectHeightPercent}%` }}
+          >
+            <div className="flex-1 min-h-0 overflow-y-auto p-4">
+              <SubjectDisplay
+                subjects={questionSelector && questionSelector.subjects}
+                translation={
+                  translationSubjectChoice && translationSubjectChoice.subjects
+                }
+              />
             </div>
-          </ResizablePanel>
-          <TestQuestionResizableHandle withHandle />
-          <ResizablePanel defaultSize="40%">
-            <div
-              className="h-full min-h-0 overflow-y-auto bg-slate-200 dark:bg-slate-800"
-              data-test-question-scroll-container
-            >
-              <Selector />
-            </div>
-          </ResizablePanel>
-        </ResizablePanelGroup>
+            <IconButtonsContainer />
+          </div>
+          <TestQuestionBorderLine
+            setSubjectHeightPercent={setSubjectHeightPercent}
+          />
+          <div
+            className="min-h-0 overflow-y-auto bg-slate-200 dark:bg-slate-800"
+            style={{ height: `${100 - subjectHeightPercent}%` }}
+          >
+            <Selector />
+          </div>
+        </main>
       </>
     )
   );
