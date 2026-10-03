@@ -76,7 +76,7 @@
 - フロントエンドアプリケーションで再利用可能なコンポーネントは、swa/src/components ディレクトリに配置する。
 - フロントエンドのスタイリングは Tailwind CSS のユーティリティクラスを使用でき、レスポンシブなレイアウトにするようにする。
 - フロントエンドの UI コンポーネントライブラリとして daisyUI を採用する。Tailwind CSS v4 の `swa/src/index.css` で `@plugin "daisyui"` を有効化し、`light` / `dark` テーマを利用する。
-- daisyUI のユーティリティクラス（`btn`、`modal`、`drawer`、`collapse`、`skeleton` など）は各コンポーネントから直接利用する。React 向けの薄いラッパー（`Button`、`Tooltip`、`Toaster`、`Resizable` など）は `swa/src/components` ディレクトリに配置する。
+- daisyUI のユーティリティクラス（`btn`、`modal`、`drawer`、`collapse`、`skeleton` など）は各コンポーネントから直接利用する。React 向けの薄いラッパー（`Button`、`Tooltip`、`Toaster` など）は `swa/src/components` ディレクトリに配置する。
 - ダークモード切替は `html` 要素の `data-theme` 属性（`light` / `dark`）で制御する。
 - フロントエンドの React Router で定義するルート単位のページコンポーネントは swa/src/pages ディレクトリに配置する。
 - フロントエンドのユーティリティ関数、API 通信、状態管理に要する処理などは swa/src/lib ディレクトリに配置する。
