@@ -3,7 +3,6 @@ import { useAtomValue } from "jotai";
 import { Check, Ellipsis, X } from "lucide-react";
 import { useCallback, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
-import Tooltip from "./Tooltip";
 
 /**
  * 別の問題へ遷移するメニューのコンポーネント
@@ -36,7 +35,10 @@ export default function ChangeQuestionsMenu() {
     questionNumber &&
     histories &&
     order && (
-      <Tooltip tip="別の問題へ">
+      <div
+        className="tooltip z-50 before:z-50 after:z-50 tooltip-bottom"
+        data-tip="別の問題へ"
+      >
         <div className="dropdown dropdown-end">
           <button
             type="button"
@@ -70,7 +72,7 @@ export default function ChangeQuestionsMenu() {
             )}
           </ul>
         </div>
-      </Tooltip>
+      </div>
     )
   );
 }

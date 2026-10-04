@@ -6,7 +6,6 @@ import { useAccount, useMsal } from "@azure/msal-react";
 import { Star } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useParams } from "react-router";
-import Tooltip from "./Tooltip";
 
 /**
  * お気に入り切替ボタンのコンポーネント
@@ -60,7 +59,10 @@ export default function FavoriteButton({
   ]);
 
   return (
-    <Tooltip tip={isFavorite ? "お気に入り解除" : "お気に入り登録"}>
+    <div
+      className="tooltip z-50 before:z-50 after:z-50 tooltip-bottom"
+      data-tip={isFavorite ? "お気に入り解除" : "お気に入り登録"}
+    >
       <button
         className={`bg-transparent border-none p-0 cursor-pointer hover:opacity-80 transition-all duration-300 focus:outline-hidden ${
           isLoading ? "opacity-50" : ""
@@ -79,6 +81,6 @@ export default function FavoriteButton({
           }`}
         />
       </button>
-    </Tooltip>
+    </div>
   );
 }

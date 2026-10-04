@@ -5,7 +5,6 @@ import { useAtom } from "jotai";
 import { RefreshCcw } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useParams } from "react-router";
-import Tooltip from "./Tooltip";
 
 /**
  * 回答・解説再生成ボタンのコンポーネント
@@ -58,7 +57,10 @@ export default function ResubmitButton() {
   ]);
 
   return (
-    <Tooltip tip="回答・解説再生成" position="top">
+    <div
+      className="tooltip z-50 before:z-50 after:z-50 tooltip-top"
+      data-tip="回答・解説再生成"
+    >
       <button
         type="button"
         className="btn btn-primary btn-square"
@@ -67,6 +69,6 @@ export default function ResubmitButton() {
       >
         <RefreshCcw />
       </button>
-    </Tooltip>
+    </div>
   );
 }

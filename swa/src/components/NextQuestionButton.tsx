@@ -8,7 +8,6 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { ChevronRight, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
-import Tooltip from "./Tooltip";
 
 /**
  * 次問題遷移ボタンのコンポーネント
@@ -71,7 +70,10 @@ export default function NextQuestionButton() {
   return (
     histories &&
     order && (
-      <Tooltip tip={tooltipTip} position="top">
+      <div
+        className="tooltip z-50 before:z-50 after:z-50 tooltip-top"
+        data-tip={tooltipTip}
+      >
         <button
           type="button"
           className="btn btn-primary btn-square"
@@ -86,7 +88,7 @@ export default function NextQuestionButton() {
             <ChevronRight />
           )}
         </button>
-      </Tooltip>
+      </div>
     )
   );
 }

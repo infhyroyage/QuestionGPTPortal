@@ -4,7 +4,6 @@ import { Info } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import ExplanationSheet from "./ExplanationSheet";
-import Tooltip from "./Tooltip";
 
 /**
  * 解説表示ボタンのコンポーネント
@@ -62,7 +61,10 @@ export default function OpenExplanationButton() {
 
   return (
     <>
-      <Tooltip tip="解説表示" position="top">
+      <div
+        className="tooltip z-50 before:z-50 after:z-50 tooltip-top"
+        data-tip="解説表示"
+      >
         <button
           type="button"
           className="btn btn-primary btn-square"
@@ -71,7 +73,7 @@ export default function OpenExplanationButton() {
         >
           <Info />
         </button>
-      </Tooltip>
+      </div>
       {mounted &&
         createPortal(
           <div className="fixed inset-0 z-100" role="dialog" aria-modal="true">

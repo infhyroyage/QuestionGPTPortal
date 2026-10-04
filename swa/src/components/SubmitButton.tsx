@@ -8,7 +8,6 @@ import { useAtom, useAtomValue } from "jotai";
 import { Check, Loader2, SendHorizontal, X } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useParams } from "react-router";
-import Tooltip from "./Tooltip";
 
 /**
  * 回答・解説生成ボタンのコンポーネント
@@ -83,7 +82,10 @@ export default function SubmitButton() {
   ]);
 
   return (
-    <Tooltip tip="回答・解説生成" position="top">
+    <div
+      className="tooltip z-50 before:z-50 after:z-50 tooltip-top"
+      data-tip="回答・解説生成"
+    >
       <button
         type="button"
         className={`btn btn-square ${buttonColorClass}`}
@@ -100,6 +102,6 @@ export default function SubmitButton() {
           <X />
         )}
       </button>
-    </Tooltip>
+    </div>
   );
 }
