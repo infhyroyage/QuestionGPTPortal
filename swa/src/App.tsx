@@ -1,5 +1,4 @@
 import ApplyMSAL from "@/components/ApplyMSAL";
-import { Toaster } from "@/components/Toaster";
 import { toggleDarkModeAtom } from "@/lib/atoms";
 import { useAtomValue } from "jotai";
 import { Suspense, lazy, useEffect } from "react";
@@ -51,7 +50,6 @@ export default function App() {
           </Routes>
         </Suspense>
       </BrowserRouter>
-      <Toaster />
     </ApplyMSAL>
   );
 }
