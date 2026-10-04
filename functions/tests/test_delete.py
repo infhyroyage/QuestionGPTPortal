@@ -11,7 +11,6 @@ from io import StringIO
 from unittest.mock import MagicMock, call, patch
 
 from azure.cosmos.exceptions import CosmosResourceNotFoundError
-
 from delete import (
     CONTAINER_NAMES_WITHOUT_TESTS,
     delete_by_course_name,
@@ -219,7 +218,10 @@ class TestParseArgs(unittest.TestCase):
         # Given: フラグに加えて位置引数がある
         # When: 引数を解析する
         # Then: 終了コード 2 で不正引数エラーになる
-        self._assert_parse_error(["--course-name", "AWS", "AWS-SAA"], "unrecognized arguments",)
+        self._assert_parse_error(
+            ["--course-name", "AWS", "AWS-SAA"],
+            "unrecognized arguments",
+        )
 
     def test_parse_help(self):
         """TC-A-07: ヘルプは削除せず終了コード 0 になる"""
@@ -265,8 +267,12 @@ class TestGetContainer(unittest.TestCase):
 
         # Then: 指定した URI・キー・データベース・コンテナーで接続する
         self.assertIs(result, mock_container)
-        mock_client_cls.assert_called_once_with(url="https://example", credential="secret")
-        mock_client_cls.return_value.get_database_client.assert_called_once_with("Users")
+        mock_client_cls.assert_called_once_with(
+            url="https://example", credential="secret"
+        )
+        mock_client_cls.return_value.get_database_client.assert_called_once_with(
+            "Users"
+        )
         database.get_container_client.assert_called_once_with("Question")
 
     @patch("delete.CosmosClient")
@@ -318,7 +324,9 @@ class TestGetContainer(unittest.TestCase):
             with self.assertRaises(RuntimeError) as ctx:
                 get_container("Test")
         self.assertEqual(str(ctx.exception), "cosmos unavailable")
-        mock_client_cls.assert_called_once_with(url="https://example", credential="secret")
+        mock_client_cls.assert_called_once_with(
+            url="https://example", credential="secret"
+        )
 
 
 class TestMain(unittest.TestCase):
@@ -453,7 +461,9 @@ class TestMain(unittest.TestCase):
         database = mock_client_cls.return_value.get_database_client.return_value
         database.get_container_client.return_value = mock_container
         mock_container.query_items.return_value = []
-        script = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "delete.py"))
+        script = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "delete.py")
+        )
         env = {"COSMOSDB_URI": "https://example", "COSMOSDB_KEY": "secret"}
         stdout = StringIO()
 
@@ -490,8 +500,12 @@ class TestDeleteItemsByTestIds(unittest.TestCase):
 
         # Then: 2件削除し、パーティションキーは testId
         self.assertEqual(total, 2)
-        containers["Answer"].delete_item.assert_called_once_with(item="a1", partition_key="t1")
-        containers["Question"].delete_item.assert_called_once_with(item="q1", partition_key="t1")
+        containers["Answer"].delete_item.assert_called_once_with(
+            item="a1", partition_key="t1"
+        )
+        containers["Question"].delete_item.assert_called_once_with(
+            item="q1", partition_key="t1"
+        )
         containers["Answer"].query_items.assert_called_once_with(
             query=CHILD_QUERY,
             parameters=[{"name": "@testId", "value": "t1"}],
@@ -561,7 +575,9 @@ class TestDeleteItemsByTestIds(unittest.TestCase):
             {"id": "a1", "testId": "t1"},
             {"id": "a2", "testId": "t1"},
         ]
-        containers["Community"].query_items.return_value = [{"id": "c1", "testId": "t1"}]
+        containers["Community"].query_items.return_value = [
+            {"id": "c1", "testId": "t1"}
+        ]
         containers["Answer"].delete_item.side_effect = [
             CosmosResourceNotFoundError(message="Resource Not Found"),
             None,
@@ -818,7 +834,9 @@ class TestDeleteByCourseName(unittest.TestCase):
 
         # Then: Test 項目1件だけ削除する
         self.assertEqual(total, 1)
-        containers["Test"].delete_item.assert_called_once_with(item="t1", partition_key="AWS")
+        containers["Test"].delete_item.assert_called_once_with(
+            item="t1", partition_key="AWS"
+        )
         containers["Answer"].delete_item.assert_not_called()
         self.assertIn("Total deleted items by courseName: AWS : 1", stdout.getvalue())
 
@@ -897,7 +915,9 @@ class TestDeleteByCourseName(unittest.TestCase):
         """TC-A-24: Test 項目に id が無い場合は KeyError"""
         # Given: id が無い Test 項目
         containers = _prepare(mock_get_container)
-        containers["Test"].query_items.return_value = [{"courseName": "AWS", "testName": "SAA"}]
+        containers["Test"].query_items.return_value = [
+            {"courseName": "AWS", "testName": "SAA"}
+        ]
 
         # When: コース名 AWS を削除する
         # Then: id の KeyError になり削除しない
@@ -969,8 +989,12 @@ class TestDeleteByTestName(unittest.TestCase):
             query=TEST_QUERY,
             parameters=[{"name": "@testName", "value": "SAA"}],
         )
-        self.assertNotIn("partition_key", containers["Test"].query_items.call_args.kwargs)
-        containers["Test"].delete_item.assert_called_once_with(item="t1", partition_key="AWS")
+        self.assertNotIn(
+            "partition_key", containers["Test"].query_items.call_args.kwargs
+        )
+        containers["Test"].delete_item.assert_called_once_with(
+            item="t1", partition_key="AWS"
+        )
         self.assertIn("Total deleted items by testName: SAA : 3", stdout.getvalue())
 
     @patch("delete.get_container")
@@ -993,7 +1017,7 @@ class TestDeleteByTestName(unittest.TestCase):
     @patch("delete.get_container")
     def test_delete_by_test_name_multiple(self, mock_get_container):
         """TC-A-20: テスト名が2件一致した場合は削除せず終了する"""
-        # Given: 同名テストが2件（複数一致の最小件数）
+        # Given: 同名テストが2件(複数一致の最小件数)
         containers = _prepare(mock_get_container)
         containers["Test"].query_items.return_value = [
             {"id": "t1", "courseName": "AWS", "testName": "SAA"},
@@ -1008,7 +1032,9 @@ class TestDeleteByTestName(unittest.TestCase):
 
         # Then: 終了コード 1 で、何も削除しない
         self.assertEqual(ctx.exception.code, 1)
-        self.assertEqual(stdout.getvalue(), "Multiple Test items found for testName: SAA\n")
+        self.assertEqual(
+            stdout.getvalue(), "Multiple Test items found for testName: SAA\n"
+        )
         containers["Test"].delete_item.assert_not_called()
         mock_get_container.assert_called_once_with("Test")
 
@@ -1067,7 +1093,9 @@ class TestDeleteByTestName(unittest.TestCase):
         """TC-A-25: 一致項目に id が無い場合は KeyError"""
         # Given: id が無い Test 項目が1件
         containers = _prepare(mock_get_container)
-        containers["Test"].query_items.return_value = [{"courseName": "AWS", "testName": "SAA"}]
+        containers["Test"].query_items.return_value = [
+            {"courseName": "AWS", "testName": "SAA"}
+        ]
 
         # When: テスト名 SAA を削除する
         # Then: id の KeyError になり削除しない
@@ -1121,8 +1149,12 @@ class TestDeleteByTestId(unittest.TestCase):
             query=TEST_ID_QUERY,
             parameters=[{"name": "@id", "value": "t1"}],
         )
-        self.assertNotIn("partition_key", containers["Test"].query_items.call_args.kwargs)
-        containers["Test"].delete_item.assert_called_once_with(item="t1", partition_key="AWS")
+        self.assertNotIn(
+            "partition_key", containers["Test"].query_items.call_args.kwargs
+        )
+        containers["Test"].delete_item.assert_called_once_with(
+            item="t1", partition_key="AWS"
+        )
         self.assertIn("Total deleted items by testId: t1 : 3", stdout.getvalue())
 
     @patch("delete.get_container")
@@ -1145,7 +1177,7 @@ class TestDeleteByTestId(unittest.TestCase):
     @patch("delete.get_container")
     def test_delete_by_test_id_multiple(self, mock_get_container):
         """TC-A-30: テストIDが2件一致した場合は削除せず終了する"""
-        # Given: 同じ id のテストが2件（複数一致の最小件数）
+        # Given: 同じ id のテストが2件(複数一致の最小件数)
         containers = _prepare(mock_get_container)
         containers["Test"].query_items.return_value = [
             {"id": "t1", "courseName": "AWS", "testName": "SAA"},
@@ -1160,7 +1192,9 @@ class TestDeleteByTestId(unittest.TestCase):
 
         # Then: 終了コード 1 で、何も削除しない
         self.assertEqual(ctx.exception.code, 1)
-        self.assertEqual(stdout.getvalue(), "Multiple Test items found for testId: t1\n")
+        self.assertEqual(
+            stdout.getvalue(), "Multiple Test items found for testId: t1\n"
+        )
         containers["Test"].delete_item.assert_not_called()
         mock_get_container.assert_called_once_with("Test")
 
@@ -1219,7 +1253,9 @@ class TestDeleteByTestId(unittest.TestCase):
         """TC-A-32: 一致項目に id が無い場合は KeyError"""
         # Given: id が無い Test 項目が1件
         containers = _prepare(mock_get_container)
-        containers["Test"].query_items.return_value = [{"courseName": "AWS", "testName": "SAA"}]
+        containers["Test"].query_items.return_value = [
+            {"courseName": "AWS", "testName": "SAA"}
+        ]
 
         # When: テストID t1 を削除する
         # Then: id の KeyError になり削除しない

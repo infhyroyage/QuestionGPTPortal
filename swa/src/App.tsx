@@ -5,7 +5,7 @@ import { useAtomValue } from "jotai";
 import { Suspense, lazy, useEffect } from "react";
 import { BrowserRouter, Route, Routes } from "react-router";
 
-// ページコンポーネントを動的インポート（コード分割）
+// ビルドアーティファクトのサイズを小さくするため、ページコンポーネントを動的インポート
 const RootPage = lazy(() => import("./pages/RootPage"));
 const TestReadyPage = lazy(() => import("./pages/TestReadyPage"));
 const TestQuestionPage = lazy(() => import("./pages/TestQuestionPage"));
@@ -19,11 +19,11 @@ const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 export default function App() {
   const isDarkMode = useAtomValue(toggleDarkModeAtom);
 
-  // htmlタグにdaisyUIテーマを反映
+  // html 要素の data-theme 属性でライトモード/ダークモードを切り替え
   useEffect(() => {
     document.documentElement.setAttribute(
       "data-theme",
-      isDarkMode ? "dark" : "light"
+      isDarkMode ? "dark" : "light",
     );
   }, [isDarkMode]);
 

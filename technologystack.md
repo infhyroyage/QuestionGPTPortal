@@ -50,7 +50,7 @@ GitHub Pages を通して React + TailwindCSS をベースとし、レスポン�
   - Azure Storage Account
     - Blob Storage (インポートデータファイル格納)
     - Queue Storage (非同期処理メッセージキュー)
-  - Azure Event Grid（Blob Storageから Functions の Blob 拡張 Webhook へのイベント配信）
+  - Azure Event Grid (Blob Storageから Functions の Blob 拡張 Webhook へのイベント配信)
   - Azure Cosmos DB (NoSQL データベース・学習データ管理)
   - Azure Key Vault (シークレット・API キー管理)
   - Azure Application Insights (ログ記録・モニタリング)
