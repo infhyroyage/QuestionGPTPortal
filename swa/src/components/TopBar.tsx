@@ -84,7 +84,7 @@ export default function TopBar({ title }: TopBarProps) {
   }, []);
 
   return (
-    <header className="navbar fixed top-0 left-0 right-0 z-30 h-[52px] min-h-[52px] items-center bg-base-100 px-4 py-0 shadow-sm">
+    <header className="navbar fixed top-0 left-0 right-0 z-30 h-13 min-h-13 items-center bg-base-100 px-4 py-0 shadow-sm">
       <div className="navbar-start flex-1 items-center gap-2">
         <h1 className="m-0 flex h-7 items-center text-lg font-bold leading-none">
           {title}

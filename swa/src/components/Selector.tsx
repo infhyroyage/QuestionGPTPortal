@@ -18,14 +18,14 @@ export default function Selector() {
   const questionSelector = useAtomValue(fetchQuestionSelectorAtom);
   const toggleSelectedChoice = useSetAtom(toggleSelectedChoiceAtom);
   const translationSubjectChoice = useAtomValue(
-    fetchTranslationSubjectChoiceAtom
+    fetchTranslationSubjectChoiceAtom,
   );
 
   // 回答・解説が生成開始後は、選択肢をすべて非活性とする
   // (回答生成中・回答済みの問題を表示している場合は選択状態を変更できない)
   const isDisabledSelectorButtons = useMemo<boolean>(
     () => !!answerExplanation,
-    [answerExplanation]
+    [answerExplanation],
   );
 
   // idx番目の選択肢押下時の処理
@@ -37,7 +37,7 @@ export default function Selector() {
       // idx番目の選択肢の選択状態を切り替え
       toggleSelectedChoice(idx);
     },
-    [answerExplanation, toggleSelectedChoice]
+    [answerExplanation, toggleSelectedChoice],
   );
 
   return (
@@ -58,11 +58,11 @@ export default function Selector() {
                   !answerExplanation.isCorrect)
                   ? "border-green-500 bg-green-50 dark:bg-green-950 hover:bg-green-100 dark:hover:bg-green-900"
                   : answerExplanation &&
-                    answerExplanation.correctFlags &&
-                    !answerExplanation.correctFlags[idx] &&
-                    questionSelector.choices[idx].isSelected
-                  ? "border-red-500 bg-red-50 dark:bg-red-950 hover:bg-red-100 dark:hover:bg-red-900"
-                  : ""
+                      answerExplanation.correctFlags &&
+                      !answerExplanation.correctFlags[idx] &&
+                      questionSelector.choices[idx].isSelected
+                    ? "border-red-500 bg-red-50 dark:bg-red-950 hover:bg-red-100 dark:hover:bg-red-900"
+                    : ""
               }
               disabled={isDisabledSelectorButtons}
               idx={idx}
@@ -83,7 +83,7 @@ export default function Selector() {
             />
           ))
         : Array.from({ length: 4 }).map((_, idx: number) => (
-            <div key={idx} className="skeleton h-[86px] w-full rounded-lg" />
+            <div key={idx} className="skeleton h-21.5 w-full rounded-lg" />
           ))}
     </div>
   );

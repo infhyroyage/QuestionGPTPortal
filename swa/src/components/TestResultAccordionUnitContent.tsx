@@ -84,7 +84,7 @@ export default function TestResultAccordionUnitContent({
                 />
               ))
             ) : (
-              <div className="skeleton h-[86px] w-full rounded-lg" />
+              <div className="skeleton h-21.5 w-full rounded-lg" />
             )}
           </div>
         </div>
@@ -104,7 +104,7 @@ export default function TestResultAccordionUnitContent({
                 />
               ))
             ) : (
-              <div className="skeleton h-[86px] w-full rounded-lg" />
+              <div className="skeleton h-21.5 w-full rounded-lg" />
             )}
           </div>
         </div>
