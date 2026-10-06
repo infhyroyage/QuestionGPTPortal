@@ -6,6 +6,8 @@ param cosmosDBName string
 param eventGridName string
 param functionsName string
 param githubRepoUrl string
+@secure()
+param googleTranslationApiKey string
 param location string = resourceGroup().location
 param openAIApiVersion string
 param openAICapacity int
@@ -53,6 +55,7 @@ var storageQueueNames = {
 var vaultSecretNames = {
   cosmosDBPrimaryKey: 'cosmos-db-primary-key'
   cosmosDBPrimaryReadonlyKey: 'cosmos-db-primary-readonly-key'
+  googleTranslationApiKey: 'google-translation-api-key'
   insightsConnectionString: 'insights-connection-string'
   insightsInstrumentationKey: 'insights-instrumentation-key'
   openAIApiKey: 'openai-api-key'
@@ -589,6 +592,16 @@ resource vaultSecretsCosmosDBPrimaryReadonlyKey 'Microsoft.KeyVault/vaults/secre
       enabled: true
     }
     value: cosmosDB.listKeys().primaryReadonlyMasterKey
+  }
+}
+resource vaultSecretsGoogleTranslationApiKey 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
+  parent: vault
+  name: vaultSecretNames.googleTranslationApiKey
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: googleTranslationApiKey
   }
 }
 resource vaultSecretsInsightsConnectionString 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {

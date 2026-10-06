@@ -20,6 +20,11 @@
     "value": "@Microsoft.KeyVault(SecretUri={cosmosdbReadonlyKey})"
   },
   {
+    "name": "GOOGLE_TRANSLATION_API_KEY",
+    "slotSetting": false,
+    "value": "@Microsoft.KeyVault(VaultName={vaultName};SecretName=google-translation-api-key)"
+  },
+  {
     "name": "OPENAI_API_KEY",
     "slotSetting": false,
     "value": "@Microsoft.KeyVault(VaultName={vaultName};SecretName=openai-api-key)"

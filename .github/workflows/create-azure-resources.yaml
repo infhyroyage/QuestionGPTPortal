@@ -47,6 +47,7 @@ jobs:
             eventGridName: ${{ vars.EVENT_GRID_NAME }}
             functionsName: ${{ vars.FUNCTIONS_NAME }}
             githubRepoUrl: ${{ github.server_url }}/${{ github.repository }}
+            googleTranslationApiKey: ${{ secrets.GOOGLE_TRANSLATION_API_KEY }}
             openAIApiVersion: ${{ vars.OPENAI_API_VERSION }}
             openAICapacity: ${{ vars.OPENAI_CAPACITY }}
             openAIDeploymentName: ${{ vars.OPENAI_DEPLOYMENT_NAME }}
