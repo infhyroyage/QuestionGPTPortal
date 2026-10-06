@@ -126,6 +126,28 @@ def translate_by_azure_translator(texts: list[str]) -> list[str]:
     return [item["translations"][0]["text"] for item in data]
 
 
+def translate_en2ja(texts: list[str]) -> list[str]:
+    """
+    指定した英語の文字列群をそれぞれ日本語に翻訳する
+    Google翻訳APIのAPIキーを設定した場合はGoogle翻訳APIで翻訳し、
+    APIキーが未設定、またはGoogle翻訳APIでの翻訳に失敗した場合はAzure Translatorで翻訳する
+
+    Args:
+        texts (list[str]): 英語の文字列群
+
+    Returns:
+        list[str]: 日本語に翻訳した文字列群
+    """
+
+    if os.getenv("GOOGLE_TRANSLATION_API_KEY"):
+        try:
+            return translate_by_google(texts)
+        except Exception:
+            logging.warning(traceback.format_exc())
+
+    return translate_by_azure_translator(texts)
+
+
 bp_put_en2ja = func.Blueprint()
 
 
@@ -149,13 +171,7 @@ def put_en2ja(req: func.HttpRequest) -> func.HttpResponse:
 
         logging.info({"texts": texts})
 
-        # Google翻訳APIで翻訳し、失敗した場合はAzure Translatorで翻訳
-        body: PutEn2JaRes
-        try:
-            body = translate_by_google(texts)
-        except Exception:
-            logging.warning(traceback.format_exc())
-            body = translate_by_azure_translator(texts)
+        body: PutEn2JaRes = translate_en2ja(texts)
 
         return func.HttpResponse(
             body=json.dumps(body),
