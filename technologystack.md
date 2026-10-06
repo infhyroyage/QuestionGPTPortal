@@ -8,7 +8,7 @@
 
 ### 1.2 ソリューション概要
 
-GitHub Pages を通して React + TailwindCSS をベースとし、レスポンシブデザインとアクセシビリティに配慮したシングルページアプリケーション(SPA)の静的サイトホスティングを行い、Azure OpenAI・Azure Translator を活用した多言語対応の学習プラットフォームを構築すべく、Azure Cosmos DB で学習データと進捗を管理することで、Azure API Management を通じて Azure Functions をベースとしたセキュア・スケーラブル・高可用性な API サーバーと連携することで、モダンな学習支援型 Web アプリケーションを提供する。
+GitHub Pages を通して React + TailwindCSS をベースとし、レスポンシブデザインとアクセシビリティに配慮したシングルページアプリケーション(SPA)の静的サイトホスティングを行い、Azure OpenAI・Google 翻訳 API・Azure Translator を活用した多言語対応の学習プラットフォームを構築すべく、Azure Cosmos DB で学習データと進捗を管理することで、Azure API Management を通じて Azure Functions をベースとしたセキュア・スケーラブル・高可用性な API サーバーと連携することで、モダンな学習支援型 Web アプリケーションを提供する。
 
 ### 1.3 フロントエンド構成概要
 
@@ -17,7 +17,7 @@ GitHub Pages を通して React + TailwindCSS をベースとし、レスポン�
 1. ユーザーがインポートデータファイルを Azure Blob Storage にアップロードし、Azure Event Grid 経由の Blob トリガーの関数アプリが Azure Cosmos DB にテスト・問題のデータをインポートする。
 2. ユーザーが Entra ID 認証でアプリケーションにログインし、MSAL によりアクセストークンを取得する。
 3. フロントエンドアプリケーションが API Management 経由で関数アプリにアクセスし、Azure Cosmos DB で管理するテスト・問題・選択肢・学習履歴・お気に入り情報を取得・表示する。
-4. 関数アプリが Azure Translator で翻訳を実行し、英語の問題文・選択肢を日本語で表示する。
+4. 関数アプリが Google 翻訳 API で翻訳を実行し(失敗した場合は Azure Translator で翻訳を実行し)、英語の問題文・選択肢を日本語で表示する。
 5. ユーザーが問題を解答し、Azure OpenAI が正解の選択肢と各選択肢の正解/不正解理由を生成・表示しつつ、Azure Storage Queue トリガーの関数アプリが Azure Cosmos DB に非同期で保存する。
 6. Azure OpenAI がコミュニティでのディスカッションの要約を生成・表示しつつ、Azure Storage Queue トリガーの関数アプリが Azure Cosmos DB に非同期で保存する。
 7. 学習進捗機能により、学習履歴・お気に入り情報を Azure Cosmos DB に保存する。
@@ -55,7 +55,8 @@ GitHub Pages を通して React + TailwindCSS をベースとし、レスポン�
   - Azure Key Vault (シークレット・API キー管理)
   - Azure Application Insights (ログ記録・モニタリング)
   - Azure OpenAI (AI モデル・正解解説生成・ディスカッション要約)
-  - Azure Translator (翻訳サービス)
+  - Google 翻訳 API (Cloud Translation API Basic(v2)・翻訳サービス)
+  - Azure Translator (Google 翻訳 API 失敗時のフォールバック先の翻訳サービス)
   - GitHub (コードリポジトリ、CI/CD パイプライン管理)
   - Microsoft ID Platform (Entra ID 認証・アクセストークン発行)
 
@@ -88,6 +89,9 @@ GitHub Pages を通して React + TailwindCSS をベースとし、レスポン�
 | (ユーザー指定)             | Azure OpenAI               | Functions からアクセスする Azure OpenAI                  | (ユーザー指定) |
 | (ユーザー指定)             | Azure Translator           | Functions からアクセスする Translator                    | japaneast      |
 
+> [!NOTE]  
+> Google 翻訳 API は Azure リソースではないため、Google Cloud コンソールで API キーを発行する。発行した API キーは GitHub Actions のシークレットから Azure Key Vault に格納し、Functions から Key Vault 参照でアクセスする。
+
 > [!WARNING]  
 > Azure OpenAI は、以下をすべてサポートする場所・モデル名・モデルバージョン・API バージョンを使用する必要がある。
 >
@@ -105,7 +109,7 @@ GitHub Pages を通して React + TailwindCSS をベースとし、レスポン�
 ### 3.1 インポートデータファイルによるテスト・問題データのインポート機能
 
 Azure Cosmos DB に格納するデータは、**インポートデータファイル**とよばれる json ファイル`data/(コース名)/(テスト名).json`として管理する。
-インポートデータファイルの json フォーマットは、 [azureenvironment.md](azureenvironment.md) の構築手順の「8. インポートデータファイルの作成・アップロード」を参照。
+インポートデータファイルの json フォーマットは、 [azureenvironment.md](azureenvironment.md) の構築手順の「9. インポートデータファイルの作成・アップロード」を参照。
 インポートデータファイルに記載したテスト・問題のデータは、Azure 環境では Blob Storage に`import-items/{courseName}/{testName}.json` パスでアップロードすることで、データインポートされる。そのアップロードをもとに、Azure Event Grid 経由の Blob トリガーの関数アプリが Azure Cosmos DB にテスト・問題のデータを非同期でインポートする。
 
 また、ローカル環境では専用のインポート処理を行う Python ファイル `functions/import_local.py`を実行することで、データインポートされる。
@@ -134,12 +138,16 @@ Azure OpenAI を用いて、問題文や選択肢の文章から正解の選択�
 
 ### 3.4 日本語翻訳システム
 
-以下を対象とする英語から日本語への翻訳を Azure Translator (Standard Tier) で実現する:
+以下を対象とする英語から日本語への翻訳を、翻訳 API `[PUT] /en2ja` で実現する:
 
 - 問題文
 - 選択肢
 - 正解/不正解の理由の解説文
 - コミュニティでのディスカッションの要約
+
+翻訳 API は、まず Google 翻訳 API (Cloud Translation API Basic(v2)) で翻訳し、Google 翻訳 API の実行に失敗した場合(API キーが未設定・無効、割り当て超過、タイムアウト、想定外のレスポンスなど)のみ、Azure Translator (Standard Tier) で翻訳するフォールバック方式を採用する。
+Google 翻訳 API の実行に失敗した場合は、Application Insights に警告ログを出力する。Azure Translator の実行にも失敗した場合は、エラーログを出力して 500 エラーを返す。
+各翻訳エンジンの API キーは Azure Key Vault で管理し、関数アプリは Key Vault 参照のアプリケーション設定(`GOOGLE_TRANSLATION_API_KEY`・`TRANSLATOR_KEY`)を通してアクセスする。
 
 このうち、問題文と選択肢は、両者をまとめて翻訳することで、API 呼び出し回数を最適化している。
 翻訳処理は、`swa/src/lib/translation.ts` で統一的に行う。

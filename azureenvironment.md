@@ -71,7 +71,27 @@
    - `appId`(=クライアント ID)
    - `password`(=クライアントシークレット)
 
-### 5. GitHub Actions 用シークレット・変数設定
+### 5. Google 翻訳 API の API キーの発行
+
+[PUT] /en2ja の翻訳 API が最初に実行する Google 翻訳 API ([Cloud Translation API](https://cloud.google.com/translate/docs/basic/translating-text) の Basic(v2)) の API キーを、以下の手順で発行する。
+
+1. [Google Cloud コンソール](https://console.cloud.google.com/)にログインし、当リポジトリ専用の Google Cloud プロジェクトを新規作成する。
+2. 1 で作成したプロジェクトを選択し、お支払い > 「請求先アカウントをリンク」より、請求先アカウントをリンクする。
+3. API とサービス > ライブラリ に遷移し、「Cloud Translation API」を検索して「有効にする」ボタンを押下する。
+4. API とサービス > 認証情報 に遷移し、「+ 認証情報を作成」 > 「API キー」の順で押下して、API キーを発行する。
+5. 4 で発行した API キーの編集画面に遷移し、以下の通りに制限を設定して「保存」ボタンを押下する。
+   - アプリケーションの制限 : `なし`
+   - API の制限 : `キーを制限`を選択し、`Cloud Translation API` のみを選択
+6. 4 で発行した API キーの値を手元に控える。
+
+> [!NOTE]  
+> Azure Functions の Flex Consumption プランは送信元 IP アドレスが固定されないため、アプリケーションの制限(IP アドレス制限)は設定せず、API の制限で Cloud Translation API のみに利用範囲を限定する。
+> 想定外の利用料金の発生を防ぐため、必要に応じて API とサービス > Cloud Translation API > 割り当てとシステム上限 から 1 日あたりの文字数の割り当てを制限するか、お支払い > 予算とアラート から予算アラートを設定すること。
+
+> [!NOTE]  
+> Google 翻訳 API の実行に失敗した場合(API キーが未設定・無効、割り当て超過、タイムアウトなど)は、Azure Translator で翻訳する。
+
+### 6. GitHub Actions 用シークレット・変数設定
 
 当リポジトリの Setting > Secrets And variables > Actions より、以下の GitHub Actions 用シークレット・変数をすべて設定する。
 
@@ -84,6 +104,10 @@ Secrets タブから「New repository secret」ボタンを押下して、下記
 | AZURE_APIM_PUBLISHER_EMAIL                  | API Management の発行者メールアドレス                                  |
 | AZURE_AD_SP_CONTRIBUTOR_CLIENT_SECRET       | 3.で発行した QGTranslator_Contributor のクライアントシークレット       |
 | AZURE_AD_SP_USER_ACCESS_ADMIN_CLIENT_SECRET | 4.で発行した QGTranslator_User_Access_Admin のクライアントシークレット |
+| GOOGLE_TRANSLATION_API_KEY                  | 5.で発行した Google 翻訳 API の API キー                               |
+
+> [!NOTE]  
+> GOOGLE_TRANSLATION_API_KEY の値は、Azure リソースの構築時に Azure Key Vault のシークレット `google-translation-api-key` に格納され、Azure Functions からは Key Vault 参照のアプリケーション設定 `GOOGLE_TRANSLATION_API_KEY` を通してアクセスする。
 
 #### 変数
 
@@ -116,7 +140,7 @@ Variables タブから「New repository variable」ボタンを押下して、�
 > [!NOTE]  
 > Azure OpenAI の Capacity 数とは、1 分間あたりに処理できるトークン数(=TPM)であり、1 Capacity = 1000 TPM である。Azure OpenAI のモデルによって、Capacity 数の最大値が異なる。
 
-### 6. Azure リソースの構築
+### 7. Azure リソースの構築
 
 新規作成した Azure サブスクリプションに対し、[technologystack.md](technologystack.md)に記載した Azure リソースを構築する。
 
@@ -124,7 +148,7 @@ Variables タブから「New repository variable」ボタンを押下して、�
 2. Create Azure Resources の workflow が無効化されている場合は、workflow を有効化する。
 3. 右上の「Re-run jobs」から「Re-run all jobs」を押下し、確認ダイアログ内の「Re-run jobs」ボタンを押下する。
 
-### 7. Azure AD 認証認可用サービスプリンシパルのリダイレクト URI の追加
+### 8. Azure AD 認証認可用サービスプリンシパルのリダイレクト URI の追加
 
 発行した QGTranslator_MSAL のリダイレクト URI に Azure Static Web Apps の URL を設定する。
 
@@ -138,7 +162,7 @@ Variables タブから「New repository variable」ボタンを押下して、�
 5. 「Add a Redirect URI」タブにある「+ Add Redirect URI」ボタンを押下し、「Select a platform to add redirect URI」で「Single-page application」ボタンを押下する。
 6. 「Redirect URI」のテキストボックスに、2 で手元に控えた Azure Static Web Apps の URL を入力し、「Configure」ボタンを押下する。
 
-### 8. インポートデータファイルの作成・アップロード
+### 9. インポートデータファイルの作成・アップロード
 
 Azure Cosmos DB に格納するデータであるインポートデータファイルを、以下の json フォーマットで`data/(コース名)/(テスト名).json`に作成する。
 
@@ -201,7 +225,7 @@ Azure Cosmos DB に格納するデータであるインポートデータファ�
 az storage blob upload-batch --destination import-items --source ./functions/data --account-name (当リポジトリの変数STORAGE_NAMEの値)
 ```
 
-### 9. Azure Static Web Apps への Web アプリケーションのデプロイ
+### 10. Azure Static Web Apps への Web アプリケーションのデプロイ
 
 Web アプリケーションをビルドし、Azure Static Web Apps に対してデプロイする。
 
@@ -213,11 +237,20 @@ Web アプリケーションをビルドし、Azure Static Web Apps に対して
 
 ### Cosmos DBのデータを増やしたい場合
 
-構築手順の「8. インポートデータファイルの作成・アップロード」の手順の通りに、増やしたいデータのインポートデータファイルを新たに格納してから、再度以下のコマンドを実行し、Azure Storage Account の Blob Storage にアップロードすれば良い。
+構築手順の「9. インポートデータファイルの作成・アップロード」の手順の通りに、増やしたいデータのインポートデータファイルを新たに格納してから、再度以下のコマンドを実行し、Azure Storage Account の Blob Storage にアップロードすれば良い。
 
 ```bash
 az storage blob upload-batch --destination import-items --source ./functions/data --account-name (当リポジトリの変数STORAGE_NAMEの値)
 ```
+
+### Google 翻訳 API の API キーを更新したい場合
+
+Google 翻訳 API の API キーは、Azure の各 API キーとは異なり、シークレット日次再発行の workflow (Regenerate Secrets) では再発行されない。API キーを更新したい場合は、以下の手順で更新する。
+
+1. [Google Cloud コンソール](https://console.cloud.google.com/)にログインし、構築手順の「5. Google 翻訳 API の API キーの発行」の 4〜6 の手順の通りに、新しい API キーを発行して手元に控える。
+2. 当リポジトリの Setting > Secrets And variables > Actions の Secrets タブから、シークレット GOOGLE_TRANSLATION_API_KEY の値を 1 で手元に控えた API キーに更新する。
+3. 構築手順の「7. Azure リソースの構築」の手順の通りに Create Azure Resources の workflow を再実行し、Azure Key Vault のシークレット `google-translation-api-key` と Azure Functions のアプリケーション設定を更新する。
+4. Google Cloud コンソールの API とサービス > 認証情報 から、更新前の API キーを削除する。
 
 ### Cosmos DBのデータを削除したい場合
 
@@ -284,7 +317,8 @@ export COSMOSDB_KEY="(取得した削除対象のCosmos DBのプライマリー�
    az resource delete --ids /subscriptions/{手元に控えたサブスクリプションID}/providers/Microsoft.CognitiveServices/locations/(当リポジトリの変数OPENAI_LOCATIONの値)/resourceGroups/qgtranslator-je/deletedAccounts/(当リポジトリの変数OPENAI_NAMEの値)
    ```
 7. 当リポジトリの Setting > Secrets And variables > Actions より、Secrets・Variables タブから初期構築時に設定した各シークレット・変数に対し、ゴミ箱のボタンを押下する。
-8. [Azure Portal](https://portal.azure.com/) にログインし、Azure AD > App Registrations に遷移後、QGTranslator_User_Access_Admin のリンク先にある Delete ボタンを押下し、「I understand the implications of deleting this app registration.」のチェックを入れて Delete ボタンを押下する。
-9. 8 に続けて、QGTranslator_Contributor のリンク先にある Delete ボタンを押下し、「I understand the implications of deleting this app registration.」のチェックを入れて Delete ボタンを押下する。
-10. 9 に続けて、QGTranslator_MSAL のリンク先にある Delete ボタンを押下し、「I understand the implications of deleting this app registration.」のチェックを入れて Delete ボタンを押下する。
-11. 構築手順の 1.で新規作成した Azure サブスクリプションを選択後、上部メニューから Delete ボタンを押下し、サブスクリプション名を入力し、Delete ボタンを押下する。
+8. [Google Cloud コンソール](https://console.cloud.google.com/)にログインし、構築手順の 5.で新規作成した Google Cloud プロジェクトを選択後、IAM と管理 > 設定 に遷移し、「シャットダウン」ボタンを押下し、プロジェクト ID を入力して「このままシャットダウン」ボタンを押下する。
+9. [Azure Portal](https://portal.azure.com/) にログインし、Azure AD > App Registrations に遷移後、QGTranslator_User_Access_Admin のリンク先にある Delete ボタンを押下し、「I understand the implications of deleting this app registration.」のチェックを入れて Delete ボタンを押下する。
+10. 9 に続けて、QGTranslator_Contributor のリンク先にある Delete ボタンを押下し、「I understand the implications of deleting this app registration.」のチェックを入れて Delete ボタンを押下する。
+11. 10 に続けて、QGTranslator_MSAL のリンク先にある Delete ボタンを押下し、「I understand the implications of deleting this app registration.」のチェックを入れて Delete ボタンを押下する。
+12. 構築手順の 1.で新規作成した Azure サブスクリプションを選択後、上部メニューから Delete ボタンを押下し、サブスクリプション名を入力し、Delete ボタンを押下する。
