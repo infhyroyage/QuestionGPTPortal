@@ -71,9 +71,9 @@
    - `appId`(=クライアント ID)
    - `password`(=クライアントシークレット)
 
-### 5. Google 翻訳 API の API キーの発行
+### 5. Google 翻訳 API の API キーの発行(任意)
 
-[PUT] /en2ja の翻訳 API が最初に実行する Google 翻訳 API ([Cloud Translation API](https://cloud.google.com/translate/docs/basic/translating-text) の Basic(v2)) の API キーを、以下の手順で発行する。
+[PUT] /en2ja の翻訳 API で Google 翻訳 API ([Cloud Translation API](https://cloud.google.com/translate/docs/basic/translating-text) の Basic(v2)) を使用する場合のみ、Google 翻訳 API の API キーを以下の手順で発行する。Google 翻訳 API を使用しない場合は、この手順をスキップしてよい。
 
 1. [Google Cloud コンソール](https://console.cloud.google.com/)にログインし、当リポジトリ専用の Google Cloud プロジェクトを新規作成する。
 2. 1 で作成したプロジェクトを選択し、お支払い > 「請求先アカウントをリンク」より、請求先アカウントをリンクする。
@@ -89,7 +89,8 @@
 > 想定外の利用料金の発生を防ぐため、必要に応じて API とサービス > Cloud Translation API > 割り当てとシステム上限 から 1 日あたりの文字数の割り当てを制限するか、お支払い > 予算とアラート から予算アラートを設定すること。
 
 > [!NOTE]  
-> Google 翻訳 API の実行に失敗した場合(API キーが未設定・無効、割り当て超過、タイムアウトなど)は、Azure Translator で翻訳する。
+> 翻訳 API は、Google 翻訳 API の API キーを設定した場合は Google 翻訳 API で翻訳し、Google 翻訳 API の実行に失敗した場合(API キーが無効、割り当て超過、タイムアウトなど)は Azure Translator で翻訳する。
+> Google 翻訳 API の API キーを設定しなかった場合は、Google 翻訳 API を実行せずに Azure Translator のみで翻訳する。
 
 ### 6. GitHub Actions 用シークレット・変数設定
 
@@ -97,17 +98,18 @@
 
 #### シークレット
 
-Secrets タブから「New repository secret」ボタンを押下して、下記の通りシークレットをすべて設定する。
+Secrets タブから「New repository secret」ボタンを押下して、下記の通りシークレットを設定する。必須指定のシークレットはすべて設定すること。
 
-| シークレット名                              | シークレット値                                                         |
-| ------------------------------------------- | ---------------------------------------------------------------------- |
-| AZURE_APIM_PUBLISHER_EMAIL                  | API Management の発行者メールアドレス                                  |
-| AZURE_AD_SP_CONTRIBUTOR_CLIENT_SECRET       | 3.で発行した QGTranslator_Contributor のクライアントシークレット       |
-| AZURE_AD_SP_USER_ACCESS_ADMIN_CLIENT_SECRET | 4.で発行した QGTranslator_User_Access_Admin のクライアントシークレット |
-| GOOGLE_TRANSLATION_API_KEY                  | 5.で発行した Google 翻訳 API の API キー                               |
+| シークレット名                              | シークレット値                                                         | 必須指定 |
+| ------------------------------------------- | ---------------------------------------------------------------------- | :------: |
+| AZURE_APIM_PUBLISHER_EMAIL                  | API Management の発行者メールアドレス                                  |    o     |
+| AZURE_AD_SP_CONTRIBUTOR_CLIENT_SECRET       | 3.で発行した QGTranslator_Contributor のクライアントシークレット       |    o     |
+| AZURE_AD_SP_USER_ACCESS_ADMIN_CLIENT_SECRET | 4.で発行した QGTranslator_User_Access_Admin のクライアントシークレット |    o     |
+| GOOGLE_TRANSLATION_API_KEY                  | 5.で発行した Google 翻訳 API の API キー                               |          |
 
 > [!NOTE]  
-> GOOGLE_TRANSLATION_API_KEY の値は、Azure リソースの構築時に Azure Key Vault のシークレット `google-translation-api-key` に格納され、Azure Functions からは Key Vault 参照のアプリケーション設定 `GOOGLE_TRANSLATION_API_KEY` を通してアクセスする。
+> GOOGLE_TRANSLATION_API_KEY を設定した場合、その値は Azure リソースの構築時に Azure Key Vault のシークレット `google-translation-api-key` に格納され、Azure Functions からは Key Vault 参照のアプリケーション設定 `GOOGLE_TRANSLATION_API_KEY` を通してアクセスする。
+> GOOGLE_TRANSLATION_API_KEY を設定しなかった場合、Azure Key Vault のシークレット `google-translation-api-key` は作成されず、Azure Functions のアプリケーション設定 `GOOGLE_TRANSLATION_API_KEY` には空文字を設定するため、翻訳 API は Azure Translator のみで翻訳する。
 
 #### 変数
 
@@ -243,11 +245,27 @@ Web アプリケーションをビルドし、Azure Static Web Apps に対して
 az storage blob upload-batch --destination import-items --source ./functions/data --account-name (当リポジトリの変数STORAGE_NAMEの値)
 ```
 
+### Google 翻訳 API を後から使用したい場合
+
+構築時に GOOGLE_TRANSLATION_API_KEY を設定せずに Azure Translator のみで翻訳している状態から、Google 翻訳 API を使用したい場合は、以下の手順で設定する。
+
+1. 構築手順の「5. Google 翻訳 API の API キーの発行(任意)」の手順の通りに、Google 翻訳 API の API キーを発行して手元に控える。
+2. 当リポジトリの Setting > Secrets And variables > Actions の Secrets タブから、シークレット GOOGLE_TRANSLATION_API_KEY に 1 で手元に控えた API キーを設定する。
+3. 構築手順の「7. Azure リソースの構築」の手順の通りに Create Azure Resources の workflow を再実行し、Azure Key Vault のシークレット `google-translation-api-key` の作成と Azure Functions のアプリケーション設定を更新する。
+
+### Google 翻訳 API の使用を停止したい場合
+
+Google 翻訳 API を使用せずに Azure Translator のみで翻訳したい場合は、以下の手順で設定する。
+
+1. 当リポジトリの Setting > Secrets And variables > Actions の Secrets タブから、シークレット GOOGLE_TRANSLATION_API_KEY のゴミ箱のボタンを押下して削除する。
+2. 構築手順の「7. Azure リソースの構築」の手順の通りに Create Azure Resources の workflow を再実行し、Azure Functions のアプリケーション設定 `GOOGLE_TRANSLATION_API_KEY` を空文字に更新する。
+3. 必要に応じて、Azure Key Vault に残ったシークレット `google-translation-api-key` を削除し、Google Cloud コンソールの API とサービス > 認証情報 から API キーを削除する。
+
 ### Google 翻訳 API の API キーを更新したい場合
 
 Google 翻訳 API の API キーは、Azure の各 API キーとは異なり、シークレット日次再発行の workflow (Regenerate Secrets) では再発行されない。API キーを更新したい場合は、以下の手順で更新する。
 
-1. [Google Cloud コンソール](https://console.cloud.google.com/)にログインし、構築手順の「5. Google 翻訳 API の API キーの発行」の 4〜6 の手順の通りに、新しい API キーを発行して手元に控える。
+1. [Google Cloud コンソール](https://console.cloud.google.com/)にログインし、構築手順の「5. Google 翻訳 API の API キーの発行(任意)」の 4〜6 の手順の通りに、新しい API キーを発行して手元に控える。
 2. 当リポジトリの Setting > Secrets And variables > Actions の Secrets タブから、シークレット GOOGLE_TRANSLATION_API_KEY の値を 1 で手元に控えた API キーに更新する。
 3. 構築手順の「7. Azure リソースの構築」の手順の通りに Create Azure Resources の workflow を再実行し、Azure Key Vault のシークレット `google-translation-api-key` と Azure Functions のアプリケーション設定を更新する。
 4. Google Cloud コンソールの API とサービス > 認証情報 から、更新前の API キーを削除する。
@@ -317,7 +335,7 @@ export COSMOSDB_KEY="(取得した削除対象のCosmos DBのプライマリー�
    az resource delete --ids /subscriptions/{手元に控えたサブスクリプションID}/providers/Microsoft.CognitiveServices/locations/(当リポジトリの変数OPENAI_LOCATIONの値)/resourceGroups/qgtranslator-je/deletedAccounts/(当リポジトリの変数OPENAI_NAMEの値)
    ```
 7. 当リポジトリの Setting > Secrets And variables > Actions より、Secrets・Variables タブから初期構築時に設定した各シークレット・変数に対し、ゴミ箱のボタンを押下する。
-8. [Google Cloud コンソール](https://console.cloud.google.com/)にログインし、構築手順の 5.で新規作成した Google Cloud プロジェクトを選択後、IAM と管理 > 設定 に遷移し、「シャットダウン」ボタンを押下し、プロジェクト ID を入力して「このままシャットダウン」ボタンを押下する。
+8. 構築手順の 5.で Google Cloud プロジェクトを新規作成した場合のみ、[Google Cloud コンソール](https://console.cloud.google.com/)にログインし、そのプロジェクトを選択後、IAM と管理 > 設定 に遷移し、「シャットダウン」ボタンを押下し、プロジェクト ID を入力して「このままシャットダウン」ボタンを押下する。
 9. [Azure Portal](https://portal.azure.com/) にログインし、Azure AD > App Registrations に遷移後、QGTranslator_User_Access_Admin のリンク先にある Delete ボタンを押下し、「I understand the implications of deleting this app registration.」のチェックを入れて Delete ボタンを押下する。
 10. 9 に続けて、QGTranslator_Contributor のリンク先にある Delete ボタンを押下し、「I understand the implications of deleting this app registration.」のチェックを入れて Delete ボタンを押下する。
 11. 10 に続けて、QGTranslator_MSAL のリンク先にある Delete ボタンを押下し、「I understand the implications of deleting this app registration.」のチェックを入れて Delete ボタンを押下する。

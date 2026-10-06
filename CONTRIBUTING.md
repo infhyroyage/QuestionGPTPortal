@@ -67,7 +67,7 @@
   - Structured Outputs
   - Vision-enabled
 - 長い実行時間を要求される生成 AI の処理が含まれている API には、Queue Storage キュートリガー関数にて Azure Cosmos DB に保存する非同期処理を採用する。
-- 英語 → 日本語の翻訳システムは、Google 翻訳 API (Cloud Translation API Basic(v2)) を採用し、Google 翻訳 API の実行に失敗した場合のフォールバック先として Azure Translator (Standard Tier) を採用する。
+- 英語 → 日本語の翻訳システムは、Google 翻訳 API (Cloud Translation API Basic(v2)) を任意で採用し、Google 翻訳 API の API キーが未設定、または Google 翻訳 API の実行に失敗した場合は Azure Translator (Standard Tier) を採用する。
 - フロントエンドは、React を用いた Single Page Application(SPA)として構築し、ルーティング機能を持つ Azure Static Web Apps 上でホスティングする。
 - フロントエンドは TypeScript で実装し、厳格な型チェックを有効にすることで`any` 型の使用は避ける。Typescript の型定義ファイルは、以下の通りに分類して swa/src/types ディレクトリに配置する:
   - atoms.ts: Jotai の Atom 関連の型定義

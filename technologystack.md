@@ -17,7 +17,7 @@ GitHub Pages を通して React + TailwindCSS をベースとし、レスポン�
 1. ユーザーがインポートデータファイルを Azure Blob Storage にアップロードし、Azure Event Grid 経由の Blob トリガーの関数アプリが Azure Cosmos DB にテスト・問題のデータをインポートする。
 2. ユーザーが Entra ID 認証でアプリケーションにログインし、MSAL によりアクセストークンを取得する。
 3. フロントエンドアプリケーションが API Management 経由で関数アプリにアクセスし、Azure Cosmos DB で管理するテスト・問題・選択肢・学習履歴・お気に入り情報を取得・表示する。
-4. 関数アプリが Google 翻訳 API で翻訳を実行し(失敗した場合は Azure Translator で翻訳を実行し)、英語の問題文・選択肢を日本語で表示する。
+4. 関数アプリが Google 翻訳 API で翻訳を実行し(Google 翻訳 API の API キーが未設定、または失敗した場合は Azure Translator で翻訳を実行し)、英語の問題文・選択肢を日本語で表示する。
 5. ユーザーが問題を解答し、Azure OpenAI が正解の選択肢と各選択肢の正解/不正解理由を生成・表示しつつ、Azure Storage Queue トリガーの関数アプリが Azure Cosmos DB に非同期で保存する。
 6. Azure OpenAI がコミュニティでのディスカッションの要約を生成・表示しつつ、Azure Storage Queue トリガーの関数アプリが Azure Cosmos DB に非同期で保存する。
 7. 学習進捗機能により、学習履歴・お気に入り情報を Azure Cosmos DB に保存する。
@@ -55,8 +55,8 @@ GitHub Pages を通して React + TailwindCSS をベースとし、レスポン�
   - Azure Key Vault (シークレット・API キー管理)
   - Azure Application Insights (ログ記録・モニタリング)
   - Azure OpenAI (AI モデル・正解解説生成・ディスカッション要約)
-  - Google 翻訳 API (Cloud Translation API Basic(v2)・翻訳サービス)
-  - Azure Translator (Google 翻訳 API 失敗時のフォールバック先の翻訳サービス)
+  - Google 翻訳 API (Cloud Translation API Basic(v2)・任意で使用する翻訳サービス)
+  - Azure Translator (Google 翻訳 API 未使用時・失敗時の翻訳サービス)
   - GitHub (コードリポジトリ、CI/CD パイプライン管理)
   - Microsoft ID Platform (Entra ID 認証・アクセストークン発行)
 
@@ -90,7 +90,7 @@ GitHub Pages を通して React + TailwindCSS をベースとし、レスポン�
 | (ユーザー指定)             | Azure Translator           | Functions からアクセスする Translator                    | japaneast      |
 
 > [!NOTE]  
-> Google 翻訳 API は Azure リソースではないため、Google Cloud コンソールで API キーを発行する。発行した API キーは GitHub Actions のシークレットから Azure Key Vault に格納し、Functions から Key Vault 参照でアクセスする。
+> Google 翻訳 API は Azure リソースではないため、使用する場合のみ Google Cloud コンソールで API キーを発行する。発行した API キーは GitHub Actions のシークレットから Azure Key Vault に格納し、Functions から Key Vault 参照でアクセスする。
 
 > [!WARNING]  
 > Azure OpenAI は、以下をすべてサポートする場所・モデル名・モデルバージョン・API バージョンを使用する必要がある。
@@ -145,7 +145,8 @@ Azure OpenAI を用いて、問題文や選択肢の文章から正解の選択�
 - 正解/不正解の理由の解説文
 - コミュニティでのディスカッションの要約
 
-翻訳 API は、まず Google 翻訳 API (Cloud Translation API Basic(v2)) で翻訳し、Google 翻訳 API の実行に失敗した場合(API キーが未設定・無効、割り当て超過、タイムアウト、想定外のレスポンスなど)のみ、Azure Translator (Standard Tier) で翻訳するフォールバック方式を採用する。
+翻訳 API は、Google 翻訳 API (Cloud Translation API Basic(v2)) の API キーを設定した場合はまず Google 翻訳 API で翻訳し、Google 翻訳 API の実行に失敗した場合(API キーが無効、割り当て超過、タイムアウト、想定外のレスポンスなど)のみ、Azure Translator (Standard Tier) で翻訳するフォールバック方式を採用する。
+Google 翻訳 API の API キーは任意で設定し、設定しなかった場合は Google 翻訳 API を実行せずに Azure Translator のみで翻訳する。
 Google 翻訳 API の実行に失敗した場合は、Application Insights に警告ログを出力する。Azure Translator の実行にも失敗した場合は、エラーログを出力して 500 エラーを返す。
 各翻訳エンジンの API キーは Azure Key Vault で管理し、関数アプリは Key Vault 参照のアプリケーション設定(`GOOGLE_TRANSLATION_API_KEY`・`TRANSLATOR_KEY`)を通してアクセスする。
 
