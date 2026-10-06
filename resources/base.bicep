@@ -7,7 +7,7 @@ param eventGridName string
 param functionsName string
 param githubRepoUrl string
 @secure()
-param googleTranslationApiKey string
+param googleTranslationApiKey string = ''
 param location string = resourceGroup().location
 param openAIApiVersion string
 param openAICapacity int
@@ -594,7 +594,7 @@ resource vaultSecretsCosmosDBPrimaryReadonlyKey 'Microsoft.KeyVault/vaults/secre
     value: cosmosDB.listKeys().primaryReadonlyMasterKey
   }
 }
-resource vaultSecretsGoogleTranslationApiKey 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
+resource vaultSecretsGoogleTranslationApiKey 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = if (!empty(googleTranslationApiKey)) {
   parent: vault
   name: vaultSecretNames.googleTranslationApiKey
   properties: {
