@@ -39,3 +39,36 @@ class AzureTranslatorRes(TypedDict):
     """
     Azure Translatorの翻訳結果
     """
+
+
+class GoogleTranslationTranslationsItem(TypedDict):
+    """
+    Google翻訳APIのレスポンスのdata.translationsフィールドの各要素の型
+    """
+
+    translatedText: str
+    """
+    Google翻訳APIで翻訳した文章
+    """
+
+
+class GoogleTranslationData(TypedDict):
+    """
+    Google翻訳APIのレスポンスのdataフィールドの型
+    """
+
+    translations: List[GoogleTranslationTranslationsItem]
+    """
+    Google翻訳APIの翻訳結果(リクエストした文章の順序と同じ)
+    """
+
+
+class GoogleTranslationRes(TypedDict):
+    """
+    Google翻訳APIのレスポンスの型
+    """
+
+    data: GoogleTranslationData
+    """
+    Google翻訳APIの翻訳結果
+    """

@@ -9,7 +9,7 @@ import azure.functions as func
 import requests
 from type.request import PutEn2JaReq
 from type.response import PutEn2JaRes
-from type.translation import AzureTranslatorRes
+from type.translation import AzureTranslatorRes, GoogleTranslationRes
 
 
 def validate_request(req: func.HttpRequest) -> str | None:
@@ -36,6 +36,52 @@ def validate_request(req: func.HttpRequest) -> str | None:
             errors.append("Request Body is Empty")
 
     return errors[0] if errors else None
+
+
+def translate_by_google(texts: list[str]) -> list[str]:
+    """
+    指定した英語の文字列群をGoogle翻訳APIでそれぞれ日本語に翻訳する
+
+    Args:
+        texts (list[str]): 英語の文字列群
+
+    Returns:
+        list[str]: 日本語に翻訳した文字列群
+    """
+
+    if not texts:
+        return []
+
+    google_translation_api_key = os.getenv("GOOGLE_TRANSLATION_API_KEY")
+    if not google_translation_api_key:
+        raise ValueError("Unset GOOGLE_TRANSLATION_API_KEY")
+
+    # APIキーをクエリパラメーターで渡すと例外メッセージのURLに含まれてログ出力されるため、ヘッダーで渡す
+    headers = {
+        "X-goog-api-key": google_translation_api_key,
+        "Content-Type": "application/json",
+    }
+    body = {
+        "q": texts,
+        "source": "en",
+        "target": "ja",
+        "format": "text",
+    }
+
+    response = requests.post(
+        "https://translation.googleapis.com/language/translate/v2",
+        headers=headers,
+        json=body,
+        timeout=10,
+    )
+    response.raise_for_status()
+    data: GoogleTranslationRes = response.json()
+    translations = data["data"]["translations"]
+    if len(translations) != len(texts):
+        raise ValueError(
+            f"Mismatched number of translations: expected {len(texts)}, got {len(translations)}"
+        )
+    return [translation["translatedText"] for translation in translations]
 
 
 def translate_by_azure_translator(texts: list[str]) -> list[str]:
@@ -103,8 +149,13 @@ def put_en2ja(req: func.HttpRequest) -> func.HttpResponse:
 
         logging.info({"texts": texts})
 
-        # Azure Translatorで翻訳
-        body: PutEn2JaRes = translate_by_azure_translator(texts)
+        # Google翻訳APIで翻訳し、失敗した場合はAzure Translatorで翻訳
+        body: PutEn2JaRes
+        try:
+            body = translate_by_google(texts)
+        except Exception:
+            logging.warning(traceback.format_exc())
+            body = translate_by_azure_translator(texts)
 
         return func.HttpResponse(
             body=json.dumps(body),
