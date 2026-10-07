@@ -76,21 +76,13 @@
 [PUT] /en2ja の翻訳 API で Google 翻訳 API ([Cloud Translation API](https://cloud.google.com/translate/docs/basic/translating-text) の Basic(v2)) を使用する場合のみ、Google 翻訳 API の API キーを以下の手順で発行する。Google 翻訳 API を使用しない場合は、この手順をスキップしてよい。
 
 1. [Google Cloud コンソール](https://console.cloud.google.com/)にログインし、当リポジトリ専用の Google Cloud プロジェクトを新規作成する。
-2. 1 で作成したプロジェクトを選択し、お支払い > 「請求先アカウントをリンク」より、請求先アカウントをリンクする。
-3. API とサービス > ライブラリ に遷移し、「Cloud Translation API」を検索して「有効にする」ボタンを押下する。
-4. API とサービス > 認証情報 に遷移し、「+ 認証情報を作成」 > 「API キー」の順で押下して、API キーを発行する。
-5. 4 で発行した API キーの編集画面に遷移し、以下の通りに制限を設定して「保存」ボタンを押下する。
+2. 1 で作成したプロジェクトを選択し、左側のドロワーにある、課金 > 「請求先アカウントを管理」より当リポジトリ専用の請求先アカウントを新規作成して、課金 > 「請求先アカウントをリンク」より新規作成した請求先アカウントをリンクする。
+3. 左側のドロワーにある、API とサービス > ライブラリ に遷移し、「Cloud Translation API」を検索して「有効にする」ボタンを押下する。
+4. 左側のドロワーにある、API とサービス > 認証情報 に遷移し、「+ 認証情報を作成」 > 「API キー」の順で押下し、以下の通りに制限を設定して「作成」ボタンを押下し、API キーを発行する。
+   - 名前 : 任意の名前
+   - API の制限 : `Cloud Translation API` のみを選択
    - アプリケーションの制限 : `なし`
-   - API の制限 : `キーを制限`を選択し、`Cloud Translation API` のみを選択
-6. 4 で発行した API キーの値を手元に控える。
-
-> [!NOTE]  
-> Azure Functions の Flex Consumption プランは送信元 IP アドレスが固定されないため、アプリケーションの制限(IP アドレス制限)は設定せず、API の制限で Cloud Translation API のみに利用範囲を限定する。
-> 想定外の利用料金の発生を防ぐため、必要に応じて API とサービス > Cloud Translation API > 割り当てとシステム上限 から 1 日あたりの文字数の割り当てを制限するか、お支払い > 予算とアラート から予算アラートを設定すること。
-
-> [!NOTE]  
-> 翻訳 API は、Google 翻訳 API の API キーを設定した場合は Google 翻訳 API で翻訳し、Google 翻訳 API の実行に失敗した場合(API キーが無効、割り当て超過、タイムアウトなど)は Azure Translator で翻訳する。
-> Google 翻訳 API の API キーを設定しなかった場合は、Google 翻訳 API を実行せずに Azure Translator のみで翻訳する。
+5. 4 で発行した API キーの値を手元に控える。
 
 ### 6. GitHub Actions 用シークレット・変数設定
 
@@ -107,37 +99,33 @@ Secrets タブから「New repository secret」ボタンを押下して、下記
 | AZURE_AD_SP_USER_ACCESS_ADMIN_CLIENT_SECRET | 4.で発行した QGTranslator_User_Access_Admin のクライアントシークレット |    o     |
 | GOOGLE_TRANSLATION_API_KEY                  | 5.で発行した Google 翻訳 API の API キー                               |          |
 
-> [!NOTE]  
-> GOOGLE_TRANSLATION_API_KEY を設定した場合、その値は Azure リソースの構築時に Azure Key Vault のシークレット `google-translation-api-key` に格納され、Azure Functions からは Key Vault 参照のアプリケーション設定 `GOOGLE_TRANSLATION_API_KEY` を通してアクセスする。
-> GOOGLE_TRANSLATION_API_KEY を設定しなかった場合、Azure Key Vault のシークレット `google-translation-api-key` は作成されず、Azure Functions のアプリケーション設定 `GOOGLE_TRANSLATION_API_KEY` には空文字を設定するため、翻訳 API は Azure Translator のみで翻訳する。
-
 #### 変数
 
 Variables タブから「New repository variable」ボタンを押下して、下記の通り変数をすべて設定する。
 
-| 変数名                                  | 変数値                                                                                    |
-| --------------------------------------- | ----------------------------------------------------------------------------------------- |
-| APIM_NAME                               | Azure API Management 名                                                                   |
-| AZURE_AD_EA_CONTRIBUTOR_OBJECT_ID       | 3.で発行した QGTranslator_Contributor のエンタープライズアプリケーションのオブジェクト ID |
-| AZURE_AD_SP_CONTRIBUTOR_CLIENT_ID       | 3.で発行した QGTranslator_Contributor のクライアント ID                                   |
-| AZURE_AD_SP_USER_ACCESS_ADMIN_CLIENT_ID | 4.で発行した QGTranslator_User_Access_Admin のクライアント ID                             |
-| AZURE_AD_SP_MSAL_CLIENT_ID              | 2.で発行した QGTranslator_MSAL のクライアント ID                                          |
-| AZURE_SUBSCRIPTION_ID                   | 1.で新規作成した Azure サブスクリプションのサブスクリプション ID                          |
-| AZURE_TENANT_ID                         | Azure ディレクトリ ID                                                                     |
-| COSMOSDB_NAME                           | Azure Cosmos DB 名                                                                        |
-| EVENT_GRID_NAME                         | Azure Event Grid システムトピック/サブスクリプション名                                    |
-| FUNCTIONS_NAME                          | Azure Functions 名                                                                        |
-| OPENAI_API_VERSION                      | Azure OpenAI の API バージョン                                                            |
-| OPENAI_CAPACITY                         | Azure OpenAI の Capacity 数                                                               |
-| OPENAI_DEPLOYMENT_NAME                  | Azure OpenAI のデプロイ名                                                                 |
-| OPENAI_LOCATION                         | Azure OpenAI のリージョン                                                                 |
-| OPENAI_MODEL_NAME                       | Azure OpenAI のモデル名                                                                   |
-| OPENAI_MODEL_VERSION                    | Azure OpenAI のモデルのバージョン                                                         |
-| OPENAI_NAME                             | Azure OpenAI 名                                                                           |
-| STORAGE_NAME                            | Azure ストレージアカウント名                                                              |
-| SWA_NAME                                | Azure Static Web Apps 名                                                                  |
-| TRANSLATOR_NAME                         | Azure Translator 名                                                                       |
-| VAULT_NAME                              | Azure Key Vault 名                                                                        |
+| 変数名                                  | 変数値                                                                                    | 必須指定 |
+| --------------------------------------- | ----------------------------------------------------------------------------------------- | :------: |
+| APIM_NAME                               | Azure API Management 名                                                                   |    o     |
+| AZURE_AD_EA_CONTRIBUTOR_OBJECT_ID       | 3.で発行した QGTranslator_Contributor のエンタープライズアプリケーションのオブジェクト ID |    o     |
+| AZURE_AD_SP_CONTRIBUTOR_CLIENT_ID       | 3.で発行した QGTranslator_Contributor のクライアント ID                                   |    o     |
+| AZURE_AD_SP_USER_ACCESS_ADMIN_CLIENT_ID | 4.で発行した QGTranslator_User_Access_Admin のクライアント ID                             |    o     |
+| AZURE_AD_SP_MSAL_CLIENT_ID              | 2.で発行した QGTranslator_MSAL のクライアント ID                                          |    o     |
+| AZURE_SUBSCRIPTION_ID                   | 1.で新規作成した Azure サブスクリプションのサブスクリプション ID                          |    o     |
+| AZURE_TENANT_ID                         | Azure ディレクトリ ID                                                                     |    o     |
+| COSMOSDB_NAME                           | Azure Cosmos DB 名                                                                        |    o     |
+| EVENT_GRID_NAME                         | Azure Event Grid システムトピック/サブスクリプション名                                    |    o     |
+| FUNCTIONS_NAME                          | Azure Functions 名                                                                        |    o     |
+| OPENAI_API_VERSION                      | Azure OpenAI の API バージョン                                                            |    o     |
+| OPENAI_CAPACITY                         | Azure OpenAI の Capacity 数                                                               |    o     |
+| OPENAI_DEPLOYMENT_NAME                  | Azure OpenAI のデプロイ名                                                                 |    o     |
+| OPENAI_LOCATION                         | Azure OpenAI のリージョン                                                                 |    o     |
+| OPENAI_MODEL_NAME                       | Azure OpenAI のモデル名                                                                   |    o     |
+| OPENAI_MODEL_VERSION                    | Azure OpenAI のモデルのバージョン                                                         |    o     |
+| OPENAI_NAME                             | Azure OpenAI 名                                                                           |    o     |
+| STORAGE_NAME                            | Azure ストレージアカウント名                                                              |    o     |
+| SWA_NAME                                | Azure Static Web Apps 名                                                                  |    o     |
+| TRANSLATOR_NAME                         | Azure Translator 名                                                                       |    o     |
+| VAULT_NAME                              | Azure Key Vault 名                                                                        |    o     |
 
 > [!NOTE]  
 > Azure OpenAI の Capacity 数とは、1 分間あたりに処理できるトークン数(=TPM)であり、1 Capacity = 1000 TPM である。Azure OpenAI のモデルによって、Capacity 数の最大値が異なる。

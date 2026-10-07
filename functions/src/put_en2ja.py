@@ -129,8 +129,6 @@ def translate_by_azure_translator(texts: list[str]) -> list[str]:
 def translate_en2ja(texts: list[str]) -> list[str]:
     """
     指定した英語の文字列群をそれぞれ日本語に翻訳する
-    Google翻訳APIのAPIキーを設定した場合はGoogle翻訳APIで翻訳し、
-    APIキーが未設定、またはGoogle翻訳APIでの翻訳に失敗した場合はAzure Translatorで翻訳する
 
     Args:
         texts (list[str]): 英語の文字列群
@@ -139,6 +137,8 @@ def translate_en2ja(texts: list[str]) -> list[str]:
         list[str]: 日本語に翻訳した文字列群
     """
 
+    # Google翻訳APIのAPIキーを設定した場合、Google翻訳APIで翻訳
+    # APIキーが未設定またはGoogle翻訳APIでの翻訳に失敗した場合、Azure Translatorで翻訳
     if os.getenv("GOOGLE_TRANSLATION_API_KEY"):
         try:
             return translate_by_google(texts)

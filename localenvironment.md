@@ -31,7 +31,7 @@ Azure 環境構築後に、以下のサーバーをすべて起動すると、�
 2. GitHub アカウントを用意して、このリポジトリをフォークし、ローカル環境にクローンする
 3. 以下を記述したファイル`local.settings.json`を functions ディレクトリ配下に保存する。
    - CORS は任意のオリジンを許可するように設定しているため、特定のオリジンのみ許可したい場合は`Host` > `CORS`にそのオリジンを設定すること。
-   - 翻訳 API は Google 翻訳 API で翻訳し、失敗した場合は Azure Translator で翻訳する。`GOOGLE_TRANSLATION_API_KEY` は任意であり、未設定または空文字にすると、Google 翻訳 API を実行せずに Azure Translator のみで翻訳する。
+   - `GOOGLE_TRANSLATION_API_KEY` の記述は任意であり、記述した場合は、 Azure Translator の代わりに Google 翻訳 API で翻訳する。
 
    ```json
    {
