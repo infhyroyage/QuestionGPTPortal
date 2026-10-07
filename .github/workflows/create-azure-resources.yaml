@@ -47,6 +47,7 @@ jobs:
             eventGridName: ${{ vars.EVENT_GRID_NAME }}
             functionsName: ${{ vars.FUNCTIONS_NAME }}
             githubRepoUrl: ${{ github.server_url }}/${{ github.repository }}
+            googleTranslationApiKey: '${{ secrets.GOOGLE_TRANSLATION_API_KEY }}'
             openAIApiVersion: ${{ vars.OPENAI_API_VERSION }}
             openAICapacity: ${{ vars.OPENAI_CAPACITY }}
             openAIDeploymentName: ${{ vars.OPENAI_DEPLOYMENT_NAME }}
@@ -155,7 +156,14 @@ jobs:
           creds: '{"clientId":"${{ vars.AZURE_AD_SP_CONTRIBUTOR_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_AD_SP_CONTRIBUTOR_CLIENT_SECRET }}","subscriptionId":"${{ vars.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ vars.AZURE_TENANT_ID }}"}'
 
       - name: Update functions-appsettings.json
+        env:
+          HAS_GOOGLE_TRANSLATION_API_KEY: ${{ secrets.GOOGLE_TRANSLATION_API_KEY != '' }}
         run: |
+          if [ "${HAS_GOOGLE_TRANSLATION_API_KEY}" = "true" ]; then
+            googleTranslationApiKey="@Microsoft.KeyVault(VaultName=${{ vars.VAULT_NAME }};SecretName=google-translation-api-key)"
+          else
+            googleTranslationApiKey=""
+          fi
           translatorKey=$( \
             az keyvault secret show \
               --vault-name ${{ vars.VAULT_NAME }} \
@@ -178,6 +186,7 @@ jobs:
               -o tsv \
           )
           sed -i.bak \
+            -e "s|{googleTranslationApiKey}|${googleTranslationApiKey}|g" \
             -e "s|{translatorKey}|${translatorKey}|g" \
             -e "s|{cosmosdbKey}|${cosmosdbKey}|g" \
             -e "s|{cosmosdbReadonlyKey}|${cosmosdbReadonlyKey}|g" \

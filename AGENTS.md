@@ -50,7 +50,7 @@ uv sync --locked --all-groups
 - **`local.settings.json`**: `functions/local.settings.json` はローカル専用 (.gitignore済み) 。CosmosDB Emulator のデフォルトキーを使用。`PYTHON_PATH` は `../.venv/bin/python` を指定。
 - **`swa/.env`**: `VITE_API_URI="http://localhost:9229"` を設定 (.gitignore済み) 。
 - **テストデータ**: `functions/data/(コース名)/(テスト名).json` に `list[ImportItem]` 形式の JSON を配置し `uv run python functions/import_local.py` でインポート。`data/` は .gitignore 済み。UI を一通り動かすにはダミーのテストデータを 1 件以上入れておくと便利。
-- **任意のクラウド機能**: 問題への回答 (正解・解説生成) は Azure OpenAI、英日翻訳は Azure Translator が必要。`local.settings.json` の `OPENAI_*` / `TRANSLATOR_KEY` が空の場合これらは失敗し、UI に「翻訳失敗」やシステムエラーが出るが想定内。テスト一覧・問題閲覧・お気に入り・進捗などローカル完結の機能は Cosmos/Azurite だけで動作する。
+- **任意のクラウド機能**: 問題への回答 (正解・解説生成) は Azure OpenAI、英日翻訳は Azure Translator が必要 (`GOOGLE_TRANSLATION_API_KEY` を設定した場合は Google 翻訳 API を優先し、未設定・失敗時は Azure Translator で翻訳)。`local.settings.json` の `OPENAI_*` / `TRANSLATOR_KEY` が空の場合これらは失敗し(`GOOGLE_TRANSLATION_API_KEY` が有効なら翻訳は成功する)、UI に「翻訳失敗」やシステムエラーが出るが想定内。テスト一覧・問題閲覧・お気に入り・進捗などローカル完結の機能は Cosmos/Azurite だけで動作する。
 
 ### lint/test/build コマンド
 

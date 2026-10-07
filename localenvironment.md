@@ -31,6 +31,7 @@ Azure 環境構築後に、以下のサーバーをすべて起動すると、�
 2. GitHub アカウントを用意して、このリポジトリをフォークし、ローカル環境にクローンする
 3. 以下を記述したファイル`local.settings.json`を functions ディレクトリ配下に保存する。
    - CORS は任意のオリジンを許可するように設定しているため、特定のオリジンのみ許可したい場合は`Host` > `CORS`にそのオリジンを設定すること。
+   - `GOOGLE_TRANSLATION_API_KEY` の記述は任意であり、記述した場合は、 Azure Translator の代わりに Google 翻訳 API で翻訳する。
 
    ```json
    {
@@ -41,6 +42,7 @@ Azure 環境構築後に、以下のサーバーをすべて起動すると、�
        "COSMOSDB_READONLY_KEY": "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==",
        "COSMOSDB_URI": "http://localhost:8081",
        "FUNCTIONS_WORKER_RUNTIME": "python",
+       "GOOGLE_TRANSLATION_API_KEY": "(Google翻訳APIのAPIキー)",
        "NODE_TLS_REJECT_UNAUTHORIZED": "0",
        "OPENAI_API_KEY": "(Azure OpenAIのAPIキー)",
        "OPENAI_API_VERSION": "(Azure OpenAIのAPIバージョン)",
