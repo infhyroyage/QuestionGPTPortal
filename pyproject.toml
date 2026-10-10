@@ -7,7 +7,7 @@ dependencies = [
     "azure-cosmos==4.17.1",
     "azure-functions==1.25.0",
     "azure-identity==1.26.0",
-    "azure-storage-queue==12.17.0",
+    "azure-storage-queue==12.18.0",
     "openai==1.109.1",
     "pydantic==2.13.5",
     "requests==2.34.2",
