@@ -125,6 +125,16 @@ export type SelectorButtonProps = {
 };
 
 /**
+ * useSheetDialogのProps
+ */
+export type SheetDialogProps = {
+  /**
+   * 子コンポーネント
+   */
+  children: ReactNode;
+};
+
+/**
  * SubjectDisplayのProps
  */
 export type SubjectDisplayProps = {
