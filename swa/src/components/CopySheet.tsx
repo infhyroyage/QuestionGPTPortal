@@ -11,9 +11,9 @@ export default function CopySheet() {
       {/* TODO: 問題・選択肢コピー用のテキストフィールド、コピーボタンを作成 */}
       <div className="divider my-6" />
       <h4 className="scroll-m-20 text-xl font-semibold tracking-tight my-4">
-        問題・選択肢・解説コピー用
+        問題・選択肢・回答・回答のポイント・解説コピー用
       </h4>
-      {/* TODO: 問題・選択肢・解説コピー用のテキストフィールド、コピーボタンを作成 */}
+      {/* TODO: 問題・選択肢・回答・回答のポイント・解説コピー用のテキストフィールド、コピーボタンを作成 */}
     </>
   );
 }
