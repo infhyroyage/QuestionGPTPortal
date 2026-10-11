@@ -2,6 +2,7 @@ import { fetchQuestionSelectorAtom } from "@/lib/atoms";
 import { useAtomValue } from "jotai";
 import { useMemo } from "react";
 import NextQuestionButton from "./NextQuestionButton";
+import OpenCopyButton from "./OpenCopyButton";
 import OpenExplanationButton from "./OpenExplanationButton";
 import ResubmitButton from "./ResubmitButton";
 import SubmitButton from "./SubmitButton";
@@ -18,7 +19,7 @@ export default function IconButtonsContainer() {
     () =>
       !questionSelector ||
       questionSelector.choices.every((choice) => !choice.isSelected),
-    [questionSelector]
+    [questionSelector],
   );
 
   return (
@@ -36,6 +37,9 @@ export default function IconButtonsContainer() {
       </div>
       <div className="shrink-0">
         <OpenExplanationButton />
+      </div>
+      <div className="shrink-0">
+        <OpenCopyButton />
       </div>
       <div className="shrink-0">
         <NextQuestionButton />
