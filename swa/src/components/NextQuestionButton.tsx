@@ -51,28 +51,33 @@ export default function NextQuestionButton() {
     testId,
   ]);
 
+  // テスト結果ページへ遷移する場合はtrue、次の問題へ遷移する場合はfalse
+  const isMovedToResultPage = useMemo<boolean>(
+    () => !!(histories && order && histories.length === order.length),
+    [histories, order],
+  );
+
   // 次の問題かテスト結果ページへ遷移
   const onClick = useCallback(() => {
     if (testId && histories && order) {
       navigate(
-        histories.length === order.length
+        isMovedToResultPage
           ? `/tests/${testId}/result`
           : `/tests/${testId}/questions/${order[histories.length]}`,
       );
     }
-  }, [histories, navigate, order, testId]);
-
-  const tooltipTip =
-    histories && order && histories.length === order.length
-      ? "テスト結果へ"
-      : "次の問題へ";
+  }, [histories, navigate, order, testId, isMovedToResultPage]);
 
   return (
     histories &&
     order && (
       <div
         className="tooltip z-50 before:z-50 after:z-50 tooltip-top"
-        data-tip={tooltipTip}
+        data-tip={
+          isMovedToResultPage
+            ? "テスト結果へ"
+            : `${order[histories.length]}問目へ`
+        }
       >
         <button
           type="button"
