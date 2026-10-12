@@ -13,6 +13,21 @@ export type ApplyMSALProps = {
 };
 
 /**
+ * CopySheetMarkdownのProps
+ */
+export type CopySheetMarkdownProps = {
+  /**
+   * 見出し
+   */
+  title: string;
+
+  /**
+   * クリップボードにコピーするMarkdown形式の文字列
+   */
+  markdown: string;
+};
+
+/**
  * ExplanationSheetCommunityのProps
  */
 export type ExplanationSheetCommunityProps = {
