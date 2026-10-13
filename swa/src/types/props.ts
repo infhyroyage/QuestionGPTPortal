@@ -17,14 +17,14 @@ export type ApplyMSALProps = {
  */
 export type CopySheetMarkdownProps = {
   /**
-   * 見出し
-   */
-  title: string;
-
-  /**
    * クリップボードにコピーするMarkdown形式の文字列
    */
   markdown: string;
+
+  /**
+   * 見出し
+   */
+  title: string;
 };
 
 /**

@@ -4,28 +4,21 @@ import { Check, Copy } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 /**
- * コピー完了表示を元に戻すまでの時間(ミリ秒)
- */
-const COPIED_DURATION_MS = 2000;
-
-/**
  * コピー用シートの見出し・Markdown形式の文字列・コピーボタンのコンポーネント
  * @returns コピー用シートの見出し・Markdown形式の文字列・コピーボタンのコンポーネント
  */
 export default function CopySheetMarkdown({
-  title,
   markdown,
+  title,
 }: CopySheetMarkdownProps) {
   const [isCopied, setIsCopied] = useState<boolean>(false);
 
   const systemErrorToast = useSystemErrorToast();
 
-  // コピー完了表示を一定時間後に元に戻す
+  // コピー完了表示を2秒間表示した後に元に戻す
   useEffect(() => {
-    if (!isCopied) {
-      return;
-    }
-    const timeoutId = setTimeout(() => setIsCopied(false), COPIED_DURATION_MS);
+    if (!isCopied) return;
+    const timeoutId = setTimeout(() => setIsCopied(false), 2000);
     return () => clearTimeout(timeoutId);
   }, [isCopied]);
 
@@ -54,7 +47,6 @@ export default function CopySheetMarkdown({
           ) : (
             <Copy className="size-4" />
           )}
-          {isCopied ? "コピーしました" : "コピー"}
         </button>
       </div>
       <textarea
