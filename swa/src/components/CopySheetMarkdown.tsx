@@ -39,7 +39,7 @@ export default function CopySheetMarkdown({
         </h4>
         <button
           type="button"
-          className={`btn btn-sm shrink-0 ${isCopied ? "btn-success" : "btn-primary"}`}
+          className={`btn btn-sm btn-square ${isCopied ? "btn-success" : "btn-primary"}`}
           onClick={onClick}
         >
           {isCopied ? (
