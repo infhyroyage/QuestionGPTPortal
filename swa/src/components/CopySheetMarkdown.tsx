@@ -4,8 +4,8 @@ import { Check, Copy } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 /**
- * コピー用シートの見出し・Markdown形式の文字列・コピーボタンのコンポーネント
- * @returns コピー用シートの見出し・Markdown形式の文字列・コピーボタンのコンポーネント
+ * コピー用シートの見出し、Markdown形式の文字列、コピーボタンのコンポーネント
+ * @returns コピー用シートの見出し、Markdown形式の文字列、コピーボタンのコンポーネント
  */
 export default function CopySheetMarkdown({
   markdown,
