@@ -33,6 +33,20 @@ jobs:
             -o tsv)
           echo "token=$TOKEN" >> $GITHUB_OUTPUT
 
+      - name: Resolve MSAL redirect URI
+        id: msal-redirect
+        run: |
+          HOST=$(az staticwebapp show \
+            -n ${{ vars.SWA_NAME }} \
+            -g ${{ env.RESOURCE_GROUP }} \
+            --query 'defaultHostname' \
+            -o tsv)
+          if [ -z "$HOST" ]; then
+            echo "Static Web App hostname is empty" >&2
+            exit 1
+          fi
+          echo "uri=https://${HOST}" >> "$GITHUB_OUTPUT"
+
       - name: Deploy Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
@@ -45,3 +59,4 @@ jobs:
           VITE_API_URI: https://${{ vars.APIM_NAME }}.azure-api.net
           VITE_AZURE_AD_SP_MSAL_CLIENT_ID: ${{ vars.AZURE_AD_SP_MSAL_CLIENT_ID }}
           VITE_AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+          VITE_MSAL_REDIRECT_URI: ${{ steps.msal-redirect.outputs.uri }}
