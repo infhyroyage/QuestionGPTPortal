@@ -152,6 +152,8 @@ Variables タブから「New repository variable」ボタンを押下して、�
 5. 「Add a Redirect URI」タブにある「+ Add Redirect URI」ボタンを押下し、「Select a platform to add redirect URI」で「Single-page application」ボタンを押下する。
 6. 「Redirect URI」のテキストボックスに、2 で手元に控えた Azure Static Web Apps の URL を入力し、「Configure」ボタンを押下する。
 
+アプリケーション側の `redirectUri` と `postLogoutRedirectUri` はリポジトリにハードコードしない。手順 10 の Deploy Azure Static Web Apps が、同じ既定ホスト名から `VITE_MSAL_REDIRECT_URI`（`https://{defaultHostname}`）を組み立て、ログイン後とログアウト後の両方へ埋め込む。Entra ID に登録する URL と、この環境変数の値を一致させる。
+
 ### 9. インポートデータファイルの作成・アップロード
 
 Azure Cosmos DB に格納するデータであるインポートデータファイルを、以下の json フォーマットで`data/(コース名)/(テスト名).json`に作成する。

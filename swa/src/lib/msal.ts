@@ -1,4 +1,15 @@
 import { Configuration } from "@azure/msal-browser";
+import { resolveMsalRedirectUri } from "./msalRedirectUri";
+
+/**
+ * ログイン後・ログアウト後のリダイレクト先。
+ * 本番は Vite 環境変数 VITE_MSAL_REDIRECT_URI を使う。
+ */
+const redirectUri = resolveMsalRedirectUri(
+  import.meta.env.VITE_MSAL_REDIRECT_URI,
+  import.meta.env.DEV,
+  () => window.location.origin,
+);
 
 /**
  * MSALプロバイダー使用時のコンフィグ
@@ -10,10 +21,9 @@ export const config: Configuration = {
       import.meta.env.VITE_AZURE_TENANT_ID
     }`,
     // ログイン後のリダイレクト先
-    // TODO: ハードコーディングせず、Viteの環境変数で設定
-    redirectUri: "https://lively-cliff-0750a6500.1.azurestaticapps.net",
+    redirectUri,
     // ログアウト後のリダイレクト先
-    postLogoutRedirectUri: "https://lively-cliff-0750a6500.1.azurestaticapps.net",
+    postLogoutRedirectUri: redirectUri,
   },
   cache: {
     // アクセストークンの格納先

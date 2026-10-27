@@ -92,6 +92,8 @@ Azure 環境構築後に、以下のサーバーをすべて起動すると、�
    VITE_API_URI="http://localhost:9229"
    ```
 
+   ローカル開発は Entra ID 認証をスキップする。`VITE_MSAL_REDIRECT_URI` は未設定でよく、その場合のリダイレクト先はブラウザのオリジンになる。本番の Static Web Apps へデプロイするときは、ワークフローが Static Web Apps の既定 URL を `VITE_MSAL_REDIRECT_URI` に設定する。
+
 8. 5 とは別のターミナルで以下のコマンドを実行し、npm パッケージをインストール後、Web サーバーを起動する。実行したターミナルはそのまま放置する。
 
    ```bash
