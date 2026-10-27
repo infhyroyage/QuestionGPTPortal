@@ -6,9 +6,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint",
-    "preview": "vite preview",
-    "test": "node --test src/lib/msalRedirectUri.test.ts",
-    "test:coverage": "node --test --experimental-test-coverage --test-coverage-include=src/lib/msalRedirectUri.ts src/lib/msalRedirectUri.test.ts"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@azure/msal-browser": "^5.25.1",

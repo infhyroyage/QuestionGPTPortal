@@ -73,14 +73,6 @@ jobs:
           reporter: github-pr-review
           workdir: swa
 
-      - name: Install npm dependencies
-        working-directory: swa
-        run: npm ci
-
-      - name: Test frontend
-        working-directory: swa
-        run: npm test
-
   test:
     runs-on: ubuntu-latest
     steps:

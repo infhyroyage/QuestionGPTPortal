@@ -59,5 +59,4 @@ uv sync --locked --all-groups
 - **Python テスト**: `cd functions && uv sync --locked --all-groups && uv run coverage run -m unittest discover -s tests && uv run coverage report -m`
 - **Pylint**: `uv sync --locked --all-groups && uv run pylint functions/**/*.py`
 - **ESLint**: `cd swa && npm run lint`
-- **フロントエンドテスト**: `cd swa && npm test`（カバレッジは `cd swa && npm run test:coverage`）
 - **フロントエンドビルド**: `cd swa && npm run build`

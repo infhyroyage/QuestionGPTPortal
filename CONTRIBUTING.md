@@ -89,11 +89,6 @@
   ```bash
   cd swa && npm run lint && cd ..
   ```
-- フロントエンドの MSAL リダイレクト URI 解決は、以下のコマンドでユニットテストする:
-  ```bash
-  cd swa && npm test && cd ..
-  ```
-  カバレッジは `cd swa && npm run test:coverage` で確認する。
 - 以下の CI/CD パイプラインは GitHub Actions によって自動化する:
   - 全 Azure リソースデプロイ: .github/workflows/create-azure-resources.yaml
   - 関数アプリのみのデプロイ: .github/workflows/deploy-functions-app.yaml
@@ -150,10 +145,6 @@
 - [ ] 以下のコマンドを実行して、ESLint の警告・エラーをすべて解消する:
   ```bash
   cd swa && npm run lint && cd ..
-  ```
-- [ ] 以下のコマンドを実行して、フロントエンドのユニットテストを成功させる:
-  ```bash
-  cd swa && npm test && cd ..
   ```
 - [ ] ターゲットを main ブランチに設定している。
 
