@@ -9,11 +9,12 @@ export const config: Configuration = {
     authority: `https://login.microsoftonline.com/${
       import.meta.env.VITE_AZURE_TENANT_ID
     }`,
-    // ログイン後のリダイレクト先
-    // TODO: ハードコーディングせず、Viteの環境変数で設定
-    redirectUri: "https://lively-cliff-0750a6500.1.azurestaticapps.net",
-    // ログアウト後のリダイレクト先
-    postLogoutRedirectUri: "https://lively-cliff-0750a6500.1.azurestaticapps.net",
+    // ログイン後のリダイレクト先(ローカル環境の場合は現在のオリジンを使用)
+    redirectUri:
+      import.meta.env.VITE_MSAL_REDIRECT_URI ?? window.location.origin,
+    // ログアウト後のリダイレクト先(ローカル環境の場合は現在のオリジンを使用)
+    postLogoutRedirectUri:
+      import.meta.env.VITE_MSAL_REDIRECT_URI ?? window.location.origin,
   },
   cache: {
     // アクセストークンの格納先
