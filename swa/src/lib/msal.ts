@@ -10,13 +10,11 @@ export const config: Configuration = {
       import.meta.env.VITE_AZURE_TENANT_ID
     }`,
     // ログイン後のリダイレクト先(ローカル環境の場合は現在のオリジンを使用)
-    redirectUri: import.meta.env.DEV
-      ? window.location.origin
-      : import.meta.env.VITE_MSAL_REDIRECT_URI,
+    redirectUri:
+      import.meta.env.VITE_MSAL_REDIRECT_URI ?? window.location.origin,
     // ログアウト後のリダイレクト先(ローカル環境の場合は現在のオリジンを使用)
-    postLogoutRedirectUri: import.meta.env.DEV
-      ? window.location.origin
-      : import.meta.env.VITE_MSAL_REDIRECT_URI,
+    postLogoutRedirectUri:
+      import.meta.env.VITE_MSAL_REDIRECT_URI ?? window.location.origin,
   },
   cache: {
     // アクセストークンの格納先

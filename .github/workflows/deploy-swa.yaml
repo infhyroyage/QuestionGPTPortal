@@ -40,7 +40,7 @@ jobs:
             -n ${{ vars.SWA_NAME }} \
             -g ${{ env.RESOURCE_GROUP }} \
             --query 'defaultHostname' \
-            -o tsv)
+            -o tsv | tr -d '[:space:]')
           echo "swa_hostname=${SWA_HOSTNAME}" >> "$GITHUB_OUTPUT"
 
       - name: Deploy Azure Static Web Apps
