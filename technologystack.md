@@ -121,8 +121,8 @@ Azure 環境の場合は、Microsoft Entra ID を利用した認証システム�
 - Microsoft Indentity Platform の URL: `https://login.microsoftonline.com/{テナント ID}`
   - テナント ID: 環境変数 `AZURE_TENANT_ID` で管理
 - 認証後・ログアウト後のリダイレクト URI: 環境変数 `VITE_MSAL_REDIRECT_URI` で管理
-  - Azure へのデプロイ時は、Static Web Apps の既定 URL（`https://{defaultHostname}`）をログイン後とログアウト後の両方に設定する
-  - ローカル開発で未設定の場合は、ブラウザのオリジンを使う
+  - Azure 環境の場合は、Static Web Apps の既定 URLをログイン後とログアウト後の両方に設定
+  - ローカル環境の場合は、ブラウザのオリジンを設定
 - アクセストークンの格納先: ブラウザの Session Storage
 
 API サーバーへの認証・アクセスは、`swa/src/lib/backend.ts` で統一的に行う。

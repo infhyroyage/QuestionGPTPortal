@@ -1,15 +1,4 @@
 import { Configuration } from "@azure/msal-browser";
-import { resolveMsalRedirectUri } from "./msalRedirectUri";
-
-/**
- * ログイン後・ログアウト後のリダイレクト先。
- * 本番は Vite 環境変数 VITE_MSAL_REDIRECT_URI を使う。
- */
-const redirectUri = resolveMsalRedirectUri(
-  import.meta.env.VITE_MSAL_REDIRECT_URI,
-  import.meta.env.DEV,
-  () => window.location.origin,
-);
 
 /**
  * MSALプロバイダー使用時のコンフィグ
@@ -20,10 +9,14 @@ export const config: Configuration = {
     authority: `https://login.microsoftonline.com/${
       import.meta.env.VITE_AZURE_TENANT_ID
     }`,
-    // ログイン後のリダイレクト先
-    redirectUri,
-    // ログアウト後のリダイレクト先
-    postLogoutRedirectUri: redirectUri,
+    // ログイン後のリダイレクト先(ローカル環境の場合は現在のオリジンを使用)
+    redirectUri: import.meta.env.DEV
+      ? window.location.origin
+      : import.meta.env.VITE_MSAL_REDIRECT_URI,
+    // ログアウト後のリダイレクト先(ローカル環境の場合は現在のオリジンを使用)
+    postLogoutRedirectUri: import.meta.env.DEV
+      ? window.location.origin
+      : import.meta.env.VITE_MSAL_REDIRECT_URI,
   },
   cache: {
     // アクセストークンの格納先
