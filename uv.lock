@@ -89,7 +89,7 @@ wheels = [
 
 [[package]]
 name = "azure-storage-queue"
-version = "12.18.0"
+version = "12.18.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "azure-core" },
@@ -97,9 +97,9 @@ dependencies = [
     { name = "isodate" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/29/78/37012b4026dfa6b9795c68736dfe70d271d70cf7f4802a2874f924643b11/azure_storage_queue-12.18.0.tar.gz", hash = "sha256:672dac5a7df2e93134f1b8ac6dc0df29823b9daa490b61bda1f88601403b5aa9", size = 233348, upload-time = "2026-09-30T21:20:05.399Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/6a/42/a46b58e23f4022fd4f41e8f49c20e7f49136802114d873f083580df30e23/azure_storage_queue-12.18.1.tar.gz", hash = "sha256:ed52931a9fbff1383a198d2d90b9692535a31e0339193ccfd5aa75cdc1808d1d", size = 234943, upload-time = "2026-10-29T23:33:12.638Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8c/d9/a528dcd2c16b7ad530b41fc54d936a178eb5ca46b961ff65a0d0922f27e1/azure_storage_queue-12.18.0-py3-none-any.whl", hash = "sha256:a91e5dce29279aa8528ee6a43a5aed10e22de94dae9a4c5dccbd4d1aee2cc5c1", size = 206472, upload-time = "2026-09-30T21:20:07.279Z" },
+    { url = "https://files.pythonhosted.org/packages/b9/5a/db288df9da1bf29a723d4bfbecc476f0c0da4764591bdb2fa8d3a00c5414/azure_storage_queue-12.18.1-py3-none-any.whl", hash = "sha256:791ed52e2aae4b136ded3e530414fda2fdaf4ab356891b017cf77b337609a2a4", size = 206738, upload-time = "2026-10-29T23:33:14.191Z" },
 ]
 
 [[package]]
@@ -960,7 +960,7 @@ requires-dist = [
     { name = "azure-cosmos", specifier = "==4.17.1" },
     { name = "azure-functions", specifier = "==1.25.0" },
     { name = "azure-identity", specifier = "==1.27.0" },
-    { name = "azure-storage-queue", specifier = "==12.18.0" },
+    { name = "azure-storage-queue", specifier = "==12.18.1" },
     { name = "openai", specifier = "==1.109.1" },
     { name = "pydantic", specifier = "==2.14.1" },
     { name = "requests", specifier = "==2.34.2" },
