@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@azure/msal-browser": "^5.27.0",
-    "@azure/msal-react": "^5.7.3",
+    "@azure/msal-react": "^5.8.0",
     "axios": "^1.21.0",
     "clsx": "^2.1.1",
     "jotai": "^3.0.1",
