@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@azure/msal-browser": "^5.27.0",
+    "@azure/msal-browser": "^5.28.0",
     "@azure/msal-react": "^5.7.3",
     "axios": "^1.21.0",
     "clsx": "^2.1.1",
