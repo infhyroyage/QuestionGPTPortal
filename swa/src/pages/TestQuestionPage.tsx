@@ -184,7 +184,7 @@ export default function TestQuestionPage() {
             order.length
           }問)`}
         />
-        <main className="flex h-screen w-full flex-col overflow-hidden pt-[52px]">
+        <main className="flex h-screen w-full flex-col overflow-hidden pt-13">
           <div
             className="relative z-10 flex min-h-0 flex-col overflow-hidden"
             style={{ height: `${subjectHeightPercent}%` }}

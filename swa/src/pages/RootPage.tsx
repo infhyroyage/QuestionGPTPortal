@@ -61,7 +61,7 @@ export default function RootPage() {
   return (
     <>
       <TopBar title="Question GPT Portal" />
-      <div className="pt-[52px]">
+      <div className="pt-13">
         {!testDetails ? (
           <div className="space-y-2">
             <div className="skeleton px-6 py-8 w-full rounded-md h-16" />

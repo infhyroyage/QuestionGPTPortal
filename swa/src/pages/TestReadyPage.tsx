@@ -39,9 +39,9 @@ export default function TestReadyPage() {
     () =>
       testDetails &&
       testDetails.find(
-        (testDetail: TestDetail) => testDetail.testId === testId
+        (testDetail: TestDetail) => testDetail.testId === testId,
       ),
-    [testDetails, testId]
+    [testDetails, testId],
   );
 
   // テスト詳細情報が取得できていない、またはブラウザバックした場合はトップページにリダイレクト
@@ -99,7 +99,7 @@ export default function TestReadyPage() {
           "GET",
           `/tests/${testId}/favorites`,
           instance,
-          accountInfo
+          accountInfo,
         );
         setFavoriteQuestionNumbers(
           res
@@ -109,7 +109,7 @@ export default function TestReadyPage() {
               }
               return prev;
             }, [])
-            .sort((a, b) => a - b) // 問題番号の昇順にソート
+            .sort((a, b) => a - b), // 問題番号の昇順にソート
         );
       } catch (e) {
         setIsOccurredSystemError(true);
@@ -130,7 +130,7 @@ export default function TestReadyPage() {
     testDetail && (
       <>
         <TopBar title="Question GPT Portal" />
-        <div className="pt-[52px] px-8 flex flex-col h-[calc(100vh-52px)]">
+        <div className="pt-13 px-8 flex flex-col h-[calc(100vh-52px)]">
           <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight my-6">
             {testDetail.courseName}
           </h3>

@@ -93,7 +93,7 @@ export default function TestResultPage() {
     order.length > 0 && (
       <>
         <TopBar title="Question GPT Portal" />
-        <div className="pt-[52px] px-8 flex flex-col h-[calc(100vh-52px)]">
+        <div className="pt-13 px-8 flex flex-col h-[calc(100vh-52px)]">
           <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight my-6">
             {`全${order.length}問中${
               histories.filter((history: History) => history.isCorrect).length
