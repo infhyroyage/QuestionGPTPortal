@@ -41,7 +41,7 @@ export default function Selector() {
   );
 
   return (
-    <div className="space-y-4 m-4">
+    <div className="space-y-4 p-4">
       {questionSelector
         ? questionSelector.choices.map((choice: Choice, idx: number) => (
             <SelectorButton

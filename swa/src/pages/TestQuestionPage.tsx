@@ -1,7 +1,6 @@
 import IconButtonsContainer from "@/components/IconButtonsContainer";
 import Selector from "@/components/Selector";
 import SubjectDisplay from "@/components/SubjectDisplay";
-import TestQuestionBorderLine from "@/components/TestQuestionBorderLine";
 import TopBar from "@/components/TopBar";
 import useSystemErrorToast from "@/hooks/useSystemErrorToast";
 import useTranslationFailedToast from "@/hooks/useTranslationFailedToast";
@@ -35,7 +34,6 @@ export default function TestQuestionPage() {
     useState<boolean>(false);
   const [isOccurredSystemError, setIsOccurredSystemError] =
     useState<boolean>(false);
-  const [subjectHeightPercent, setSubjectHeightPercent] = useState<number>(60);
   const fetchQuestionSelectorCalledRef = useRef<boolean>(false);
   const fetchTranslationSubjectChoiceCalledRef = useRef<boolean>(false);
   const restoreAnsweredQuestionCalledRef = useRef<boolean>(false);
@@ -184,30 +182,17 @@ export default function TestQuestionPage() {
             order.length
           }問)`}
         />
-        <main className="flex h-screen w-full flex-col overflow-hidden pt-13">
-          <div
-            className="relative z-10 flex min-h-0 flex-col overflow-hidden"
-            style={{ height: `${subjectHeightPercent}%` }}
-          >
-            <div className="flex-1 min-h-0 overflow-y-auto p-4">
-              <SubjectDisplay
-                subjects={questionSelector && questionSelector.subjects}
-                translation={
-                  translationSubjectChoice && translationSubjectChoice.subjects
-                }
-              />
-            </div>
-            <IconButtonsContainer />
-          </div>
-          <TestQuestionBorderLine
-            setSubjectHeightPercent={setSubjectHeightPercent}
-          />
-          <div
-            className="min-h-0 overflow-y-auto bg-slate-200 dark:bg-slate-800"
-            style={{ height: `${100 - subjectHeightPercent}%` }}
-          >
+        <main className="relative flex h-screen w-full flex-col overflow-hidden pt-13">
+          <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
+            <SubjectDisplay
+              subjects={questionSelector && questionSelector.subjects}
+              translation={
+                translationSubjectChoice && translationSubjectChoice.subjects
+              }
+            />
             <Selector />
           </div>
+          <IconButtonsContainer />
         </main>
       </>
     )
