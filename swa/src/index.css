@@ -10,14 +10,12 @@
 
 body {
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
-/* 境界線で区切った領域内でも tooltip が隠れないようにする */
-@layer components {
-  .tooltip::before,
-  .tooltip::after {
-    z-index: 100;
-  }
+.h-visual-screen {
+  height: 100vh;
+  height: 100dvh;
 }
 
 /* 解説ドロワーの開閉アニメーション(下から上へ流れる) */
