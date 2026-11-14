@@ -193,7 +193,6 @@ export default function TestQuestionPage() {
             <Selector />
           </div>
         </main>
-        {/* overflow-hidden の外に置く。fixed が祖先のクリップ対象にならないようにする */}
         <IconButtonsContainer />
       </>
     )

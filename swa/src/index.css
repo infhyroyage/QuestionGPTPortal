@@ -9,26 +9,13 @@
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
 body {
-  /* 100vh はアドレスバーを隠したときの高さ。表示中の画面より高くなるため、
-     対応ブラウザでは表示領域に追従する 100dvh を使う。 */
   min-height: 100vh;
   min-height: 100dvh;
 }
 
-/* 問題画面の高さを表示領域に合わせる。
-   100vh のままだと下端が画面外になり、選択肢選択後の操作ボタンが
-   文書末尾のオーバースクロールまで見えない。 */
 .h-visual-screen {
   height: 100vh;
   height: 100dvh;
-}
-
-/* 境界線で区切った領域内でも tooltip が隠れないようにする */
-@layer components {
-  .tooltip::before,
-  .tooltip::after {
-    z-index: 100;
-  }
 }
 
 /* 解説ドロワーの開閉アニメーション(下から上へ流れる) */
