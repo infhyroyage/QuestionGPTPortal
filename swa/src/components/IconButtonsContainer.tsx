@@ -23,9 +23,13 @@ export default function IconButtonsContainer() {
   );
 
   return (
+    // absolute を 100vh の親に付けると、アドレスバー表示中は下端が画面外になる。
+    // fixed は表示中のビューポート下端に追従する。
     <div
-      className={`flex items-center space-x-4 absolute right-4 bottom-4 z-50 overflow-visible transition-all duration-300 ease-in-out ${
-        isHidden ? "translate-y-20 opacity-0" : "translate-y-0 opacity-100"
+      className={`flex items-center space-x-4 fixed right-4 bottom-4 z-50 overflow-visible transition-all duration-300 ease-in-out ${
+        isHidden
+          ? "pointer-events-none translate-y-20 opacity-0"
+          : "translate-y-0 opacity-100"
       }
       `}
     >

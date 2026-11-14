@@ -182,8 +182,8 @@ export default function TestQuestionPage() {
             order.length
           }問)`}
         />
-        <main className="relative flex h-screen w-full flex-col overflow-hidden pt-13">
-          <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
+        <main className="flex h-visual-screen w-full flex-col overflow-hidden pt-13">
+          <div className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain p-4 space-y-4">
             <SubjectDisplay
               subjects={questionSelector && questionSelector.subjects}
               translation={
@@ -192,8 +192,9 @@ export default function TestQuestionPage() {
             />
             <Selector />
           </div>
-          <IconButtonsContainer />
         </main>
+        {/* overflow-hidden の外に置く。fixed が祖先のクリップ対象にならないようにする */}
+        <IconButtonsContainer />
       </>
     )
   );
